@@ -2,12 +2,17 @@ package org.example.designs.chain;
 
 import org.example.designs.task.TaskInfo;
 
+
 /**
- * @Program: 8.mindmap
- * @Author: 海里的鱼
- * @Create: 2024-09-08 19:41
- * @Name: TODO
- * @Desc: 责任链节点
+ * TODO
+ *
+ * <p>
+ *     TODO
+ * </p>
+ *
+ * @author HaiYu
+ * @version 1.0.0
+ * @date 2024-11-19
  */
 public  class ChainNode<T extends IChainNode> {
     //处理者类型，用于从Bean容器里获取处理者对象
@@ -19,7 +24,17 @@ public  class ChainNode<T extends IChainNode> {
 
     private TaskInfo info;
 
-    public ChainNode(Class<T> nodeClass, T node,String nodeName) {
+
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * TODO
+     *
+     * @param nodeClass
+     * @param node
+     * @param nodeName
+     * @throws Exception
+     */
+    public ChainNode(Class<T> nodeClass, T node,String nodeName) throws Exception{
         this.nodeClass = nodeClass;
         this.node = node;
         this.handlerName = nodeName;

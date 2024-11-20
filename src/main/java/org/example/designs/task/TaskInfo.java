@@ -6,11 +6,15 @@ import java.time.temporal.ChronoUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * @Program: 11.designs
- * @Author: 海里的鱼
- * @Create: 2024-11-07 15:02
- * @Name: TODO
- * @Desc: TODO
+ * TODO
+ *
+ * <p>
+ *     TODO
+ * </p>
+ *
+ * @author HaiYu
+ * @version 1.0.0
+ * @date 2024-11-19
  */
 public class TaskInfo {
     private Integer id;

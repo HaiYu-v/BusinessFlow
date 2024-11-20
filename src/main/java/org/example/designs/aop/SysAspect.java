@@ -1,4 +1,4 @@
-package org.example.aop;
+package org.example.designs.aop;
 
 
 
@@ -24,7 +24,7 @@ public class SysAspect {
 //    private void pointcut() {
 //
 //    }
-    @Pointcut("@annotation(org.example.aop.Function)")
+    @Pointcut("@annotation(org.example.designs.aop.Function)")
     private void pointcut() {
 
     }

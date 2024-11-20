@@ -1,7 +1,7 @@
 package org.example.designs.strategy;
 
 
-import org.example.designs.utils.beanUtils.AppContextUtil;
+import org.example.designs.utils.AppContextUtil;
 import org.springframework.context.ApplicationContext;
 
 /**
