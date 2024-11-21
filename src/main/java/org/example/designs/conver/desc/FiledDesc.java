@@ -1,4 +1,4 @@
-package org.example.designs.chain.desc;
+package org.example.designs.conver.desc;
 
 /**
  * 字段描述

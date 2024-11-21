@@ -30,24 +30,28 @@ public class TemporaryCache {
 
     /**
      * -----------------------------------------------------------------------------------------------------------------
-     * 获取
+     * 获取, 用完即删
      *
      * @param key
      * @return {@link Object }
      */
     public Object get(String key) {
-        return temporaryMap.get(key);
+        Object ret = temporaryMap.get(key);
+        temporaryMap.remove(key);
+        return ret;
     }
 
     /**
      * -----------------------------------------------------------------------------------------------------------------
-     * 获取指定类型
+     * 获取指定类型, 用完即删
      *
      * @param key
      * @param classType
      * @return {@link T }
      */
     public <T> T get(String key,Class<T> classType){
-        return (T) temporaryMap.get(key);
+        T ret = (T) temporaryMap.get(key);
+        temporaryMap.remove(key);
+        return ret;
     }
 }

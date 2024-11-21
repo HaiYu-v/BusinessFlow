@@ -1,10 +1,10 @@
-package org.example.designs.chain.mapper;
+package org.example.designs.conver.mapper;
 
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
-import org.example.designs.chain.desc.FiledDesc;
+import org.example.designs.conver.desc.FiledDesc;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ import java.util.List;
  * @create 2024-11-20
  */
 @Mapper
-public interface ChainMapper {
+public interface ConverMapper {
 
     /**
      * -----------------------------------------------------------------------------------------------------------------

@@ -6,6 +6,8 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Chain {
+    //业务点描述
     String value();
-    String desc();
+    //业务点code
+    String code() default "";
 }

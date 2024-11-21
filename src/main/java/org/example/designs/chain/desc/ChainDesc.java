@@ -1,11 +1,13 @@
 package org.example.designs.chain.desc;
 
 import cn.hutool.core.util.ReflectUtil;
+import cn.hutool.core.util.StrUtil;
 import org.example.designs.chain.annotation.Chain;
 import org.example.designs.chain.context.BeanException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 
 /**
  * 业务点描述
@@ -19,38 +21,20 @@ import java.lang.reflect.Method;
  * @version 1.0.0
  * @create 2024-11-19
  */
- public class ChainDesc<T> {
+ public class ChainDesc {
+
     //业务处理者
-    private T bean;
+    private Object bean;
     //处理方法
     private Method method;
-    //方法code
-    private String methodCode;
     //方法描述
     private String desc;
-    //参数类型列表
-    private Class<?>[] paramTypes;
+    //参数列表
+    private Parameter[] parameters;
+    //参数列表
+    private Object[] params;
     //方法返回类型
     private Class<?> returnType;
-
-
-    /**
-     * -----------------------------------------------------------------------------------------------------------------
-     * 构造方法
-     *
-     * @param bean 业务点处理者
-     * @param method 业务点处理方法
-     * @param methodCode 方法编码
-     * @param desc 描述信息
-     */
-    public ChainDesc(T bean, Method method, String methodCode, String desc) {
-        this.bean = bean;
-        this.method = method;
-        this.methodCode = methodCode;
-        this.desc = desc;
-        this.returnType = method.getReturnType();
-        this.paramTypes = method.getParameterTypes();
-    }
 
     /** ----------------------------------------------------------------------------------------------------------------
      * 通过注解获取信息
@@ -58,30 +42,12 @@ import java.lang.reflect.Method;
      * @param  bean   业务点处理者
      * @param  method 业务点处理方法
      */
-     public ChainDesc(T bean, Method method){
+    public ChainDesc(Object bean, Method method,String desc){
         this.bean = bean;
         this.method = method;
-        this.methodCode = null;
-        this.desc = "";
+        this.desc = desc;
         this.returnType = method.getReturnType();
-        this.paramTypes = method.getParameterTypes();
-        Chain chain = method.getAnnotation(Chain.class);
-        if (null != chain){
-            this.methodCode = chain.value();
-            this.desc = chain.desc();
-        }
-    }
-
-
-    /** ---------------------------------------------------------------------------------------------------------------------
-     * 获取一个ChainDesc
-     *
-     * @param  bean   业务点处理者
-     * @param  method 业务点处理方法
-     * @return ChainDesc 业务点描述
-     */
-    public static <T> ChainDesc getDesc(T bean, Method method){
-         return new ChainDesc(bean,method);
+        this.parameters = method.getParameters();
     }
 
     /** ---------------------------------------------------------------------------------------------------------------------
@@ -89,36 +55,49 @@ import java.lang.reflect.Method;
      *
      * @param  bean   业务点处理者
      * @param  methodCode 业务点处理方法编码
+     * @param  desc 业务点描述
      * @return ChainDesc 业务点描述
      */
-    public static <T> ChainDesc getDesc(T bean, String methodCode){
-        return getDesc(bean,getMethod(bean.getClass(),methodCode));
+    public static <T> ChainDesc getDesc(T bean, String methodCode, String desc) throws BeanException {
+        MethodDesc methodDesc = getMethod(bean.getClass(), methodCode);
+        if(StrUtil.isBlank(methodDesc.getDesc())){
+            methodDesc.setDesc(desc);
+        }
+        return new ChainDesc(bean,methodDesc.getMethod(),methodDesc.getDesc());
     }
+
 
     /** ---------------------------------------------------------------------------------------------------------------------
      * 通过反射获取业务点描述
      *
      * 优先获取{@Chain}注解过的方法，如果没有注解，则取第一个方法名匹配的方法
-     *
+     * method匹配的优先级：首位@Chain.Code() > @Chain.Code() > 尾位@Chain > methodName
+     * desc匹配的优先级: @Chain.value() > 传入的desc
      * @param  beanType bean类型
-     * @param  method     方法名
+     * @param  methodCode 方法编号（方法名）
      * @return Method   方法
      */
-    public static <T> Method getMethod(Class<T> beanType,String method) {
+    private static <T> MethodDesc getMethod(Class<T> beanType,String methodCode) throws BeanException {
         Method[] methods = ReflectUtil.getPublicMethods(beanType);
-        Method ret = null;
-        for (Method cur : methods) {
-            if (cur.isAnnotationPresent(Chain.class)) {
-                // 获取 MyAnnotation 注解实例
-                Chain chain = cur.getAnnotation(Chain.class);
-                // 判断注解的 value 属性是否为 func
-                if (cur.equals(chain.value())) {
-                    return cur;
-                }
-                if(null == ret && cur.getName().equals(cur)) {
-                    ret = cur;
+        MethodDesc ret = null;
+        for (Method method : methods) {
+            if (method.isAnnotationPresent(Chain.class)) {
+                // 获取 Chain 注解实例
+                Chain chain = method.getAnnotation(Chain.class);
+                // 首位@Chain.Code()
+                if(null != chain && chain.code().equals(methodCode)){
+                    return new MethodDesc(method,chain.value());
+                // 尾位@Chain
+                }else if (null != chain && method.getName().equals(methodCode)){
+                    ret = new MethodDesc(method,chain.value());
+                // methodName
+                }else if(null == ret && method.getName().equals(methodCode)){
+                    ret = new MethodDesc(method,null);
                 }
             }
+        }
+        if(null == ret) {
+            throw new BeanException(beanType.getName()+":@Chain的code错误，或方法["+methodCode+"]不存在");
         }
         return ret;
     }
@@ -127,27 +106,25 @@ import java.lang.reflect.Method;
      * -----------------------------------------------------------------------------------------------------------------
      * 执行对象的指定方法
      *
-     * @param params 参数列表
-     * @param returnType 返回类型
      * @return 返回类型
      * @throws InvocationTargetException
      * @throws IllegalAccessException
      * @throws BeanException
      */
-    public <R> R invoke(Object[] params,Class<R> returnType) throws InvocationTargetException, IllegalAccessException, BeanException {
-        if(null == bean || null == method){
+    public Object invoke() throws InvocationTargetException, IllegalAccessException, BeanException {
+        if(null == this.bean || null == this.method){
             throw new BeanException("bean or method is null");
         }
-        return (R) method.invoke(bean,params);
+        return this.method.invoke(bean,this.params);
     }
 
 
-    public Class<?>[] getParamTypes() {
-        return paramTypes;
+    public Parameter[] getParameters() {
+        return parameters;
     }
 
-    public void setParamTypes(Class<?>[] paramTypes) {
-        this.paramTypes = paramTypes;
+    public void setParameters(Parameter[] parameters) {
+        this.parameters = parameters;
     }
 
     public Class<?> getReturnType() {
@@ -158,11 +135,11 @@ import java.lang.reflect.Method;
         this.returnType = returnType;
     }
 
-    public T getBean() {
+    public Object getBean() {
         return bean;
     }
 
-    public void setBean(T bean) {
+    public void setBean(Object bean) {
         this.bean = bean;
     }
 
@@ -174,19 +151,19 @@ import java.lang.reflect.Method;
         this.method = method;
     }
 
-    public String getMethodCode() {
-        return methodCode;
-    }
-
-    public void setMethodCode(String methodCode) {
-        this.methodCode = methodCode;
-    }
-
     public String getDesc() {
         return desc;
     }
 
     public void setDesc(String desc) {
         this.desc = desc;
+    }
+
+    public Object[] getParams() {
+        return params;
+    }
+
+    public void setParams(Object[] params) {
+        this.params = params;
     }
 }

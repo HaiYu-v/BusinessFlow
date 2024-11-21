@@ -1,10 +1,9 @@
 package org.example.designs;
 
 
-import cn.hutool.core.util.ReflectUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.example.designs.aop.Function;
-import org.example.designs.chain.conver.ConverHandler;
+import org.example.designs.chain.annotation.Chain;
+import org.example.designs.conver.Converter;
 import org.example.designs.task.strategy.after.fail.UnThrow;
 import org.example.designs.utils.MyReflectUtil;
 import org.junit.jupiter.api.Test;
@@ -40,6 +39,7 @@ class ApplicationTests  {
     }
 
     @Test
+    @Chain(value = "123", code ="123")
     void test2(){
         String rule = "{\n" +
                 "    \"targetCode\":\"code\",\n" +
@@ -52,7 +52,7 @@ class ApplicationTests  {
                 "}";
 
         try {
-            ConverHandler.analysisRule(rule);
+            Converter.analysis(rule);
         } catch (NoSuchFieldException e) {
             throw new RuntimeException(e);
         }

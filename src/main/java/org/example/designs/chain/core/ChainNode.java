@@ -1,4 +1,4 @@
-package org.example.designs.chain;
+package org.example.designs.chain.core;
 
 import org.example.designs.task.TaskInfo;
 

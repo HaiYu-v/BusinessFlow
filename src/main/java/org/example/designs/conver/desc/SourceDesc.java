@@ -1,8 +1,8 @@
-package org.example.designs.chain.desc;
+package org.example.designs.conver.desc;
+
+import org.example.designs.conver.IDataSource;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 来源描述描述
@@ -21,7 +21,7 @@ public class SourceDesc {
     //来源beanCode
     private String code;
     //来源值
-    private Object bean;
+    private Object value;
     //来源字段
     private String field;
     //转换公式
@@ -35,16 +35,19 @@ public class SourceDesc {
      *
      * @return 计算值
      */
-    public Object getTargetValue() throws IllegalAccessException, NoSuchFieldException {
-            Field field = this.bean.getClass().getField(this.field);
-            return field.get(this.bean);
+    public Object getTargetValue(IDataSource dataSource) throws IllegalAccessException, NoSuchFieldException {
+        if(null == value){
+            value = dataSource.getValue(code);
+        }
+        Field field = this.value.getClass().getField(this.field);
+            return field.get(this.value);
 
     }
 
-    public SourceDesc(String type, String code, Object bean, String field, String formula) {
+    public SourceDesc(String type, String code, Object value, String field, String formula) {
         this.type = type;
         this.code = code;
-        this.bean = bean;
+        this.value = value;
         this.field = field;
         this.formula = formula;
     }
@@ -65,12 +68,12 @@ public class SourceDesc {
         this.code = code;
     }
 
-    public Object getBean() {
-        return bean;
+    public Object getValue() {
+        return value;
     }
 
-    public void setBean(Object bean) {
-        this.bean = bean;
+    public void setValue(Object value) {
+        this.value = value;
     }
 
     public String getField() {
