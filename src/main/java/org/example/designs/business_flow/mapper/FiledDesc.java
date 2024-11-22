@@ -1,4 +1,4 @@
-package org.example.designs.chain.mapper;
+package org.example.designs.business_flow.mapper;
 
 /**
  * 字段描述

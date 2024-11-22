@@ -21,8 +21,8 @@ import java.util.Map;
  *     转换时再从数据源加载值，扩展性会更好一些
  *
  *     记录一个code和他的一个field
- *     如果field为空，则表示此code指向一个数值，而非Bean
- *     如果field不为空，则取bean的此field值
+ *     如果field为空，则表示此code指向一个数值，而非Data
+ *     如果field不为空，则取data的此field值
  * </p>
  *
  * @author HaiYu
@@ -36,55 +36,77 @@ public class Converter {
      * -----------------------------------------------------------------------------------------------------------------
      * 转换
      *
-     * @param  target      目标bean
-     * @param  targetCode  目标bean的code
-     * @param  beanRuleMap bean转换规则缓存
+     *  - 匹配rule > 匹配code > 抛异常
+     *   - 有rule，则根据rule转换，无rule。
+     *   - 无rule，则直接在数据源里匹配key
+     *
+     * @param  target      目标data
+     * @param  targetCode  目标data的code
+     * @param  dataRuleMap data转换规则缓存
      * @param  dataSource  数据源
      * @return 转换是否成功
      * @throws Exception
      */
-    public static boolean conver(Object target, String targetCode, BeanRuleMap beanRuleMap, IDataSource dataSource) throws Exception {
-        FieldRuleMap fieldRuleMap = beanRuleMap.get(targetCode);
-        if(null == fieldRuleMap){
-            throw new ConverException("Bean转换规则Map里，没有["+targetCode+"]");
+    public static boolean conver(Object target, String targetCode, DataRuleMap dataRuleMap, IDataSource dataSource) throws ConverException {
+        try {
+            //有rule
+            FieldRuleMap fieldRuleMap = dataRuleMap.get(targetCode);
+            if(null != fieldRuleMap){
+                List<Field> fields = MyReflectUtil.getFieldsWithGetterAndSetter(target.getClass());
+                for(Field field:fields){
+                    // 设置字段可访问
+                    field.setAccessible(true);
+                    // 修改字段值
+                    ConverDesc converDesc = fieldRuleMap.get(field.getName());
+                    field.set(target,converDesc.getConverValue(dataSource));
+                }
+                return true;
+            }
+
+            //无rule，但有code
+            if(dataSource.contains(targetCode)){
+                target = dataSource.get(targetCode);
+                return true;
+            }
+
+            throw new ConverException("targetCode["+targetCode+"]不存在");
+
+        } catch (Exception e) {
+            throw new ConverException(e);
         }
-        List<Field> fields = MyReflectUtil.getFieldsWithGetterAndSetter(target.getClass());
-        for(Field field:fields){
-            // 设置字段可访问
-            field.setAccessible(true);
-            // 修改字段值
-            ConverDesc converDesc = fieldRuleMap.get(field.getName());
-            field.set(target,converDesc.getConverValue(dataSource));
-        }
-        return true;
     }
 
     /**
      * -----------------------------------------------------------------------------------------------------------------
      * 解析规则JSON
+     * TODO 增加一个解析器
      *
      * @param json rule字符串
-     * @param beanRuleMapCache bean转换规则缓存
+     * @param dataRuleMapCache data转换规则缓存
      * @return {@link FieldRuleMap }
      */
-    public static boolean analysis(String json, BeanRuleMap beanRuleMapCache){
-        JSONObject ruleJSON = JSONUtil.parseObj(json);
-        //目标编码
-        String targetCode = ruleJSON.getStr("targetCode");
-        //转换规则
-        JSONObject rules = ruleJSON.getJSONObject("rules");
+    public static boolean analysis(String json, DataRuleMap dataRuleMapCache) throws ConverException {
+        try {
+            JSONObject ruleJSON = JSONUtil.parseObj(json);
+            //目标编码
+            String targetCode = ruleJSON.getStr("targetCode");
+            //转换规则
+            JSONObject rules = ruleJSON.getJSONObject("rules");
 
-        //解析成字段转换规则
-        FieldRuleMap fieldRuleMap = new FieldRuleMap();
-        HashMap<String,JSONObject> curMap = (HashMap<String,JSONObject>) JSONUtil.toBean(rules, HashMap.class);
-        for(Map.Entry<String,JSONObject> entry:curMap.entrySet()){
-            String field = entry.getKey();
-            String conver = entry.getValue().toString();
-            ConverDesc converDesc = ConverDesc.build(conver);
-            fieldRuleMap.put(field, converDesc);
+            //解析成字段转换规则
+            FieldRuleMap fieldRuleMap = new FieldRuleMap();
+            HashMap<String,JSONObject> curMap = (HashMap<String,JSONObject>) JSONUtil.toBean(rules, HashMap.class);
+            for(Map.Entry<String,JSONObject> entry:curMap.entrySet()){
+                String field = entry.getKey();
+                String conver = entry.getValue().toString();
+                ConverDesc converDesc = ConverDesc.build(conver);
+                fieldRuleMap.put(field, converDesc);
+            }
+            //解析成data转换规则
+            dataRuleMapCache.put(targetCode, fieldRuleMap);
+            return true;
+        } catch (Exception e) {
+            throw new ConverException(e);
         }
-        //解析成bean转换规则
-        beanRuleMapCache.put(targetCode, fieldRuleMap);
-        return true;
     }
 }

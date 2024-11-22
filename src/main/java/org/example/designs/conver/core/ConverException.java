@@ -15,4 +15,8 @@ public class ConverException extends Exception{
     public ConverException(String message) {
         super(message);
     }
+
+    public ConverException(Exception e) {
+        super(e);
+    }
 }

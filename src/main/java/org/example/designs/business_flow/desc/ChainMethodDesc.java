@@ -1,4 +1,4 @@
-package org.example.designs.chain.desc;
+package org.example.designs.business_flow.desc;
 
 import java.lang.reflect.Method;
 
@@ -13,13 +13,16 @@ import java.lang.reflect.Method;
  * @author  HaiYu
  * @version 1.0.0
  */
-public class MethodDesc {
+public class ChainMethodDesc {
     private Method method;
     private String desc;
+    private String retCode;
 
-    public MethodDesc(Method method, String desc) {
+
+    public ChainMethodDesc(Method method,String desc,String retCode) {
         this.method = method;
         this.desc = desc;
+        this.retCode = retCode;
     }
 
     public Method getMethod() {
@@ -36,5 +39,13 @@ public class MethodDesc {
 
     public void setDesc(String desc) {
         this.desc = desc;
+    }
+
+    public String getRetCode() {
+        return retCode;
+    }
+
+    public void setRetCode(String retCode) {
+        this.retCode = retCode;
     }
 }

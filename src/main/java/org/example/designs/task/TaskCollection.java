@@ -12,11 +12,15 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * @Program: 0.test
- * @Author: 海里的鱼
- * @Create: 2024-08-27 20:51
- * @Name: 任务集合类
- * @Desc: TODO
+ * 任务集合
+ *
+ * <p>
+ *     TODO
+ * </p>
+ *
+ * @author HaiYu
+ * @version 1.0.0
+ * @date 2024-11-22
  */
 public class TaskCollection<T extends AbstractTask> {
 
@@ -29,12 +33,14 @@ public class TaskCollection<T extends AbstractTask> {
     }
 
 
-
-    /** ---------------------------------------------------------------------------------------------------------------------
-     * @Method  : 添加任务
-     * @Describe: TODO
-     **/
-     public String add(T task) {
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 添加任务
+     *
+     * @param task
+     * @return {@link String }
+     */
+    public String add(T task) {
         //执行任务重命名策略
 //        renameStrategy.AutoIncrementRename(task);
 
@@ -53,47 +59,59 @@ public class TaskCollection<T extends AbstractTask> {
          return tasks.size();
     }
 
-    /** ---------------------------------------------------------------------------------------------------------------------
-     * @Method  : 获取任务
-     * @Describe: TODO
-     **/
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 获取任务
+     *
+     * @param name
+     * @return {@link T }
+     */
     public T get(String name) {
         return tasks.get(name);
     }
 
-    /** ---------------------------------------------------------------------------------------------------------------------
-     * @Method  : 任务大小
-     * @Describe: TODO
-     **/
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 任务大小
+     *
+     * @return int
+     */
     public int size(){
         return tasks.size();
     }
 
-    /** ---------------------------------------------------------------------------------------------------------------------
-     * @Method  : 删除任务
-     * @Describe: TODO
-     **/
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 删除
+     *
+     * @param name
+     * @return {@link String }
+     */
     public String remove(String name) {
         AbstractTask task = tasks.remove(name);
         return task == null ?null :task.getName();
     }
 
     /**
-     * ---------------------------------------------------------------------------------------------------------------------
+     * -----------------------------------------------------------------------------------------------------------------
+     * 任务集合
      *
-     * @Method : 获取任务集合
-     * @Describe: TODO
-     **/
+     * @return {@link List }<{@link T }>
+     */
     public List<T> getTasks() {
         return new ArrayList<T>(tasks.values());
     }
 
 
-//    public IRename getRenameStrategy() {
-//        return renameStrategy;
-//    }
-//
-//    public void setRenameStrategy(IRename renameStrategy) {
-//        this.renameStrategy = renameStrategy;
-//    }
+    public IBeforeExecute getRenameStrategy() {
+        return renameStrategy;
+    }
+
+    public void setRenameStrategy(IBeforeExecute renameStrategy) {
+        this.renameStrategy = renameStrategy;
+    }
+
+    public void setTasks(HashMap<String, T> tasks) {
+        this.tasks = tasks;
+    }
 }

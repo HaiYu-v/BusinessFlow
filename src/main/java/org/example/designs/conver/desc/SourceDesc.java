@@ -10,8 +10,8 @@ import java.lang.reflect.Field;
  *
  * <p>
  *     记录一个code和他的一个field
- *     如果field为空，则表示此code指向一个数值，而非Bean
- *     如果field不为空，则取bean的此field值
+ *     如果field为空，则表示此code指向一个数值，而非Data
+ *     如果field不为空，则取data的此field值
  * </p>
  *
  * @author HaiYu
@@ -27,11 +27,11 @@ public class SourceDesc {
         if(StrUtil.isBlank(field)){
             return dataSource.get(code);
         }
-        //file不为空，则从bean里取值
-        Object bean = dataSource.get(code);
-        Field declaredField = bean.getClass().getDeclaredField(field);
+        //file不为空，则从data里取值
+        Object data = dataSource.get(code);
+        Field declaredField = data.getClass().getDeclaredField(field);
         declaredField.setAccessible(true);
-        return declaredField.get(bean);
+        return declaredField.get(data);
     }
 
     public SourceDesc(String code, String field) {

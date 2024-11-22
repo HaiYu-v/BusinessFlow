@@ -3,7 +3,7 @@ package org.example.designs.theadPool;
 
 
 import org.example.designs.task.AbstractTask;
-import org.example.designs.task.TaskEnum;
+import org.example.designs.task.TaskStatusEnum;
 import org.example.designs.task.strategy.after.IAfterExecute;
 import org.example.designs.task.strategy.after.fail.RetryFail;
 import org.example.designs.task.strategy.before.IBeforeExecute;
@@ -11,7 +11,6 @@ import org.example.designs.task.strategy.before.rename.AutoIncrementRename;
 import org.example.designs.task.TaskCollection;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
 import java.util.*;
@@ -136,7 +135,7 @@ public class BulkExecutor<T extends AbstractTask> {
                  throw new RuntimeException(e);
              }
          });
-         return task.getState() == TaskEnum.SUCCESS;
+         return task.getState() == TaskStatusEnum.SUCCESS;
     }
 
     /* ---------------------------------------------------------------------------------------------------------------------
@@ -157,11 +156,11 @@ public class BulkExecutor<T extends AbstractTask> {
         } catch (Exception e) {
             throw new BulkExecuteException(e);
         }
-        if(task.getState() == TaskEnum.FAILED) failTasks.add(task.getName());
-        if(task.getState() == TaskEnum.SUCCESS) successTasks.add(task.getName());
+        if(task.getState() == TaskStatusEnum.FAILED) failTasks.add(task.getName());
+        if(task.getState() == TaskStatusEnum.SUCCESS) successTasks.add(task.getName());
         //任务结束
         this.endTime = LocalDateTime.now();
-        return task.getState() == TaskEnum.SUCCESS;
+        return task.getState() == TaskStatusEnum.SUCCESS;
     }
 
 

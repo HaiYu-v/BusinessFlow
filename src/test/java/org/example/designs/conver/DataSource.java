@@ -27,4 +27,9 @@ public class DataSource implements IDataSource {
     public Object put(String code, Object value) {
         return dataMap.put(code,value);
     }
+
+    @Override
+    public boolean contains(String code) {
+        return dataMap.containsKey(code);
+    }
 }

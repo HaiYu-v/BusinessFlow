@@ -16,4 +16,5 @@ public interface IDataSource {
 
     Object put(String code,Object value);
 
+    boolean contains(String code);
 }

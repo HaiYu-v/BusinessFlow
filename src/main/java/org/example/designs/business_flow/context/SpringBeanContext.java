@@ -1,11 +1,11 @@
-package org.example.designs.chain.context;
+package org.example.designs.business_flow.context;
 
-import org.example.designs.chain.core.ChainException;
+import org.example.designs.business_flow.core.BusinessFlowException;
 import org.example.designs.utils.AppContextUtil;
 
 
 /**
- * Spring的Bean容器
+ * Spring的Data容器
  *
  * <p>
  *     TODO
@@ -19,17 +19,17 @@ public class SpringBeanContext implements IContext{
 
 
     @Override
-    public Object getBean(String var1) throws ChainException {
+    public Object getData(String var1) throws BusinessFlowException {
         return AppContextUtil.getBean(var1);
     }
 
     @Override
-    public <T> T getBean(Class<T> var1) throws ChainException {
+    public <T> T getData(Class<T> var1) throws BusinessFlowException {
         return AppContextUtil.getBean(var1);
     }
 
     @Override
-    public boolean containsBean(String var1) {
+    public boolean containsData(String var1) {
         return AppContextUtil.containsBean(var1);
     }
 }

@@ -1,4 +1,4 @@
-package org.example.designs.chain.annotation;
+package org.example.designs.business_flow.annotation;
 
 import java.lang.annotation.*;
 

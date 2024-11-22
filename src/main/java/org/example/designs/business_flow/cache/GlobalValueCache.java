@@ -1,22 +1,25 @@
-package org.example.designs.chain.cache;
+package org.example.designs.business_flow.cache;
 
 import org.example.designs.conver.core.IDataSource;
+
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 业务流数据临时缓存
+ * 业务流数据全局缓存
  *
  * <p>
- *     数据只能取一次，取后数据就会销毁
+ *     数据在整个业务流中共享，
  * </p>
  *
  * @author HaiYu
  * @version 1.0.0
  * @date 2024-11-21
  */
-public class TemporaryValueCache implements IDataSource {
-    private Map<String,Object> temporaryMap = new HashMap<>();
+public class GlobalValueCache implements IDataSource {
+    //全局map
+    private Map<String,Object> globalMap = new HashMap<>();
+
     /**
      * -----------------------------------------------------------------------------------------------------------------
      * 缓存
@@ -27,34 +30,43 @@ public class TemporaryValueCache implements IDataSource {
      */
     @Override
     public Object put(String key, Object value) {
-        return temporaryMap.put(key,value);
+        return globalMap.put(key,value);
     }
 
     /**
      * -----------------------------------------------------------------------------------------------------------------
-     * 获取, 用完即删
+     * 是否有
+     *
+     * @param code
+     * @return boolean
+     */
+    @Override
+    public boolean contains(String code) {
+        return globalMap.containsKey(code);
+    }
+
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 获取
      *
      * @param key
      * @return {@link Object }
      */
     @Override
     public Object get(String key) {
-        Object ret = temporaryMap.get(key);
-        temporaryMap.remove(key);
-        return ret;
+        return globalMap.get(key);
     }
 
     /**
      * -----------------------------------------------------------------------------------------------------------------
-     * 获取指定类型, 用完即删
+     * 获取指定类型
      *
      * @param key
      * @param classType
      * @return {@link T }
      */
     public <T> T get(String key,Class<T> classType){
-        T ret = (T) temporaryMap.get(key);
-        temporaryMap.remove(key);
-        return ret;
+        return (T) globalMap.get(key);
     }
+
 }

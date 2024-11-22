@@ -1,4 +1,4 @@
-package org.example.designs.chain.mapper;
+package org.example.designs.business_flow.mapper;
 
 
 import org.apache.ibatis.annotations.Mapper;

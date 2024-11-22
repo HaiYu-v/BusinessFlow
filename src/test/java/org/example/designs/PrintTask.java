@@ -6,6 +6,7 @@ import org.example.designs.task.AbstractTask;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -26,7 +27,7 @@ class PrintTask extends AbstractTask {
      * @Describe: 重写这个方法，实现任务的执行逻辑，
      **/
     @Override
-    public boolean executeFunction()  {
+    public boolean executeFunction(Map<String,Object> params)  {
         List<Integer> list = new ArrayList<Integer>();
         for (int i = start; i <= end; i++) {
             list.add(i);

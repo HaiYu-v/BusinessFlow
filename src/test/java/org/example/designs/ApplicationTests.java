@@ -1,12 +1,17 @@
 package org.example.designs;
 
 
-import lombok.extern.slf4j.Slf4j;
+import org.example.designs.business_flow.Chain1;
+import org.example.designs.business_flow.core.BusinessFlow;
+import org.example.designs.business_flow.core.BusinessFlowException;
+import org.example.designs.business_flow.mapper.DataDesc;
 import org.example.designs.conver.DataSource;
 import org.example.designs.conver.Test1;
 import org.example.designs.conver.Test2;
-import org.example.designs.conver.core.BeanRuleMap;
+import org.example.designs.conver.core.ConverException;
 import org.example.designs.conver.core.Converter;
+import org.example.designs.conver.core.DataRuleMap;
+import org.example.designs.task.TaskInfo;
 import org.example.designs.task.strategy.after.fail.UnThrow;
 import org.example.designs.utils.MyReflectUtil;
 import org.junit.jupiter.api.Test;
@@ -16,7 +21,6 @@ import java.lang.reflect.Field;
 import java.util.List;
 
 
-@Slf4j
 @SpringBootTest
 class ApplicationTests  {
 
@@ -43,8 +47,8 @@ class ApplicationTests  {
 
 
     @Test
-    void test2(){
-        BeanRuleMap beanRuleMap = new BeanRuleMap();
+    void test2() throws ConverException {
+        DataRuleMap beanRuleMap = new DataRuleMap();
         String rule = "{\n" +
                 "    \"targetCode\":\"test2\",\n" +
                 "    \"rules\":{\n" +
@@ -65,9 +69,31 @@ class ApplicationTests  {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        System.out.println(test2);
+        System.out.println(DataDesc.class.getCanonicalName());
         System.out.println(beanRuleMap);
 
+    }
+
+    @Test
+    void test3(){
+        try {
+            BusinessFlow businessFlow = BusinessFlow.build();
+            Test1 end = businessFlow
+                    .start()
+                    .add(Chain1.class, "start")
+                    .add(Chain1.class, "conver1")
+                    .end(Test1.class);
+
+//            System.out.println(end.getId());
+
+            for (TaskInfo taskInfo : businessFlow.getInfoList()) {
+                System.out.println();
+                System.out.println(taskInfo.toJsonString());
+                System.out.println();
+            }
+        } catch (BusinessFlowException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

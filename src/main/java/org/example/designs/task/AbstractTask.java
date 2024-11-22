@@ -8,21 +8,26 @@ import org.example.designs.task.strategy.after.IAfterExecute;
 import org.example.designs.task.strategy.after.fail.Throw;
 import org.example.designs.task.strategy.before.IBeforeExecute;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * @Author: 海里的鱼
- * @Create: 2024-08-26 09:22
- * @Name: 任务的抽象类类
- * @Desc: TODO
+ * 任务抽象类
+ *
+ * <p>
+ *     TODO
+ * </p>
+ *
+ * @author HaiYu
+ * @version 1.0.0
+ * @date 2024-11-22
  */
 @Slf4j
 public abstract class AbstractTask {
-    //ID自增
+    //ID自增，保证全局唯一
     private static AtomicInteger NextId  = new AtomicInteger(0);
     //任务ID，唯一
     protected Integer id;
@@ -35,7 +40,7 @@ public abstract class AbstractTask {
     //执行次数
     protected AtomicInteger countExecute = new AtomicInteger(0);
     //任务状态
-    protected TaskEnum state = TaskEnum.UN_EXECUTED;
+    protected TaskStatusEnum state = TaskStatusEnum.UN_EXECUTED;
     //开始时间
     protected LocalDateTime startTime;
     //结束时间
@@ -52,35 +57,73 @@ public abstract class AbstractTask {
         this.id = NextId.incrementAndGet();
     }
 
-    //自定义，任务执行函数
-    public abstract boolean executeFunction() throws Exception;
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * TODO
+     *
+     * @param params
+     * @return boolean
+     * @throws Exception
+     *///自定义，任务执行函数
+    public abstract boolean executeFunction(Map<String,Object> params) throws Exception;
 
-    /** ---------------------------------------------------------------------------------------------------------------------
-     * @Method  : 简单的执行任务一次
-     * @Describe: TODO
-     **/
-     public void simpleExecute() throws Exception {
+
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 简单执行一次（无参）
+     *
+     * @return boolean
+     * @throws TaskException
+     */
+    public boolean simpleExecute() throws TaskException {
+        return simpleExecute(null);
+    }
+
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 简单执行一次
+     *
+     * @param params
+     * @return boolean
+     * @throws TaskException
+     */
+    public boolean simpleExecute(Map<String,Object> params) throws TaskException {
         //修改状态为"任务开始"
-        state= TaskEnum.EXECUTING;
+        state= TaskStatusEnum.EXECUTING;
         try {
             countExecute.incrementAndGet();
             //执行任务
-            if(executeFunction()){
-                state = TaskEnum.SUCCESS;
+            if(executeFunction(params)){
+                state = TaskStatusEnum.SUCCESS;
             }else {
-                state = TaskEnum.FAILED;
+                state = TaskStatusEnum.FAILED;
             }
         } catch (Exception e1) {
-            state = TaskEnum.EXCEPTION;
-            throw e1;
+            state = TaskStatusEnum.EXCEPTION;
+            throw new TaskException(e1);
         }
+        return true;
     }
 
-    /** ---------------------------------------------------------------------------------------------------------------------
-     * @Method  : 执行任务
-     * @Describe: TODO
-     **/
-     public boolean execute() throws Exception {
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 执行任务（无参）
+     *
+     * @return boolean
+     * @throws TaskException
+     */
+    public boolean execute() throws TaskException {
+         return execute(null);
+    }
+
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 执行任务
+     *
+     * @return boolean
+     * @throws TaskException
+     */
+    public boolean execute(Map<String,Object> params) throws TaskException {
         //执行的初始时间
         startTime = LocalDateTime.now();
         List<String> msg = new ArrayList<>();
@@ -97,7 +140,7 @@ public abstract class AbstractTask {
         //任务执行
         Exception e = null;
         try {
-            simpleExecute();
+            simpleExecute(params);
         } catch (Exception ex) {
             log.error(ex.getMessage(),ex);
             e = ex;
@@ -118,7 +161,7 @@ public abstract class AbstractTask {
 
         //判断是否需要抛出异常
         if(e != null && isThrow){
-            throw e;
+            throw new TaskException(e);
         }else if(beforeException != null && aftereException != null){
             throw new TaskException((id!=null ? "Task:"+id+", " : "")+"beforeExecute and afterExecute error");
         }else if(beforeException != null){
@@ -127,26 +170,30 @@ public abstract class AbstractTask {
             throw new TaskException((id!=null ? "Task:"+id+", " : "" )+"afterExecute error");
         }
 
-        return state == TaskEnum.SUCCESS;
+        return state == TaskStatusEnum.SUCCESS;
     }
 
 
-    /** ---------------------------------------------------------------------------------------------------------------------
-     * @Method  : 获取运行时间
-     * @Describe: TODO
-     **/
-     public Long getRunningTime(){
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 运行时间
+     *
+     * @return {@link Long }
+     */
+    public Long getRunningTime(){
         if(startTime == null || endTime == null){
             return -1L;
         }
         return ChronoUnit.MILLIS.between(startTime, endTime);
     }
 
-    /** ---------------------------------------------------------------------------------------------------------------------
-     * @Method  : 获取任务的信息
-     * @Describe: TODO
-     **/
-     public TaskInfo getInfo(){
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 任务信息
+     *
+     * @return {@link TaskInfo }
+     */
+    public TaskInfo getInfo(){
          TaskInfo taskInfo = new TaskInfo();
          taskInfo.setId(id);
          taskInfo.setName(name);
@@ -175,11 +222,11 @@ public abstract class AbstractTask {
         this.afterExecute = afterExecute;
     }
 
-    public TaskEnum getState() {
+    public TaskStatusEnum getState() {
         return state;
     }
 
-    public void setState(TaskEnum state) {
+    public void setState(TaskStatusEnum state) {
         this.state = state;
     }
 

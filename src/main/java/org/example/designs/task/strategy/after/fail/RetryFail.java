@@ -2,7 +2,7 @@ package org.example.designs.task.strategy.after.fail;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.designs.task.AbstractTask;
-import org.example.designs.task.TaskEnum;
+import org.example.designs.task.TaskStatusEnum;
 import org.example.designs.task.strategy.after.IAfterExecute;
 
 
@@ -39,7 +39,7 @@ public class RetryFail implements IAfterExecute {
     @Override
     public boolean afterExecute(AbstractTask task, Exception e) {
         int count = retryCount;
-        while(task.getState() != TaskEnum.SUCCESS && count > 0){
+        while(task.getState() != TaskStatusEnum.SUCCESS && count > 0){
             try {
                 Thread.sleep(interval);
                 count--;
@@ -48,6 +48,6 @@ public class RetryFail implements IAfterExecute {
                 log.error(ex.getMessage(),ex);
             }
         }
-        return task.getState() != TaskEnum.SUCCESS;
+        return task.getState() != TaskStatusEnum.SUCCESS;
     }
 }

@@ -27,7 +27,7 @@ import java.util.Map;
 public class ConverDesc {
     //转换方式
     private String type;
-    //来源beanCode
+    //来源dataCode
     private Map<String,SourceDesc> sourceMap = new HashMap<>();
     //转换公式
     private String formula;

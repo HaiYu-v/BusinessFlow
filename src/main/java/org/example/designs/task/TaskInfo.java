@@ -6,7 +6,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * TODO
+ * 任务信息
  *
  * <p>
  *     TODO
@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class TaskInfo {
     private Integer id;
     private String name;
-    private TaskEnum state;
+    private TaskStatusEnum state;
     private Integer sort;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
@@ -37,10 +37,10 @@ public class TaskInfo {
     // 转换为 JSON 字符串的方法
     public String toJsonString() {
         StringBuilder info = new StringBuilder("{");
+        info.append("\"desc\":\"").append(describe == null ? "null" : describe).append("\",");
         info.append("\"id\":\"").append(id == null ? "null" : id).append("\",");
         info.append("\"name\":\"").append(name == null ? "null" : name).append("\",");
         info.append("\"state\":\"").append(state == null ? "null" : state.getMessage()).append("\",");
-        info.append("\"describe\":\"").append(describe == null ? "null" : describe).append("\",");
         info.append("\"sort\":\"").append(sort == null ? "null" : sort).append("\",");
         info.append("\"startTime\":\"").append(startTime == null ? "null" : startTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append("\",");
         info.append("\"endTime\":\"").append(endTime == null ? "null" : endTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append("\",");
@@ -67,11 +67,11 @@ public class TaskInfo {
         this.name = name;
     }
 
-    public TaskEnum getState() {
+    public TaskStatusEnum getState() {
         return state;
     }
 
-    public void setState(TaskEnum state) {
+    public void setState(TaskStatusEnum state) {
         this.state = state;
     }
 

@@ -1,6 +1,6 @@
 package org.example.designs.conver;
 
-import org.example.designs.chain.annotation.Table;
+import org.example.designs.business_flow.annotation.Table;
 
 /**
  * TODO
