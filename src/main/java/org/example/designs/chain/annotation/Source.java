@@ -2,12 +2,9 @@ package org.example.designs.chain.annotation;
 
 import java.lang.annotation.*;
 
-@Target(ElementType.METHOD )
+@Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface Chain {
-    //业务点描述
+public @interface Source {
     String value();
-    //业务点code
-    String code() default "";
 }

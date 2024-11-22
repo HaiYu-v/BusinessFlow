@@ -3,7 +3,7 @@ package org.example.designs.chain.desc;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import org.example.designs.chain.annotation.Chain;
-import org.example.designs.chain.context.BeanException;
+import org.example.designs.chain.core.ChainException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -58,7 +58,7 @@ import java.lang.reflect.Parameter;
      * @param  desc 业务点描述
      * @return ChainDesc 业务点描述
      */
-    public static <T> ChainDesc getDesc(T bean, String methodCode, String desc) throws BeanException {
+    public static <T> ChainDesc build(T bean, String methodCode, String desc) throws ChainException {
         MethodDesc methodDesc = getMethod(bean.getClass(), methodCode);
         if(StrUtil.isBlank(methodDesc.getDesc())){
             methodDesc.setDesc(desc);
@@ -70,14 +70,14 @@ import java.lang.reflect.Parameter;
     /** ---------------------------------------------------------------------------------------------------------------------
      * 通过反射获取业务点描述
      *
-     * 优先获取{@Chain}注解过的方法，如果没有注解，则取第一个方法名匹配的方法
-     * method匹配的优先级：首位@Chain.Code() > @Chain.Code() > 尾位@Chain > methodName
+     * 匹配{@link Chain}注解过的方法
+     * method匹配的优先级：首位@Chain.Code() > @Chain.Code() > 尾位@Chain
      * desc匹配的优先级: @Chain.value() > 传入的desc
      * @param  beanType bean类型
      * @param  methodCode 方法编号（方法名）
      * @return Method   方法
      */
-    private static <T> MethodDesc getMethod(Class<T> beanType,String methodCode) throws BeanException {
+    private static <T> MethodDesc getMethod(Class<T> beanType,String methodCode) throws ChainException {
         Method[] methods = ReflectUtil.getPublicMethods(beanType);
         MethodDesc ret = null;
         for (Method method : methods) {
@@ -90,14 +90,11 @@ import java.lang.reflect.Parameter;
                 // 尾位@Chain
                 }else if (null != chain && method.getName().equals(methodCode)){
                     ret = new MethodDesc(method,chain.value());
-                // methodName
-                }else if(null == ret && method.getName().equals(methodCode)){
-                    ret = new MethodDesc(method,null);
                 }
             }
         }
         if(null == ret) {
-            throw new BeanException(beanType.getName()+":@Chain的code错误，或方法["+methodCode+"]不存在");
+            throw new ChainException(beanType.getName()+":@Chain的code错误，或方法["+methodCode+"]没有使用@Chain");
         }
         return ret;
     }
@@ -109,11 +106,11 @@ import java.lang.reflect.Parameter;
      * @return 返回类型
      * @throws InvocationTargetException
      * @throws IllegalAccessException
-     * @throws BeanException
+     * @throws ChainException
      */
-    public Object invoke() throws InvocationTargetException, IllegalAccessException, BeanException {
+    public Object invoke() throws InvocationTargetException, IllegalAccessException, ChainException {
         if(null == this.bean || null == this.method){
-            throw new BeanException("bean or method is null");
+            throw new ChainException("bean or method is null");
         }
         return this.method.invoke(bean,this.params);
     }
@@ -151,7 +148,7 @@ import java.lang.reflect.Parameter;
         this.method = method;
     }
 
-    public String getDesc() {
+    public String build() {
         return desc;
     }
 

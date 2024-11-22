@@ -1,10 +1,10 @@
-package org.example.designs.conver.desc;
+package org.example.designs.chain.mapper;
 
 /**
  * 字段描述
  *
  * <p>
- *     TODO
+ *     用于描述一个字段
  * </p>
  *
  * @author HaiYu

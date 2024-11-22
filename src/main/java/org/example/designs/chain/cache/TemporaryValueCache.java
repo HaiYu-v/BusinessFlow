@@ -1,5 +1,6 @@
 package org.example.designs.chain.cache;
 
+import org.example.designs.conver.core.IDataSource;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,7 +15,7 @@ import java.util.Map;
  * @version 1.0.0
  * @date 2024-11-21
  */
-public class TemporaryCache {
+public class TemporaryValueCache implements IDataSource {
     private Map<String,Object> temporaryMap = new HashMap<>();
     /**
      * -----------------------------------------------------------------------------------------------------------------
@@ -24,6 +25,7 @@ public class TemporaryCache {
      * @param value
      * @return {@link Object }
      */
+    @Override
     public Object put(String key, Object value) {
         return temporaryMap.put(key,value);
     }
@@ -35,6 +37,7 @@ public class TemporaryCache {
      * @param key
      * @return {@link Object }
      */
+    @Override
     public Object get(String key) {
         Object ret = temporaryMap.get(key);
         temporaryMap.remove(key);

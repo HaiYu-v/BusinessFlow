@@ -2,8 +2,11 @@ package org.example.designs;
 
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.designs.chain.annotation.Chain;
-import org.example.designs.conver.Converter;
+import org.example.designs.conver.DataSource;
+import org.example.designs.conver.Test1;
+import org.example.designs.conver.Test2;
+import org.example.designs.conver.core.BeanRuleMap;
+import org.example.designs.conver.core.Converter;
 import org.example.designs.task.strategy.after.fail.UnThrow;
 import org.example.designs.utils.MyReflectUtil;
 import org.junit.jupiter.api.Test;
@@ -38,24 +41,33 @@ class ApplicationTests  {
         System.out.println(fields);
     }
 
+
     @Test
-    @Chain(value = "123", code ="123")
     void test2(){
+        BeanRuleMap beanRuleMap = new BeanRuleMap();
         String rule = "{\n" +
-                "    \"targetCode\":\"code\",\n" +
+                "    \"targetCode\":\"test2\",\n" +
                 "    \"rules\":{\n" +
-                "        \"file1\":{\"type\":\"常量||映射||公式\",\"code\":\"code1\",\"field\":\"file\",\"formula\":\"=c1+c2\"},\n" +
-                "        \"file2\":{\"type\":\"常量\",\"code\":\"code1\",\"field\":\"file\",\"formula\":\"=1\"},\n" +
-                "        \"file3\":{\"type\":\"映射\",\"code\":\"code2\",\"field\":\"file\"},\n" +
-                "        \"file4\":{\"type\":\"公式\",\"formula\":\"=c1+c2\"}\n" +
+                "        \"id\":{\"type\":\"0\",\"code\":\"test1\",\"field\":\"id\",\"formula\":\"\"},\n" +
+                "        \"name\":{\"type\":\"0\",\"code\":\"test1\",\"field\":\"name\",\"formula\":\"\"},\n" +
+                "        \"price\":{\"type\":\"0\",\"code\":\"test1\",\"field\":\"price\"},\n" +
                 "    }\n" +
                 "}";
+        Converter.analysis(rule,beanRuleMap);
+        DataSource dataSource = new DataSource();
 
+        Test1 test1 = new Test1(1, "test1", 2);
+        Test2 test2 = new Test2();
+        dataSource.put("test1",test1);
+        dataSource.put("price",3);
         try {
-            Converter.analysis(rule);
-        } catch (NoSuchFieldException e) {
+            Converter.conver(test2,"test2",beanRuleMap,dataSource);
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        System.out.println(test2);
+        System.out.println(beanRuleMap);
+
     }
 
 }

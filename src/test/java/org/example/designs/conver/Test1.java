@@ -1,4 +1,4 @@
-package org.example.designs;
+package org.example.designs.conver;
 
 import org.example.designs.chain.annotation.Table;
 
@@ -18,6 +18,23 @@ public class Test1 {
     private int id;
     private String name;
     private double price;
+
+    public Test1(int id, String name, double price) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+    }
+
+    public Test1( ) {
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
 
     public int getId() {
         return id;

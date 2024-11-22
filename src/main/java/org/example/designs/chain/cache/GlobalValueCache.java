@@ -1,5 +1,7 @@
 package org.example.designs.chain.cache;
 
+import org.example.designs.conver.core.IDataSource;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,7 +16,7 @@ import java.util.Map;
  * @version 1.0.0
  * @date 2024-11-21
  */
-public class GlobalCache {
+public class GlobalValueCache implements IDataSource {
     //全局map
     private Map<String,Object> globalMap = new HashMap<>();
 
@@ -26,6 +28,7 @@ public class GlobalCache {
      * @param value
      * @return {@link Object }
      */
+    @Override
     public Object put(String key, Object value) {
         return globalMap.put(key,value);
     }
@@ -37,6 +40,7 @@ public class GlobalCache {
      * @param key
      * @return {@link Object }
      */
+    @Override
     public Object get(String key) {
         return globalMap.get(key);
     }

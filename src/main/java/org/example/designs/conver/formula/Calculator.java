@@ -1,6 +1,9 @@
-package org.example.designs.conver;
+package org.example.designs.conver.formula;
 
-import java.util.HashMap;
+import org.example.designs.conver.core.IDataSource;
+import org.example.designs.conver.desc.SourceDesc;
+
+import java.util.Map;
 
 /**
  * 计算器
@@ -22,8 +25,8 @@ public class Calculator {
      * @param formula  计算公式
      * @return {@link Object }
      */
-    public static Object compute(HashMap<String,Object> variates,String formula){
-        return compute(variates,formula);
+    public static Object compute(Map<String, SourceDesc> variates, String formula, IDataSource dataSource){
+        return null;
     }
 
     /**
@@ -35,7 +38,7 @@ public class Calculator {
      * @param retType  返回类型
      * @return {@link Object }
      */
-    public static <T> T compute(HashMap<String,Object> variates,String formula,Class<T> retType){
-        return (T) compute(variates,formula);
+    public static <T> T compute(Map<String,SourceDesc> variates,String formula,Class<T> retType,IDataSource dataSource){
+        return (T) compute(variates,formula,dataSource);
     }
 }

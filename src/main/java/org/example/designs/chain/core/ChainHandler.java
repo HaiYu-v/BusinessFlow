@@ -1,17 +1,15 @@
 package org.example.designs.chain.core;
 
-import org.example.designs.chain.cache.GlobalCache;
-import org.example.designs.chain.cache.TemporaryCache;
-import org.example.designs.chain.context.BeanException;
+import org.example.designs.chain.cache.GlobalValueCache;
+import org.example.designs.chain.cache.TemporaryValueCache;
 import org.example.designs.chain.context.IContext;
 import org.example.designs.chain.context.SpringBeanContext;
-import org.example.designs.conver.BeanRule;
-import org.example.designs.conver.Converter;
+import org.example.designs.conver.core.BeanRuleMap;
+import org.example.designs.conver.core.Converter;
 import org.example.designs.chain.desc.ChainDesc;
 import org.example.designs.task.AbstractTask;
 import org.example.designs.task.TaskInfo;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,11 +28,11 @@ public class ChainHandler extends AbstractTask {
     //链路列表
     private List<TaskInfo> infoList = new ArrayList<>();
     //全局数据的缓存，真条业务流程里的缓存
-    private GlobalCache globalCache = new GlobalCache();
+    private GlobalValueCache globalValueCache = new GlobalValueCache();
     //临时数据的缓存，只传递一次
-    private TemporaryCache temporaryCache = new TemporaryCache();
+    private TemporaryValueCache temporaryValueCache = new TemporaryValueCache();
     //转换规则缓存
-    private BeanRule ruleCache = new BeanRule();
+    private BeanRuleMap ruleCache = new BeanRuleMap();
     //业务逻辑
     private BiFunction<Map<String,Object>,Map<String,Object>,Object> process;
     //Bean容器
@@ -50,21 +48,24 @@ public class ChainHandler extends AbstractTask {
      * @param desc 业务点描述
      * @return {@link ChainHandler }
      */
-    public <T> ChainHandler add(Class<T> beanType, String methodCode, String desc) throws NoSuchFieldException, IllegalAccessException, InvocationTargetException {
+    public <T> ChainHandler add(Class<T> beanType, String methodCode, String desc) throws Exception {
         try {
             //获得业务处理者
             T bean = context.getBean(beanType);
             //获得业务点
-            ChainDesc chainDesc = ChainDesc.getDesc(bean,methodCode,desc);
+            ChainDesc chainDesc = ChainDesc.build(bean,methodCode,desc);
             //业务点所需参数
             Parameter[] parameters = chainDesc.getParameters();
             //转换器为参数赋值
-            Object[] params = Converter.converBatch(parameters, ruleCache);
+            Object[] params = new Object[parameters.length];
+            for (int i = 0; i < parameters.length; i++) {
+                Converter.conver(params[i], parameters[i].getName(), ruleCache, temporaryValueCache);
+            }
             //执行业务点
             chainDesc.setParams(params);
             Object ret = chainDesc.invoke();
             System.out.println(ret);
-        } catch (BeanException e) {
+        } catch (ChainException e) {
             throw new RuntimeException(e);
         }
         return this;
@@ -78,7 +79,7 @@ public class ChainHandler extends AbstractTask {
      * @param methodCode 处理方法code
      * @return {@link ChainHandler }
      */
-    public <T> ChainHandler add(Class<T> beanType,String methodCode) throws NoSuchFieldException, InvocationTargetException, IllegalAccessException {
+    public <T> ChainHandler add(Class<T> beanType,String methodCode) throws Exception {
         add(beanType,methodCode,null);
         return this;
     }

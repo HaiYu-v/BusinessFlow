@@ -1,5 +1,6 @@
 package org.example.designs.chain.context;
 
+import org.example.designs.chain.core.ChainException;
 import org.example.designs.utils.AppContextUtil;
 
 
@@ -18,12 +19,12 @@ public class SpringBeanContext implements IContext{
 
 
     @Override
-    public Object getBean(String var1) throws BeanException {
+    public Object getBean(String var1) throws ChainException {
         return AppContextUtil.getBean(var1);
     }
 
     @Override
-    public <T> T getBean(Class<T> var1) throws BeanException {
+    public <T> T getBean(Class<T> var1) throws ChainException {
         return AppContextUtil.getBean(var1);
     }
 

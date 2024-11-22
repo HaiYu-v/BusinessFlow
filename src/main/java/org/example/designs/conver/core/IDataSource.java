@@ -1,4 +1,4 @@
-package org.example.designs.conver;
+package org.example.designs.conver.core;
 
 /**
  * 转换器的数据源
@@ -12,6 +12,8 @@ package org.example.designs.conver;
  * @create 2024-11-21
  */
 public interface IDataSource {
-    Object getValue(String key);
-    <T> T getValue(String key,Class<T> valueType);
+    Object get(String code);
+
+    Object put(String code,Object value);
+
 }

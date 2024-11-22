@@ -1,10 +1,9 @@
-package org.example.designs.conver.mapper;
+package org.example.designs.chain.mapper;
 
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
-import org.example.designs.conver.desc.FiledDesc;
 
 import java.util.List;
 
