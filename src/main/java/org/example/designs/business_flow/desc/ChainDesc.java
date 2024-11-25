@@ -24,8 +24,6 @@ import java.util.Map;
  * @create 2024-11-19
  */
  public class ChainDesc extends AbstractTask {
-//     //业务点原型
-//     private static ChainDesc CHAINDESC_PROTORYPE = new ChainDesc();
      //业务处理者
     private Object bean;
     //处理方法
@@ -65,20 +63,7 @@ import java.util.Map;
         return true;
     }
 
-    /**
-     * -----------------------------------------------------------------------------------------------------------------
-     * 克隆方法，用于原型模式
-     *
-     * @return {@link ChainDesc }
-     */
-//    @Override
-//    public ChainDesc clone() {
-//        try {
-//            return (ChainDesc) super.clone();
-//        } catch (CloneNotSupportedException e) {
-//            throw new RuntimeException("Clone not supported", e);
-//        }
-//    }
+
 
     /** ---------------------------------------------------------------------------------------------------------------------
      * 构建一个ChainDesc
@@ -90,7 +75,7 @@ import java.util.Map;
      * @param  desc 业务点描述
      * @return ChainDesc 业务点描述
      */
-    public static  ChainDesc build(Object bean, String methodCode,String retCode, String desc) throws BusinessFlowException {
+    public static ChainDesc build(Object bean, String methodCode,String retCode, String desc) throws BusinessFlowException {
         ChainMethodDesc chainMethodDesc = getChainMethod(bean.getClass(), methodCode);
 
         if(StrUtil.isNotBlank(desc)){
@@ -154,6 +139,7 @@ import java.util.Map;
         }
         return this.method.invoke(bean,this.params);
     }
+
 
 
     public Parameter[] getParameters() {

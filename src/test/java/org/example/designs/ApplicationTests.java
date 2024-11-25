@@ -11,7 +11,6 @@ import org.example.designs.conver.Test2;
 import org.example.designs.conver.core.ConverException;
 import org.example.designs.conver.core.Converter;
 import org.example.designs.conver.core.DataRules;
-import org.example.designs.task.TaskInfo;
 import org.example.designs.task.strategy.after.fail.UnThrow;
 import org.example.designs.utils.MyReflectUtil;
 import org.junit.jupiter.api.Test;
@@ -76,26 +75,20 @@ class ApplicationTests  {
     @Test
     void test3(){
         try {
-            Long startTime = System.currentTimeMillis();
-            BusinessFlow businessFlow = BusinessFlow.build();
-            for(int i=0 ;i<10000; i++){
-                businessFlow.add(Chain1.class,"performance");
-            }
-//            Chain1 chain1 = new Chain1();
-//            Test1 end = businessFlow
-//                    .add(Chain1.class, "conver1")
-//                    .start(Test1.class);
-//            System.out.println(end.getName());
-
-            businessFlow.start();
-
-            System.out.println("总耗时："+(System.currentTimeMillis()-startTime));
-
-//            for (TaskInfo taskInfo : businessFlow.getInfoList()) {
-//                System.out.println();
-//                System.out.println(taskInfo.toJsonString());
-//                System.out.println();
+            BusinessFlow businessFlow = BusinessFlow.build("测试业务流性能");
+//            for(int i=0 ;i<100; i++){
+//                businessFlow.add(Chain1.class,"performance");
 //            }
+            Chain1 chain1 = new Chain1();
+            Test1 end = businessFlow
+                    .add(chain1, "start")
+                    .add(Chain1.class, "conver1")
+                    .start(Test1.class);
+            System.out.println(end.getName());
+
+            StringBuilder stringBuilder = new StringBuilder();
+            System.out.println(businessFlow.getInfoJSON());
+
         } catch (BusinessFlowException e) {
             throw new RuntimeException(e);
         }

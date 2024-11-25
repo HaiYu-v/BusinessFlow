@@ -30,6 +30,7 @@ public abstract class AbstractTask {
     //ID自增，保证全局唯一
     private static AtomicInteger NextId  = new AtomicInteger(0);
     protected TaskInfo taskInfo;
+
 //    //任务ID，唯一
 //    protected Integer id;
 //    //任务名

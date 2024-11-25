@@ -28,7 +28,6 @@ public class Chain1 {
 
     @Chain(desc = "转换为test1",retCode = "test1",code = "conver1")
     public Test1 conver(Test1 test1) throws InterruptedException {
-        Thread.sleep(1000);
         return test1;
     }
 
@@ -39,7 +38,7 @@ public class Chain1 {
 
     @Chain(desc = "性能测试",retCode = "test2")
     public void performance() throws InterruptedException {
-        Thread.sleep(1);
+//        Thread.sleep(1000);
         System.out.println("1"+"2"+"3"+"4"+ UUID.randomUUID());
     }
 

@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @date 2024-11-19
  */
 public class TaskInfo {
+    public String desc;
     public Integer id;
     public String name;
     public TaskStatusEnum state;
@@ -24,7 +25,6 @@ public class TaskInfo {
     public LocalDateTime startTime;
     public LocalDateTime endTime;
     public AtomicInteger countExecute;
-    public String desc;
 
     // 获取运行时间的方法
     private Long getRunningTime() {
@@ -35,7 +35,8 @@ public class TaskInfo {
     }
 
     // 转换为 JSON 字符串的方法
-    public String toJsonString() {
+    @Override
+    public String toString() {
         StringBuilder info = new StringBuilder("{");
         info.append("\"desc\":\"").append(desc == null ? "null" : desc).append("\",");
         info.append("\"id\":\"").append(id == null ? "null" : id).append("\",");
