@@ -1,14 +1,12 @@
 package org.example.designs.conver.desc;
 
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
+
 import org.example.designs.conver.core.ConverException;
 import org.example.designs.conver.converter.ConverType;
 import org.example.designs.conver.core.IDataSource;
 import org.example.designs.conver.formula.Calculator;
-
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,11 +24,24 @@ import java.util.Map;
  */
 public class ConverDesc {
     //转换方式
-    private String type;
+    private ConverType type;
     //来源dataCode
     private Map<String,SourceDesc> sourceMap = new HashMap<>();
     //转换公式
     private String formula;
+
+
+    public ConverDesc(ConverType type, SourceDesc sourceDesc, String formula) {
+        this.type = type;
+        this.sourceMap.put(sourceDesc.getKey(),sourceDesc);
+        this.formula = formula;
+    }
+
+    public ConverDesc(ConverType type, List<SourceDesc> sourceDesc, String formula) {
+        this.type = type;
+        this.formula = formula;
+        addSourceBatch(sourceDesc);
+    }
 
     /**
      * -----------------------------------------------------------------------------------------------------------------
@@ -42,54 +53,79 @@ public class ConverDesc {
      */
     public Object getConverValue(IDataSource dataSource) throws Exception {
         //简单映射
-        if(type.equals(ConverType.SIMPLE_MAPPING.getCode())){
+        if(type.equals(ConverType.SIMPLE_MAPPING)){
             return ((SourceDesc)(sourceMap.values().toArray()[0])).getValue(dataSource);
         //常量也由公式来赋值
-        }else if(type.equals(ConverType.CONSTANT.getCode()) || type.equals(ConverType.FORMULA_CALCULATION.getCode())){
+        }else if(type.equals(ConverType.CONSTANT) || type.equals(ConverType.FORMULA_CALCULATION)){
             return Calculator.compute(sourceMap,formula,dataSource);
         }else {
             throw new ConverException("不支持的转换方式:["+type+"]");
         }
     }
 
+//    /**
+//     * -----------------------------------------------------------------------------------------------------------------
+//     * 构建方法
+//     *
+//     * @param json converJSON字符串
+//     * @return {@link ConverDesc }
+//     */
+//    public static ConverDesc build(String json){
+//        JSONObject converJSON = JSONUtil.parseObj(json);
+//        String type = converJSON.getStr("type");
+//        String code = converJSON.getStr("code");
+//        String field = converJSON.getStr("field");
+//        String formula = converJSON.getStr("formula");
+//        return new ConverDesc(type,code,field,formula);
+//    }
+
     /**
      * -----------------------------------------------------------------------------------------------------------------
-     * 构建方法
+     * 添加Source
      *
-     * @param json converJSON字符串
+     * @param code
+     * @param field
      * @return {@link ConverDesc }
      */
-    public static ConverDesc build(String json){
-        JSONObject converJSON = JSONUtil.parseObj(json);
-        String type = converJSON.getStr("type");
-        String code = converJSON.getStr("code");
-        String field = converJSON.getStr("field");
-        String formula = converJSON.getStr("formula");
-        return new ConverDesc(type,code,field,formula);
+    public SourceDesc addSource(String code, String field){
+        SourceDesc sourceDesc = new SourceDesc(code, field);
+        addSource(sourceDesc);
+        return sourceDesc;
     }
 
-    public ConverDesc(String type, String code, String field, String formula) {
-        this.type = type;
-        this.sourceMap.put(getKey(code,field),new SourceDesc(code,field));
-        this.formula = formula;
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 添加Source
+     *
+     * @param sourceDesc
+     * @return {@link ConverDesc }
+     */
+    public SourceDesc addSource(SourceDesc sourceDesc){
+        this.sourceMap.put(sourceDesc.getKey(), sourceDesc);
+        return sourceDesc;
     }
 
-    private String getKey(String code,String field){
-        StringBuilder builder = new StringBuilder();
-        if(StrUtil.isNotBlank(code)){
-            builder.append(code);
-            if (StrUtil.isNotBlank(field)){
-                builder.append(".").append(field);
-            }
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 批量添加Source
+     *
+     * @param sourceList
+     * @return {@link ConverDesc }
+     */
+    public int addSourceBatch(List<SourceDesc> sourceList){
+        for (SourceDesc sourceDesc : sourceList) {
+            addSource(sourceDesc);
         }
-        return builder.toString();
+        return sourceList.size();
     }
 
-    public String getType() {
+
+
+    public ConverType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(ConverType type) {
         this.type = type;
     }
 

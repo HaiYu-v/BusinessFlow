@@ -9,9 +9,9 @@ import java.lang.reflect.Field;
  * 来源描述
  *
  * <p>
- *     记录一个code和他的一个field
- *     如果field为空，则表示此code指向一个数值，而非Data
- *     如果field不为空，则取data的此field值
+ *     记录一个bean的code和他的一个field
+ *     如果field为空，则表示此code指向一个数值，而非bean
+ *     如果field不为空，则取此code指向bean的field值
  * </p>
  *
  * @author HaiYu
@@ -37,5 +37,38 @@ public class SourceDesc {
     public SourceDesc(String code, String field) {
         this.field = field;
         this.code = code;
+    }
+
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 获得Key，用于外界的映射
+     *
+     * @return {@link String }
+     */
+    public String getKey(){
+        StringBuilder builder = new StringBuilder();
+        if(StrUtil.isNotBlank(this.code)){
+            builder.append(this.code);
+            if (StrUtil.isNotBlank(this.field)){
+                builder.append(".").append(this.field);
+            }
+        }
+        return builder.toString();
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getField() {
+        return field;
+    }
+
+    public void setField(String field) {
+        this.field = field;
     }
 }

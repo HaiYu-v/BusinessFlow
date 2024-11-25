@@ -1,16 +1,12 @@
 package org.example.designs.conver.core;
 
-import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
+import org.example.designs.conver.analysis.DefaultAnalyzer;
+import org.example.designs.conver.analysis.IAnalyzer;
 import org.example.designs.conver.desc.ConverDesc;
-import org.example.designs.conver.rule.FieldRuleMap;
+import org.example.designs.conver.rule.FieldRules;
 import org.example.designs.utils.MyReflectUtil;
-
-
 import java.lang.reflect.Field;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -31,6 +27,8 @@ import java.util.Map;
  */
 public class Converter {
 
+    private static IAnalyzer analyzer = new DefaultAnalyzer();
+
 
     /**
      * -----------------------------------------------------------------------------------------------------------------
@@ -42,22 +40,22 @@ public class Converter {
      *
      * @param  target      目标data
      * @param  targetCode  目标data的code
-     * @param  dataRuleMap data转换规则缓存
+     * @param  dataRules data转换规则缓存
      * @param  dataSource  数据源
      * @return 转换是否成功
      * @throws Exception
      */
-    public static boolean conver(Object target, String targetCode, DataRuleMap dataRuleMap, IDataSource dataSource) throws ConverException {
+    public static boolean conver(Object target, String targetCode, DataRules dataRules, IDataSource dataSource) throws ConverException {
         try {
             //有rule
-            FieldRuleMap fieldRuleMap = dataRuleMap.get(targetCode);
-            if(null != fieldRuleMap){
+            FieldRules fieldRules = dataRules.get(targetCode);
+            if(null != fieldRules){
                 List<Field> fields = MyReflectUtil.getFieldsWithGetterAndSetter(target.getClass());
                 for(Field field:fields){
                     // 设置字段可访问
                     field.setAccessible(true);
                     // 修改字段值
-                    ConverDesc converDesc = fieldRuleMap.get(field.getName());
+                    ConverDesc converDesc = fieldRules.get(field.getName());
                     field.set(target,converDesc.getConverValue(dataSource));
                 }
                 return true;
@@ -82,31 +80,23 @@ public class Converter {
      * TODO 增加一个解析器
      *
      * @param json rule字符串
-     * @param dataRuleMapCache data转换规则缓存
-     * @return {@link FieldRuleMap }
+     * @param dataRulesCache data转换规则缓存
+     * @return {@link FieldRules }
      */
-    public static boolean analysis(String json, DataRuleMap dataRuleMapCache) throws ConverException {
+    public static boolean analysis(String json, DataRules dataRulesCache) throws ConverException {
         try {
-            JSONObject ruleJSON = JSONUtil.parseObj(json);
-            //目标编码
-            String targetCode = ruleJSON.getStr("targetCode");
-            //转换规则
-            JSONObject rules = ruleJSON.getJSONObject("rules");
-
-            //解析成字段转换规则
-            FieldRuleMap fieldRuleMap = new FieldRuleMap();
-            HashMap<String,JSONObject> curMap = (HashMap<String,JSONObject>) JSONUtil.toBean(rules, HashMap.class);
-            for(Map.Entry<String,JSONObject> entry:curMap.entrySet()){
-                String field = entry.getKey();
-                String conver = entry.getValue().toString();
-                ConverDesc converDesc = ConverDesc.build(conver);
-                fieldRuleMap.put(field, converDesc);
-            }
-            //解析成data转换规则
-            dataRuleMapCache.put(targetCode, fieldRuleMap);
-            return true;
+            analyzer.analysis(json,dataRulesCache);
         } catch (Exception e) {
             throw new ConverException(e);
         }
+        return true;
+    }
+
+    public static IAnalyzer getAnalyzer() {
+        return analyzer;
+    }
+
+    public static void setAnalyzer(IAnalyzer analyzer) {
+        Converter.analyzer = analyzer;
     }
 }

@@ -27,6 +27,15 @@ public enum ConverType {
         this.type = type;
     }
 
+    public static ConverType ValueOf(String code) {
+        for (ConverType type : ConverType.values()) {
+            if (type.code.equals(code)) {
+                return type;
+            }
+        }
+        return null;
+    }
+
     public String getCode() {
         return code;
     }

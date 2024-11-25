@@ -4,10 +4,12 @@ import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import org.example.designs.business_flow.annotation.Chain;
 import org.example.designs.business_flow.core.BusinessFlowException;
+import org.example.designs.task.AbstractTask;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.Map;
 
 /**
  * 业务点描述
@@ -21,29 +23,62 @@ import java.lang.reflect.Parameter;
  * @version 1.0.0
  * @create 2024-11-19
  */
- public class ChainDesc {
-    //业务处理者
+ public class ChainDesc extends AbstractTask {
+//     //业务点原型
+//     private static ChainDesc CHAINDESC_PROTORYPE = new ChainDesc();
+     //业务处理者
     private Object bean;
     //处理方法
     private Method method;
-    //业务点描述
-    private String desc;
     //参数列表
     private Parameter[] parameters;
     //参数列表
     private Object[] params;
     //方法值code，存入数据缓存时的key
     private String retCode;
-    //返回类型
+    //返回bean
+    private Object retBean;
+
+    private ChainDesc(){}
 
 
-    public ChainDesc(Object bean, Method method, String desc, String retCode){
+
+    private ChainDesc(Object bean, Method method, String desc, String retCode) {
         this.bean = bean;
         this.method = method;
-        this.desc = desc;
+        super.taskInfo.desc = desc;
         this.retCode = retCode;
         this.parameters = method.getParameters();
     }
+
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 执行业务点
+     *
+     * @param params
+     * @return boolean
+     * @throws Exception
+     */
+    @Override
+    public boolean executeFunction(Map<String, Object> params) throws Exception {
+        this.retBean = invoke();
+        return true;
+    }
+
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 克隆方法，用于原型模式
+     *
+     * @return {@link ChainDesc }
+     */
+//    @Override
+//    public ChainDesc clone() {
+//        try {
+//            return (ChainDesc) super.clone();
+//        } catch (CloneNotSupportedException e) {
+//            throw new RuntimeException("Clone not supported", e);
+//        }
+//    }
 
     /** ---------------------------------------------------------------------------------------------------------------------
      * 构建一个ChainDesc
@@ -64,6 +99,7 @@ import java.lang.reflect.Parameter;
         if(StrUtil.isNotBlank(retCode)){
             chainMethodDesc.setRetCode(retCode);
         }
+
         return new ChainDesc(bean
                 , chainMethodDesc.getMethod()
                 ,chainMethodDesc.getDesc()
@@ -133,7 +169,7 @@ import java.lang.reflect.Parameter;
     }
 
     public String getDesc() {
-        return desc;
+        return super.taskInfo.desc;
     }
 
     public String getRetCode() {
@@ -160,12 +196,8 @@ import java.lang.reflect.Parameter;
         this.method = method;
     }
 
-    public String build() {
-        return desc;
-    }
-
     public void setDesc(String desc) {
-        this.desc = desc;
+        this.taskInfo.desc = desc;
     }
 
     public Object[] getParams() {
@@ -176,4 +208,11 @@ import java.lang.reflect.Parameter;
         this.params = params;
     }
 
+    public Object getRetBean() {
+        return retBean;
+    }
+
+    public void setRetBean(Object retBean) {
+        this.retBean = retBean;
+    }
 }

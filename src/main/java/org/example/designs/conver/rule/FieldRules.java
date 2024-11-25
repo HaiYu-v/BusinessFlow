@@ -16,7 +16,7 @@ import java.util.Map;
  * @version 1.0.0
  * @date 2024-11-20
  */
-public class FieldRuleMap {
+public class FieldRules {
     //target.field:ConverDesc
     private Map<String, ConverDesc> valueMap = new HashMap<>();
 

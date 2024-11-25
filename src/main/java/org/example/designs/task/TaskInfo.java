@@ -17,14 +17,14 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @date 2024-11-19
  */
 public class TaskInfo {
-    private Integer id;
-    private String name;
-    private TaskStatusEnum state;
-    private Integer sort;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
-    private AtomicInteger countExecute;
-    private String describe;
+    public Integer id;
+    public String name;
+    public TaskStatusEnum state;
+    public Integer sort;
+    public LocalDateTime startTime;
+    public LocalDateTime endTime;
+    public AtomicInteger countExecute;
+    public String desc;
 
     // 获取运行时间的方法
     private Long getRunningTime() {
@@ -37,7 +37,7 @@ public class TaskInfo {
     // 转换为 JSON 字符串的方法
     public String toJsonString() {
         StringBuilder info = new StringBuilder("{");
-        info.append("\"desc\":\"").append(describe == null ? "null" : describe).append("\",");
+        info.append("\"desc\":\"").append(desc == null ? "null" : desc).append("\",");
         info.append("\"id\":\"").append(id == null ? "null" : id).append("\",");
         info.append("\"name\":\"").append(name == null ? "null" : name).append("\",");
         info.append("\"state\":\"").append(state == null ? "null" : state.getMessage()).append("\",");
@@ -107,11 +107,11 @@ public class TaskInfo {
         this.countExecute = countExecute;
     }
 
-    public String getDescribe() {
-        return describe;
+    public String getDesc() {
+        return desc;
     }
 
-    public void setDescribe(String describe) {
-        this.describe = describe;
+    public void setDesc(String desc) {
+        this.desc = desc;
     }
 }

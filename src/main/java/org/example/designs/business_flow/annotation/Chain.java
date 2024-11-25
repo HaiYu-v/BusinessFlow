@@ -20,8 +20,8 @@ import java.lang.annotation.*;
 public @interface Chain {
     //业务点处理方法描述
     String desc();
+    //业务处理方法的返回值key，存入临时缓存的key
     String retCode();
     //业务点code
     String code() default "";
-    //返回值code
 }

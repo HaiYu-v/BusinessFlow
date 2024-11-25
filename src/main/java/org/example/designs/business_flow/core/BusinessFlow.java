@@ -7,17 +7,19 @@ import org.example.designs.business_flow.cache.GlobalValueCache;
 import org.example.designs.business_flow.cache.TemporaryValueCache;
 import org.example.designs.business_flow.context.IContext;
 import org.example.designs.business_flow.context.SpringBeanContext;
-import org.example.designs.conver.core.DataRuleMap;
+import org.example.designs.conver.core.DataRules;
 import org.example.designs.conver.core.ConverException;
 import org.example.designs.conver.core.Converter;
 import org.example.designs.business_flow.desc.ChainDesc;
 import org.example.designs.task.AbstractTask;
+import org.example.designs.task.TaskException;
 import org.example.designs.task.TaskInfo;
+
+import java.lang.invoke.SerializedLambda;
+import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
 
 
 /**
@@ -32,10 +34,13 @@ import java.util.Map;
  * @version 1.0.0
  * @date 2024-11-22
  */
-public class BusinessFlow extends AbstractTask {
+public class BusinessFlow {
+    //业务流的锁
+    private final Object startupShutdownMonitor;
     //data容器内
     static private IContext CONTEXT = new SpringBeanContext();
-    
+    //业务点执行列表
+    private Queue<ChainDesc> chainList = new LinkedList<>();
     //业务执行信息列表
     private List<TaskInfo> infoList;
     //全局数据的缓存，整条业务流程里的缓存
@@ -43,41 +48,20 @@ public class BusinessFlow extends AbstractTask {
     //临时数据的缓存，只传递一次
     private TemporaryValueCache temporaryValueCache;
     //转换规则缓存
-    private DataRuleMap ruleCache;
+    private DataRules ruleCache;
     //当前ChainDesc
     private ChainDesc curChain;
 
     //构造方法私有
     private BusinessFlow() {
+        this.startupShutdownMonitor = new Object();
         this.infoList = new ArrayList<>();
         this.globalValueCache = new GlobalValueCache();
         this.temporaryValueCache = new TemporaryValueCache();
-        this.ruleCache = new DataRuleMap();
+        this.ruleCache = new DataRules();
         this.curChain = null;
     }
 
-    @Override
-    public boolean executeFunction(Map<String,Object> params) throws Exception {
-        Class<?> dataType = (Class<?>) params.get("dataType");
-        String methodCode = (String) params.get("methodCode");
-        String desc = (String) params.get("desc");
-        String retCode = (String) params.get("retCode");
-        //获得业务data
-        Object data = CONTEXT.getData(dataType);
-        //获得业务点
-        this.curChain = ChainDesc.build(data,methodCode,desc,retCode);
-        //业务点所需参数
-        Parameter[] parameters = curChain.getParameters();
-        //参数赋值
-        curChain.setParams(importParams(parameters));
-        //获取参数后，清除临时缓存
-        temporaryValueCache.clear();
-        //执行业务点
-        Object ret = curChain.invoke();
-        //返回值送入临时缓存
-        temporaryValueCache.put(curChain.getRetCode(),ret);
-        return true;
-    }
 
     /**
      * -----------------------------------------------------------------------------------------------------------------
@@ -94,71 +78,100 @@ public class BusinessFlow extends AbstractTask {
      * -----------------------------------------------------------------------------------------------------------------
      * 启动方法
      *
+     * @param retType 业务流返回值类型
      * @return {@link BusinessFlow }
-     */
-    public BusinessFlow start(){
-        return this;
-    }
-
-    /**
-     * -----------------------------------------------------------------------------------------------------------------
-     * 结束方法
-     *
-     * @param retType
-     * @return {@link T }
      * @throws BusinessFlowException Data异常
      */
-    public <T> T end(Class<T> retType) throws BusinessFlowException {
-        T ret = null;
+    public <T> T start(Class<T> retType) throws BusinessFlowException {
         try {
-            ret = (T)temporaryValueCache.get(curChain.getRetCode());
+            synchronized (startupShutdownMonitor) {
+                String LastRetCode = null;
+                for(int i=0; !chainList.isEmpty(); i++){
+                    ChainDesc chainDesc = chainList.poll();
+                    //业务点所需参数
+                    Parameter[] parameters = chainDesc.getParameters();
+                    //参数赋值
+                    chainDesc.setParams(importParams(parameters));
+                    //获取参数后，清除临时缓存
+                    temporaryValueCache.clear();
+                    //执行业务点,本质上是执行chainDesc的invoke()：execute() -> executeFunction() -> invoke()
+                    chainDesc.execute();
+                    //获取执行信息
+                    infoList.add(chainDesc.getInfo());
+                    //最后返回值的Code
+                    LastRetCode = chainDesc.getRetCode();
+                    //返回值送入临时缓存
+                    temporaryValueCache.put(chainDesc.getRetCode(),chainDesc.getRetBean());
+                }
+                return (T)temporaryValueCache.get(LastRetCode);
+            }
         } catch (Exception e) {
             throw new BusinessFlowException(e);
         }
-        return ret;
     }
 
     /**
      * -----------------------------------------------------------------------------------------------------------------
-     * 添加业务点
+     * 无返回类型
      *
-     * @param dataType   处理者类型
-     * @param methodCode 处理方法code
-     * @param desc       业务点描述
-     * @return {@link BusinessFlow }
-     * @throws BusinessFlowException 业务流异常
+     * @throws BusinessFlowException Data异常
      */
-    public BusinessFlow add(Class<?> dataType, String methodCode,String desc,String retCode) throws BusinessFlowException {
+    public void start() throws BusinessFlowException {
         try {
-            HashMap<String, Object> params = new HashMap<>();
-            params.put("dataType",dataType);
-            params.put("methodCode",methodCode);
-            params.put("desc",desc);
-            params.put("retCode",retCode);
-            //execute的本质就是调用上面的executeFunction，只是套了一些东西进去，用于获取执行信息
-            execute(params);
-            //获取执行信息
-            TaskInfo info = getInfo();
-            info.setDescribe(curChain.getDesc());
-            infoList.add(info);
+            start(Object.class);
         } catch (Exception e) {
             throw new BusinessFlowException(e);
         }
-        return this;
     }
+
 
     /**
      * -----------------------------------------------------------------------------------------------------------------
      * 添加业务节点
      *
-     * @param dataType 处理者类型
+     * @param bean 处理者bean
      * @param methodCode 处理方法code
-     * @return {@link BusinessFlow }
+     * @param desc 业务点描述
+     * @param retCode 返回值key
+     * @return {@link BusinessFlow } 链式调用
+     * @throws BusinessFlowException 业务流异常
      */
-    public <T> BusinessFlow add(Class<T> dataType, String methodCode) throws BusinessFlowException {
-        add(dataType,methodCode,null,null);
+    public BusinessFlow add(Object bean, String methodCode,String desc,String retCode) throws BusinessFlowException {
+        try {
+            //获得业务点
+            ChainDesc chainDesc = ChainDesc.build(bean, methodCode, desc, retCode);
+            chainList.offer(chainDesc);
+        } catch (Exception e) {
+            throw new BusinessFlowException(e);
+        }
         return this;
     }
+
+    //bean类型
+    public <T> BusinessFlow add(Class<T> beanType, String methodCode) throws BusinessFlowException {
+        add(beanType,methodCode,null,null);
+        return this;
+    }
+
+    //实体bean
+    public <T> BusinessFlow add(Object bean, String methodCode) throws BusinessFlowException {
+        add(bean,methodCode,null,null);
+        return this;
+    }
+
+
+    //bean类型
+    public BusinessFlow add(Class<?> beanType, String methodCode,String desc,String retCode) throws BusinessFlowException {
+        try {
+            //获得业务data
+            Object bean = CONTEXT.getData(beanType);
+            add(bean, methodCode,desc,retCode);
+        } catch (Exception e) {
+            throw new BusinessFlowException(e);
+        }
+        return this;
+    }
+
 
     /**
      * -----------------------------------------------------------------------------------------------------------------
