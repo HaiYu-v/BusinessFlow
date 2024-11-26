@@ -45,6 +45,11 @@ public class GlobalValueCache implements IDataSource {
         return globalMap.containsKey(code);
     }
 
+    @Override
+    public Map<String, Object> getMap() {
+        return globalMap;
+    }
+
     /**
      * -----------------------------------------------------------------------------------------------------------------
      * 获取

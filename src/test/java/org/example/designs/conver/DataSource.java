@@ -32,4 +32,9 @@ public class DataSource implements IDataSource {
     public boolean contains(String code) {
         return dataMap.containsKey(code);
     }
+
+    @Override
+    public Map<String, Object> getMap() {
+        return dataMap;
+    }
 }

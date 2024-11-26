@@ -2,6 +2,9 @@ package org.example.designs.conver.formula;
 
 import org.example.designs.conver.core.IDataSource;
 import org.example.designs.conver.desc.SourceDesc;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.Map;
 
@@ -9,7 +12,8 @@ import java.util.Map;
  * 计算器
  *
  * <p>
- *     用来进行公式运算
+ *     用来进行公式运算,使用的是SpEL
+ *
  * </p>
  *
  * @author HaiYu
@@ -25,20 +29,20 @@ public class Calculator {
      * @param formula  计算公式
      * @return {@link Object }
      */
-    public static Object compute(Map<String, SourceDesc> variates, String formula, IDataSource dataSource){
-        return null;
-    }
-
-    /**
-     * -----------------------------------------------------------------------------------------------------------------
-     * 计算
-     *
-     * @param variates 变量列表
-     * @param formula  计算公式
-     * @param retType  返回类型
-     * @return {@link Object }
-     */
-    public static <T> T compute(Map<String,SourceDesc> variates,String formula,Class<T> retType,IDataSource dataSource){
-        return (T) compute(variates,formula,dataSource);
+    public static <T> T compute(Map<String, SourceDesc> variates, String formula, IDataSource dataSource,Class<T> type){
+        T ret = null;
+        try {
+            ExpressionParser parser = new SpelExpressionParser();
+            StandardEvaluationContext context = new StandardEvaluationContext();
+            //设置变量
+            for (Map.Entry<String, SourceDesc> stringSourceDescEntry : variates.entrySet()) {
+                context.setVariable(stringSourceDescEntry.getKey(),dataSource.get(stringSourceDescEntry.getValue().getKey()));
+            }
+            //公式计算
+            ret = parser.parseExpression(formula).getValue(context,type);
+        } catch (Exception e) {
+            throw new RuntimeException("计算公式["+formula+"]异常",e);
+        }
+        return ret;
     }
 }

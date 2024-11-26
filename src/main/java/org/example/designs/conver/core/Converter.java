@@ -1,5 +1,7 @@
 package org.example.designs.conver.core;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.json.JSONException;
 import org.example.designs.conver.analysis.DefaultAnalyzer;
 import org.example.designs.conver.analysis.IAnalyzer;
 import org.example.designs.conver.desc.ConverDesc;
@@ -50,34 +52,39 @@ public class Converter {
             //有rule
             FieldRules fieldRules = dataRules.get(targetCode);
             if(null != fieldRules){
+                //同名字段先简单映射
+                Object cur = dataSource.get(targetCode);
+                BeanUtil.copyProperties(cur,target);
+
                 List<Field> fields = MyReflectUtil.getFieldsWithGetterAndSetter(target.getClass());
                 for(Field field:fields){
                     // 设置字段可访问
                     field.setAccessible(true);
                     // 修改字段值
                     ConverDesc converDesc = fieldRules.get(field.getName());
-                    field.set(target,converDesc.getConverValue(dataSource));
+                    field.set(target,converDesc.getConverValue(dataSource,field.getType()));
                 }
                 return true;
             }
 
             //无rule，但有code
             if(dataSource.contains(targetCode)){
-                target = dataSource.get(targetCode);
+                Object cur = dataSource.get(targetCode);
+                //类型相同和类型不相同,都可以简单映射同名字段
+                BeanUtil.copyProperties(cur,target);
                 return true;
             }
 
             throw new ConverException("targetCode["+targetCode+"]不存在");
 
         } catch (Exception e) {
-            throw new ConverException(e);
+            throw new ConverException("转换失败",e);
         }
     }
 
     /**
      * -----------------------------------------------------------------------------------------------------------------
      * 解析规则JSON
-     * TODO 增加一个解析器
      *
      * @param json rule字符串
      * @param dataRulesCache data转换规则缓存
@@ -86,6 +93,8 @@ public class Converter {
     public static boolean analysis(String json, DataRules dataRulesCache) throws ConverException {
         try {
             analyzer.analysis(json,dataRulesCache);
+        }catch (JSONException e){
+          throw new ConverException("JSON格式错误(公式里的字符串请用单引号)");
         } catch (Exception e) {
             throw new ConverException(e);
         }

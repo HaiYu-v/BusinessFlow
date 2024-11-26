@@ -42,6 +42,11 @@ public class TemporaryValueCache implements IDataSource {
         return temporaryMap.containsKey(code);
     }
 
+    @Override
+    public Map<String, Object> getMap() {
+        return temporaryMap;
+    }
+
     /**
      * -----------------------------------------------------------------------------------------------------------------
      * 获取, 用完即删
@@ -52,7 +57,6 @@ public class TemporaryValueCache implements IDataSource {
     @Override
     public Object get(String key) {
         Object ret = temporaryMap.get(key);
-        temporaryMap.remove(key);
         return ret;
     }
 
@@ -66,7 +70,6 @@ public class TemporaryValueCache implements IDataSource {
      */
     public <T> T get(String key,Class<T> classType){
         T ret = (T) temporaryMap.get(key);
-        temporaryMap.remove(key);
         return ret;
     }
 

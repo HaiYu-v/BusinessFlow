@@ -24,10 +24,37 @@ public class TaskInfo {
     public Integer sort;
     public LocalDateTime startTime;
     public LocalDateTime endTime;
+    public Long runningTime;
     public AtomicInteger countExecute;
 
+    public TaskInfo() {
+    }
+    public TaskInfo(String desc, Integer id, String name, TaskStatusEnum state, Integer sort, LocalDateTime startTime, LocalDateTime endTime, Long runningTime, AtomicInteger countExecute) {
+        this.desc = desc;
+        this.id = id;
+        this.name = name;
+        this.state = state;
+        this.sort = sort;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.runningTime = runningTime;
+        this.countExecute = countExecute;
+    }
+
+    public TaskInfo(TaskInfo info) {
+        this.desc = info.desc;
+        this.id = info.id;
+        this.name = info.name;
+        this.state = info.state;
+        this.sort = info.sort;
+        this.startTime = info.startTime;
+        this.endTime = info.endTime;
+        this.runningTime = info.runningTime;
+        this.countExecute = info.countExecute;
+    }
+
     // 获取运行时间的方法
-    private Long getRunningTime() {
+    public Long getRunningTime() {
         if(startTime == null || endTime == null){
             return -1L;
         }
@@ -35,18 +62,18 @@ public class TaskInfo {
     }
 
     // 转换为 JSON 字符串的方法
-    @Override
-    public String toString() {
+    public String toJSON() {
         StringBuilder info = new StringBuilder("{");
         info.append("\"desc\":\"").append(desc == null ? "null" : desc).append("\",");
         info.append("\"id\":\"").append(id == null ? "null" : id).append("\",");
         info.append("\"name\":\"").append(name == null ? "null" : name).append("\",");
         info.append("\"state\":\"").append(state == null ? "null" : state.getMessage()).append("\",");
-        info.append("\"sort\":\"").append(sort == null ? "null" : sort).append("\",");
         info.append("\"startTime\":\"").append(startTime == null ? "null" : startTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append("\",");
         info.append("\"endTime\":\"").append(endTime == null ? "null" : endTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append("\",");
-        info.append("\"runningTime\":\"").append(getRunningTime()).append("\",");
+        this.runningTime = getRunningTime();
+        info.append("\"runningTime\":\"").append(runningTime).append("\",");
         info.append("\"countExecute\":\"").append(countExecute == null ? "null" : countExecute.get()).append("\"}");
+        info.append("\"sort\":\"").append(sort == null ? "null" : sort).append("\",");
         return info.toString();
     }
 

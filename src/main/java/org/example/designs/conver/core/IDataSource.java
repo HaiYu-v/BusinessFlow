@@ -1,5 +1,7 @@
 package org.example.designs.conver.core;
 
+import java.util.Map;
+
 /**
  * 转换器的数据源
  *
@@ -17,4 +19,6 @@ public interface IDataSource {
     Object put(String code,Object value);
 
     boolean contains(String code);
+
+    Map<String,Object> getMap();
 }

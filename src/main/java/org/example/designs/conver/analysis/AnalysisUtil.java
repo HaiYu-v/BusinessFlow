@@ -1,10 +1,13 @@
 package org.example.designs.conver.analysis;
 
+import cn.hutool.json.JSONUtil;
 import org.example.designs.conver.converter.ConverType;
+import org.example.designs.conver.core.ConverException;
 import org.example.designs.conver.desc.ConverDesc;
 import org.example.designs.conver.desc.SourceDesc;
 import org.example.designs.conver.rule.FieldRules;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -25,12 +28,20 @@ public class AnalysisUtil {
      * -----------------------------------------------------------------------------------------------------------------
      * 构建SourceDesc
      *
-     * @param code
-     * @param field
+     * @param source
      * @return {@link SourceDesc }
      */
-    public static SourceDesc buildSourceDesc(String code, String field) {
-        return new SourceDesc(code,field);
+    public static List<SourceDesc> buildSourceDesc(String source) throws ConverException {
+        List<String> list = JSONUtil.toList(source, String.class);
+        List<SourceDesc> ret = new ArrayList<>();
+        for (String s : list) {
+            String[] split = s.split("\\.");
+            if(split.length <=0 || split.length > 2){
+                throw new ConverException("解析错误，不能为空且只能存在一个[.]");
+            }
+            ret.add(new SourceDesc(split[0],(split.length==2 ? split[1] : null)));
+        }
+        return ret;
     }
 
     /**

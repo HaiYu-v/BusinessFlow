@@ -10,6 +10,7 @@ import org.example.designs.conver.desc.SourceDesc;
 import org.example.designs.conver.rule.FieldRules;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -53,11 +54,11 @@ public class DefaultAnalyzer implements IAnalyzer{
             String field = entry.getKey();
             JSONObject conver = entry.getValue();
             //解析SourceDesc
-            SourceDesc sourceDesc = AnalysisUtil.buildSourceDesc(conver.getStr("code"), conver.getStr("field"));
+            List<SourceDesc> sourceDescList = AnalysisUtil.buildSourceDesc(conver.getStr("source"));
             //解析ConverDesc
             ConverDesc converDesc = AnalysisUtil.buildConverDesc(
                             ConverType.ValueOf(conver.getStr("type"))
-                            ,sourceDesc,conver.getStr("formula"));
+                            ,sourceDescList,conver.getStr("formula"));
             fieldMap.put(field,converDesc);
         }
         FieldRules fieldRules = AnalysisUtil.buildFieldRules(fieldMap);

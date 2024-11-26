@@ -1,10 +1,10 @@
 package org.example.designs;
 
 
+import cn.hutool.json.JSONUtil;
 import org.example.designs.business_flow.Chain1;
 import org.example.designs.business_flow.core.BusinessFlow;
 import org.example.designs.business_flow.core.BusinessFlowException;
-import org.example.designs.business_flow.mapper.DataDesc;
 import org.example.designs.conver.DataSource;
 import org.example.designs.conver.Test1;
 import org.example.designs.conver.Test2;
@@ -24,8 +24,6 @@ class ApplicationTests  {
 
     @Test
     void contextLoads() {
-
-
         PrintTask task = new PrintTask(1,10000);
 //        task.setAfterExecute(new RetryFail());
         task.setAfterExecute(new UnThrow());
@@ -44,31 +42,39 @@ class ApplicationTests  {
     }
 
 
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 测试规则转换
+     *
+     * @throws ConverException 转换异常
+     */
     @Test
     void test2() throws ConverException {
         DataRules beanRuleMap = new DataRules();
         String rule = "{\n" +
                 "    \"targetCode\":\"test2\",\n" +
                 "    \"rules\":{\n" +
-                "        \"id\":{\"type\":\"0\",\"code\":\"test1\",\"field\":\"id\",\"formula\":\"\"},\n" +
-                "        \"name\":{\"type\":\"0\",\"code\":\"test1\",\"field\":\"name\",\"formula\":\"\"},\n" +
-                "        \"price\":{\"type\":\"0\",\"code\":\"test1\",\"field\":\"price\"},\n" +
+                "        \"id\":{\"type\":\"1\",\"formula\":\"123\"},\n" +
+                "        \"name1\":{\"type\":\"1\",\"formula\":\"\"price\"\"},\n" +
+                "        \"price\":{\"type\":\"0\",\"source\":[\"price\"]},\n" +
                 "    }\n" +
                 "}";
         Converter.analysis(rule,beanRuleMap);
         DataSource dataSource = new DataSource();
 
-        Test1 test1 = new Test1(1, "test1", 2);
+        Test1 test1 = new Test1(1, "test1", 2.0);
         Test2 test2 = new Test2();
         dataSource.put("test1",test1);
         dataSource.put("price",3);
         try {
             Converter.conver(test2,"test2",beanRuleMap,dataSource);
         } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
-        System.out.println(DataDesc.class.getCanonicalName());
-        System.out.println(beanRuleMap);
+        System.out.println(JSONUtil.toJsonPrettyStr(test2));
+//        System.out.println(DataDesc.class.getCanonicalName());
+//        System.out.println(beanRuleMap);
 
     }
 
@@ -76,29 +82,33 @@ class ApplicationTests  {
     void test3(){
         try {
             BusinessFlow businessFlow = BusinessFlow.build("测试业务流性能");
-//            for(int i=0 ;i<100; i++){
-//                businessFlow.add(Chain1.class,"performance");
-//            }
-            Chain1 chain1 = new Chain1();
-            Test1 end = businessFlow
-                    .add(chain1, "start")
-                    .add(Chain1.class, "conver1")
-                    .start(Test1.class);
-            System.out.println(end.getName());
+            for(int i=0 ;i<1; i++){
+                businessFlow.add(Chain1.class,"performance");
+            }
+            businessFlow.getGlobalValueCache().put("test2",new Test1(1,"xiaoming",1.0));
+            businessFlow
+//                    .add(Chain1.class, "start")
+//                    .add(Chain1.class, "conver")
+//                    .add(Chain1.class, "converTest2")
+                    .start();
+//            System.out.println(end.getName());
 
             StringBuilder stringBuilder = new StringBuilder();
             System.out.println(businessFlow.getInfoJSON());
+            System.out.println(businessFlow.getVisualJSON());
 
         } catch (BusinessFlowException e) {
             throw new RuntimeException(e);
         }
     }
 
+
     @Test
     void test4(){
-//        System.out.println(getMethodName(Chain1::conver));
-//        System.out.println(getClass(chain1::start));
+        TestController controller = new TestController();
+        System.out.println(controller.test());
     }
+
 
     private String getMethodName(MyFunction myFunction){
         return myFunction.getImplMethodName();

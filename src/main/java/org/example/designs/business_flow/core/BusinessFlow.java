@@ -9,6 +9,7 @@ import org.example.designs.business_flow.cache.GlobalValueCache;
 import org.example.designs.business_flow.cache.TemporaryValueCache;
 import org.example.designs.business_flow.context.IContext;
 import org.example.designs.business_flow.context.SpringBeanContext;
+import org.example.designs.business_flow.desc.ChainInfo;
 import org.example.designs.conver.core.DataRules;
 import org.example.designs.conver.core.ConverException;
 import org.example.designs.conver.core.Converter;
@@ -60,14 +61,16 @@ public class BusinessFlow {
     private LocalDateTime endTime;
     //运行时间
     private Long runningTime;
+    //业务流最终返回值
+    private Object ret;
     //业务执行信息列表
-    private List<TaskInfo> chainInfo;
+    private List<ChainInfo> chainInfoList;
 
 
     //构造方法私有
     private BusinessFlow() {
         this.startupShutdownMonitor = new Object();
-        this.chainInfo = new ArrayList<>();
+        this.chainInfoList = new ArrayList<>();
         this.globalValueCache = new GlobalValueCache();
         this.temporaryValueCache = new TemporaryValueCache();
         this.ruleCache = new DataRules();
@@ -99,8 +102,8 @@ public class BusinessFlow {
         try {
             synchronized (startupShutdownMonitor){
                 this.startTime = LocalDateTime.now();
-                String LastRetCode = null;
-                for(int i=0; !chainList.isEmpty(); i++){
+                String lastRetCode = null;
+                while(!chainList.isEmpty()){
                     ChainDesc chainDesc = chainList.poll();
                     //业务点所需参数
                     Parameter[] parameters = chainDesc.getParameters();
@@ -111,14 +114,24 @@ public class BusinessFlow {
                     //执行业务点,本质上是执行chainDesc的invoke()：execute() -> executeFunction() -> invoke()
                     chainDesc.execute();
                     //获取执行信息
-                    chainInfo.add(chainDesc.getInfo());
+                    TaskInfo info = chainDesc.getInfo();
+                    chainInfoList.add(new ChainInfo(parameters,chainDesc.getRetBean(),info));
                     //最后返回值的Code
-                    LastRetCode = chainDesc.getRetCode();
+                    lastRetCode = chainDesc.getRetCode();
                     //返回值送入临时缓存
                     temporaryValueCache.put(chainDesc.getRetCode(),chainDesc.getRetBean());
                 }
                 this.endTime = LocalDateTime.now();
-                return (T)temporaryValueCache.get(LastRetCode);
+                //是否有返回类型,没有就代表不需要返回值
+                if(null == retType){
+                    this.ret = null;
+                    return null;
+                //没有找到返回值
+                }else if(null  == temporaryValueCache.get(lastRetCode)){
+                    throw  new BusinessFlowException("找不到业务流返回值,retCode为["+lastRetCode+"],类型为["+retType.getName()+"]");
+                }
+                this.ret = temporaryValueCache.get(lastRetCode);
+                return (T)ret;
             }
         } catch (Exception e) {
             throw new BusinessFlowException(e);
@@ -132,11 +145,7 @@ public class BusinessFlow {
      * @throws BusinessFlowException Data异常
      */
     public void start() throws BusinessFlowException {
-        try {
-            start(Object.class);
-        } catch (Exception e) {
-            throw new BusinessFlowException(e);
-        }
+            start(null);
     }
 
 
@@ -274,9 +283,16 @@ public class BusinessFlow {
         businessFlowInfo.put("startTime",startTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         businessFlowInfo.put("endTime",endTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         businessFlowInfo.put("runningTime", ChronoUnit.MILLIS.between(startTime, endTime));
-        businessFlowInfo.put("chainInfo", chainInfo);
-        JSONConfig config = JSONConfig.create().setDateFormat("yyyy-MM-dd HH:mm:ss");
+        businessFlowInfo.put("ret",(null == this.ret?"null":ret));
+        businessFlowInfo.put("chainInfo", chainInfoList);
+        JSONConfig config = JSONConfig.create()
+                .setDateFormat("yyyy-MM-dd HH:mm:ss")
+                .setIgnoreNullValue(false);
         return JSONUtil.toJsonStr(businessFlowInfo,config);
+    }
+
+    public String getVisualJSON(){
+        return JSONUtil.toJsonPrettyStr(getInfoJSON());
     }
 
     /**
@@ -308,12 +324,12 @@ public class BusinessFlow {
         this.chainList = chainList;
     }
 
-    public List<TaskInfo> getChainInfo() {
-        return chainInfo;
+    public List<ChainInfo> getChainInfoList() {
+        return chainInfoList;
     }
 
-    public void setChainInfo(List<TaskInfo> chainInfo) {
-        this.chainInfo = chainInfo;
+    public void setChainInfoList(List<ChainInfo> chainInfoList) {
+        this.chainInfoList = chainInfoList;
     }
 
     public GlobalValueCache getGlobalValueCache() {
@@ -379,5 +395,13 @@ public class BusinessFlow {
 
     public void setRunningTime(Long runningTime) {
         this.runningTime = runningTime;
+    }
+
+    public Object getRet() {
+        return ret;
+    }
+
+    public void setRet(Object ret) {
+        this.ret = ret;
     }
 }

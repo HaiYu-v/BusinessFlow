@@ -25,7 +25,7 @@ import java.util.Map;
 public class ConverDesc {
     //转换方式
     private ConverType type;
-    //来源dataCode
+    //来源dataCode: bean.field:SourceDesc
     private Map<String,SourceDesc> sourceMap = new HashMap<>();
     //转换公式
     private String formula;
@@ -51,15 +51,25 @@ public class ConverDesc {
      *
      * @return 计算值
      */
-    public Object getConverValue(IDataSource dataSource) throws Exception {
+    public <T> T getConverValue(IDataSource dataSource, Class<T> type) throws Exception {
         //简单映射
-        if(type.equals(ConverType.SIMPLE_MAPPING)){
-            return ((SourceDesc)(sourceMap.values().toArray()[0])).getValue(dataSource);
-        //常量也由公式来赋值
-        }else if(type.equals(ConverType.CONSTANT) || type.equals(ConverType.FORMULA_CALCULATION)){
-            return Calculator.compute(sourceMap,formula,dataSource);
-        }else {
-            throw new ConverException("不支持的转换方式:["+type+"]");
+        try {
+            if(this.type.equals(ConverType.SIMPLE_MAPPING)){
+                return (T)((SourceDesc)(sourceMap.values().toArray()[0])).getValue(dataSource);
+            //常量也由公式来赋值
+            }else if(this.type.equals(ConverType.CONSTANT)){
+                if(!sourceMap.isEmpty()){
+                    throw new ConverException("常量不能有[source]");
+                }
+                return (T)Calculator.compute(sourceMap,formula,dataSource,type);
+            //公式计算
+            }else if(type.equals(ConverType.FORMULA_CALCULATION)){
+                return (T)Calculator.compute(sourceMap,formula,dataSource,type);
+            } else {
+                throw new ConverException("不支持的转换方式:["+ this.type +"]");
+            }
+        } catch (Exception e) {
+            throw new ConverException("数据转换异常",e);
         }
     }
 

@@ -13,12 +13,12 @@ package org.example.designs.conver;
  */
 public class Test2 {
     private int id;
-    private String name;
+    private String name1;
     private double price;
 
-    public Test2(int id, String name, double price) {
+    public Test2(int id, String name1, double price) {
         this.id = id;
-        this.name = name;
+        this.name1 = name1;
         this.price = price;
     }
 
@@ -41,12 +41,12 @@ public class Test2 {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getName1() {
+        return name1;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setName1(String name1) {
+        this.name1 = name1;
     }
 
 

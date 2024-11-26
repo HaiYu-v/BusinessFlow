@@ -46,14 +46,18 @@ public class SourceDesc {
      * @return {@link String }
      */
     public String getKey(){
-        StringBuilder builder = new StringBuilder();
-        if(StrUtil.isNotBlank(this.code)){
-            builder.append(this.code);
-            if (StrUtil.isNotBlank(this.field)){
-                builder.append(".").append(this.field);
-            }
+//        StringBuilder builder = new StringBuilder();
+//        if(StrUtil.isNotBlank(this.code)){
+//            builder.append(this.code);
+//            if (StrUtil.isNotBlank(this.field)){
+//                builder.append(".").append(this.field);
+//            }
+//        }
+//        return builder.toString();
+        if(code!=null){
+            return code;
         }
-        return builder.toString();
+        return field;
     }
 
     public String getCode() {

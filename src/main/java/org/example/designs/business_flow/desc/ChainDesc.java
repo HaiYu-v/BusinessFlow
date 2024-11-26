@@ -5,7 +5,6 @@ import cn.hutool.core.util.StrUtil;
 import org.example.designs.business_flow.annotation.Chain;
 import org.example.designs.business_flow.core.BusinessFlowException;
 import org.example.designs.task.AbstractTask;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -36,9 +35,8 @@ import java.util.Map;
     private String retCode;
     //返回bean
     private Object retBean;
-
-    private ChainDesc(){}
-
+    //业务点执行的信息
+    private ChainInfo chainInfo;
 
 
     private ChainDesc(Object bean, Method method, String desc, String retCode) {
@@ -141,6 +139,13 @@ import java.util.Map;
     }
 
 
+    public ChainInfo getChainInfo() {
+        return chainInfo;
+    }
+
+    public void setChainInfo(ChainInfo chainInfo) {
+        this.chainInfo = chainInfo;
+    }
 
     public Parameter[] getParameters() {
         return parameters;
@@ -201,4 +206,6 @@ import java.util.Map;
     public void setRetBean(Object retBean) {
         this.retBean = retBean;
     }
+
+
 }

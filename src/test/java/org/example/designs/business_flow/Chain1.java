@@ -1,6 +1,9 @@
 package org.example.designs.business_flow;
 
 import org.example.designs.business_flow.annotation.Chain;
+import org.example.designs.business_flow.annotation.Source;
+import org.example.designs.business_flow.cache.GlobalValueCache;
+import org.example.designs.business_flow.cache.TemporaryValueCache;
 import org.example.designs.conver.Test1;
 import org.example.designs.conver.Test2;
 import org.springframework.stereotype.Component;
@@ -21,25 +24,28 @@ import java.util.UUID;
 @Component
 public class Chain1 {
 
-    @Chain(desc = "起始",retCode = "test1")
+    @Chain(desc = "提供test1",retCode = "test1")
     public  Test1 start(){
-        return new Test1();
+        return new Test1(1,"xiaoming",1.0);
     }
 
-    @Chain(desc = "转换为test1",retCode = "test1",code = "conver1")
+    @Chain(desc = "接收test1",retCode = "test2")
     public Test1 conver(Test1 test1) throws InterruptedException {
         return test1;
     }
 
-    @Chain(desc = "转换为test2",retCode = "test2")
-    public Test2 conver(Test2 test2) throws InterruptedException {
+    @Chain(desc = "转换为test2",retCode = "test2",code = "converTest2")
+    public Test2 conver(@Source Test2 test2) throws InterruptedException {
         return test2;
     }
 
-    @Chain(desc = "性能测试",retCode = "test2")
-    public void performance() throws InterruptedException {
+    @Chain(desc = "性能测试",retCode = "test3")
+    public void performance(TemporaryValueCache temporary, GlobalValueCache global) throws InterruptedException {
 //        Thread.sleep(1000);
-        System.out.println("1"+"2"+"3"+"4"+ UUID.randomUUID());
+        System.out.println(temporary);
+        System.out.println(global);
+        System.out.println(global.get("test2"));
+//        System.out.println("1"+"2"+"3"+"4"+ UUID.randomUUID());
     }
 
     public Object start(Object o) {
