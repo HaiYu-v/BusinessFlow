@@ -42,9 +42,9 @@ public class Chain1 {
     @Chain(desc = "性能测试",retCode = "test3")
     public void performance(TemporaryValueCache temporary, GlobalValueCache global) throws InterruptedException {
 //        Thread.sleep(1000);
-        System.out.println(temporary);
-        System.out.println(global);
-        System.out.println(global.get("test2"));
+//        System.out.println(temporary);
+//        System.out.println(global);
+//        System.out.println(global.get("test2"));
 //        System.out.println("1"+"2"+"3"+"4"+ UUID.randomUUID());
     }
 

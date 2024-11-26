@@ -99,14 +99,16 @@ public class BusinessFlow {
      * @throws BusinessFlowException Data异常
      */
     public <T> T start(Class<T> retType) throws BusinessFlowException {
+        ChainDesc chainDesc = null;
+        Parameter[] parameters = null;
         try {
-            synchronized (startupShutdownMonitor){
+            synchronized (startupShutdownMonitor) {
                 this.startTime = LocalDateTime.now();
                 String lastRetCode = null;
-                while(!chainList.isEmpty()){
-                    ChainDesc chainDesc = chainList.poll();
+                while (!chainList.isEmpty()) {
+                    chainDesc = chainList.poll();
                     //业务点所需参数
-                    Parameter[] parameters = chainDesc.getParameters();
+                    parameters = chainDesc.getParameters();
                     //参数赋值
                     chainDesc.setParams(importParams(parameters));
                     //获取参数后，清除临时缓存
@@ -115,25 +117,28 @@ public class BusinessFlow {
                     chainDesc.execute();
                     //获取执行信息
                     TaskInfo info = chainDesc.getInfo();
-                    chainInfoList.add(new ChainInfo(parameters,chainDesc.getRetBean(),info));
+                    chainInfoList.add(new ChainInfo(parameters, chainDesc.getRetBean(), info));
                     //最后返回值的Code
                     lastRetCode = chainDesc.getRetCode();
                     //返回值送入临时缓存
-                    temporaryValueCache.put(chainDesc.getRetCode(),chainDesc.getRetBean());
+                    temporaryValueCache.put(chainDesc.getRetCode(), chainDesc.getRetBean());
                 }
                 this.endTime = LocalDateTime.now();
                 //是否有返回类型,没有就代表不需要返回值
-                if(null == retType){
+                if (null == retType) {
                     this.ret = null;
                     return null;
-                //没有找到返回值
-                }else if(null  == temporaryValueCache.get(lastRetCode)){
-                    throw  new BusinessFlowException("找不到业务流返回值,retCode为["+lastRetCode+"],类型为["+retType.getName()+"]");
+                    //没有找到返回值
+                } else if (null == temporaryValueCache.get(lastRetCode)) {
+                    throw new BusinessFlowException("找不到业务流返回值,retCode为[" + lastRetCode + "],类型为[" + retType.getName() + "]");
                 }
                 this.ret = temporaryValueCache.get(lastRetCode);
-                return (T)ret;
+                return (T) ret;
             }
         } catch (Exception e) {
+            this.endTime = LocalDateTime.now();
+            TaskInfo info = chainDesc.getInfo();
+            chainInfoList.add(new ChainInfo(parameters, chainDesc.getRetBean(), info));
             throw new BusinessFlowException(e);
         }
     }
@@ -279,7 +284,7 @@ public class BusinessFlow {
      */
     public String getInfoJSON(){
         businessFlowInfo.put("desc",desc);
-        businessFlowInfo.put("chainCount", chainList.size());
+        businessFlowInfo.put("chainCount", chainInfoList.size());
         businessFlowInfo.put("startTime",startTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         businessFlowInfo.put("endTime",endTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         businessFlowInfo.put("runningTime", ChronoUnit.MILLIS.between(startTime, endTime));

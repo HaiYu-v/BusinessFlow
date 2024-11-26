@@ -26,8 +26,9 @@ public class VtChBillService {
 
     @Chain(desc = "数电红字确认单申请主表",retCode = "redApply")
     public void converRedApply() throws InterruptedException {
-        Thread.sleep(300);
-        System.out.println("converRedApply");
+        throw new InterruptedException("任务失败");
+//        Thread.sleep(300);
+//        System.out.println("converRedApply");
 
     }
 

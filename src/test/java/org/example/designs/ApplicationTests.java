@@ -82,7 +82,7 @@ class ApplicationTests  {
     void test3(){
         try {
             BusinessFlow businessFlow = BusinessFlow.build("测试业务流性能");
-            for(int i=0 ;i<1; i++){
+            for(int i=0 ;i<100000; i++){
                 businessFlow.add(Chain1.class,"performance");
             }
             businessFlow.getGlobalValueCache().put("test2",new Test1(1,"xiaoming",1.0));
