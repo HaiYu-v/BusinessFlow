@@ -24,5 +24,5 @@ public interface IAnalyzer {
      * @param dataRules 解析入dataRules
      * @return {@link DataRules }
      */
-    DataRules analysis(Object rules,DataRules dataRules) throws ConverException;
+    DataRules analysis(Object rules,DataRules dataRules) throws Exception;
 }

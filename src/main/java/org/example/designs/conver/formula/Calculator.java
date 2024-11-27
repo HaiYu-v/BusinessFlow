@@ -42,7 +42,7 @@ public class Calculator {
             //公式计算
             ret = parser.parseExpression(formula).getValue(context,type);
         } catch (Exception e) {
-            throw new ConverException("公式["+formula+"]计算失败，原因是："+e.getMessage());
+            throw new ConverException("公式["+formula+"]计算失败",e);
         }
         return ret;
     }

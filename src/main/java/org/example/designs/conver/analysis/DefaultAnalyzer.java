@@ -9,6 +9,7 @@ import org.example.designs.conver.desc.ConverDesc;
 import org.example.designs.conver.desc.SourceDesc;
 import org.example.designs.conver.rule.FieldRules;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,26 +36,54 @@ public class DefaultAnalyzer implements IAnalyzer{
      * @return {@link DataRules }
      */
     @Override
-    public DataRules analysis(Object rules, DataRules dataRules) throws ConverException {
+    public DataRules analysis(Object rules, DataRules dataRules) throws Exception {
         if(!(rules instanceof String)) {
-            throw new ConverException("不支持该类型:"+rules.toString());
+            throw new ConverException("只能解析String类型的rule:"+rules.toString());
         }
+        if(!JSONUtil.isTypeJSON((String) rules)){
+            throw new ConverException("只能解析JSON格式的rule");
+        }
+
+
         String json = (String) rules;
-        JSONObject ruleJSON = JSONUtil.parseObj(json);
+        JSONObject ruleJSON = null;
+        try {
+            ruleJSON = JSONUtil.parseObj(json);
+        } catch (Exception e) {
+            throw new ConverException("JSON格式错误(公式里的字符串用单引号[']表示)",e);
+        }
         //目标编码
         String targetCode = ruleJSON.getStr("targetCode");
         //转换规则
         JSONObject curRules = ruleJSON.getJSONObject("rules");
 
-        //解析成字段转换规则
-        HashMap<String,JSONObject> curMap = (HashMap<String,JSONObject>) JSONUtil.toBean(curRules, HashMap.class);
+        //解析成各字段的转换规则
+        HashMap<String,JSONObject> curMap = null;
+        try {
+            curMap = (HashMap<String, JSONObject>) JSONUtil.toBean(curRules, HashMap.class);
+        } catch (Exception e) {
+            throw new ConverException("targetCode["+targetCode+"]的转换规则有错误",e);
+        }
         Map<String,ConverDesc> fieldMap = new HashMap<>();
+
         //解析fieldRules
         for(Map.Entry<String,JSONObject> entry:curMap.entrySet()){
             String field = entry.getKey();
             JSONObject conver = entry.getValue();
+
             //解析SourceDesc
-            List<SourceDesc> sourceDescList = AnalysisUtil.buildSourceDesc(conver.getStr("source"));
+            List<String> list = null;
+            try {
+                list = JSONUtil.toList(conver.getStr("source"), String.class);
+            } catch (Exception e) {
+                throw new ConverException("field["+field+"]的source不是一个JSON数组",e);
+            }
+
+            List<SourceDesc> sourceDescList = new ArrayList<>();
+            for (String s : list) {
+                sourceDescList.add(AnalysisUtil.buildSourceDesc(s));
+            }
+
             //解析ConverDesc
             ConverDesc converDesc = AnalysisUtil.buildConverDesc(
                             ConverType.ValueOf(conver.getStr("type"))
@@ -62,6 +91,7 @@ public class DefaultAnalyzer implements IAnalyzer{
             fieldMap.put(field,converDesc);
         }
         FieldRules fieldRules = AnalysisUtil.buildFieldRules(fieldMap);
+
         //添加到dataRules中
         dataRules.put(targetCode, fieldRules);
         return dataRules;

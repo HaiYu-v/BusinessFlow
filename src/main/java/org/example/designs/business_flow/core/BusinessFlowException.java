@@ -18,4 +18,9 @@ public class BusinessFlowException extends Exception{
     public BusinessFlowException(Exception e){
         super(e);
     }
+
+    public BusinessFlowException(String message, Throwable e) {
+        super(message+"\n-> "+e.getMessage(), e);
+        this.setStackTrace(e.getStackTrace());
+    }
 }

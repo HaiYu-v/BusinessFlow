@@ -55,8 +55,8 @@ class ApplicationTests  {
                 "    \"targetCode\":\"test2\",\n" +
                 "    \"rules\":{\n" +
                 "        \"id\":{\"type\":\"1\",\"formula\":\"123\"},\n" +
-                "        \"name1\":{\"type\":\"1\",\"formula\":\"2\"},\n" +
-                "        \"price\":{\"type\":\"0\",\"source\":[\"#test1.price1\"]},\n" +
+                "        \"name1\":{\"type\":\"1\",\"formula\":\"#price + 1\"},\n" +
+                "        \"price\":{\"type\":\"0\",\"source\":\"[test1.price]\"}\n" +
                 "    }\n" +
                 "}";
         Converter.analysis(rule,beanRuleMap);
@@ -69,12 +69,7 @@ class ApplicationTests  {
         try {
             Converter.conver(test2,"test2",beanRuleMap,dataSource);
         } catch (Exception e) {
-//            System.out.println(e.getMessage());
-            System.out.println();
-//            e.fillInStackTrace();
-            System.out.println();
             e.printStackTrace();
-//            throw new RuntimeException(e);
         }
         System.out.println(JSONUtil.toJsonPrettyStr(test2));
 //        System.out.println(DataDesc.class.getCanonicalName());

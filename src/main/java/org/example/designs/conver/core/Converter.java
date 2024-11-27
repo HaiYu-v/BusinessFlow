@@ -77,28 +77,24 @@ public class Converter {
 
             throw new ConverException("找不到targetCode["+targetCode+"]的source");
 
-        }catch (ConverException e){
-            throw e;
-        } catch (Exception e) {
-            throw new ConverException(e);
+        }catch (Exception e) {
+            throw new ConverException("target[" + targetCode + "]转换失败",e);
         }
     }
 
     /**
      * -----------------------------------------------------------------------------------------------------------------
-     * 解析规则JSON
+     * 解析转换规则
      *
-     * @param json rule字符串
+     * @param rules 转换规则
      * @param dataRulesCache data转换规则缓存
      * @return {@link FieldRules }
      */
-    public static boolean analysis(String json, DataRules dataRulesCache) throws ConverException {
+    public static boolean analysis(Object rules, DataRules dataRulesCache) throws ConverException {
         try {
-            analyzer.analysis(json,dataRulesCache);
-        }catch (JSONException e){
-          throw new ConverException("JSON格式错误(公式里的字符串请用单引号)");
-        } catch (Exception e) {
-            throw new ConverException(e);
+            analyzer.analysis(rules,dataRulesCache);
+        }catch (Exception e) {
+            throw new ConverException("转换规则解析失败",e);
         }
         return true;
     }

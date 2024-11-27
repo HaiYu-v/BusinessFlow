@@ -31,17 +31,15 @@ public class AnalysisUtil {
      * @param source
      * @return {@link SourceDesc }
      */
-    public static List<SourceDesc> buildSourceDesc(String source) throws ConverException {
-        List<String> list = JSONUtil.toList(source, String.class);
-        List<SourceDesc> ret = new ArrayList<>();
-        for (String s : list) {
-            String[] split = s.split("\\.");
-            if(split.length <=0 || split.length > 2){
-                throw new ConverException("解析错误，不能为空且只能存在一个[.]");
-            }
-            ret.add(new SourceDesc(split[0],(split.length==2 ? split[1] : null)));
+    public static SourceDesc buildSourceDesc(String source) throws ConverException {
+        if(source.contains("#")){
+            throw new ConverException("解析[source]失败，不能包含[#]");
         }
-        return ret;
+        String[] split = source.split("\\.");
+        if(split.length <=0 || split.length > 2){
+            throw new ConverException("解析[source]失败，不能为空且只能存在一个[.]");
+        }
+        return new SourceDesc(split[0],(split.length==2 ? split[1] : null));
     }
 
     /**

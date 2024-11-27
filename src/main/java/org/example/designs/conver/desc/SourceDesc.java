@@ -1,6 +1,7 @@
 package org.example.designs.conver.desc;
 
 import cn.hutool.core.util.StrUtil;
+import org.example.designs.conver.core.ConverException;
 import org.example.designs.conver.core.IDataSource;
 
 import java.lang.reflect.Field;
@@ -31,7 +32,7 @@ public class SourceDesc {
      * @return {@link Object }
      * @throws Exception
      */
-    public Object getValue(IDataSource dataSource){
+    public Object getValue(IDataSource dataSource) throws ConverException {
         try {
             //file为空，则直接返回code对应的bean
             if(StrUtil.isBlank(field)){
@@ -42,11 +43,8 @@ public class SourceDesc {
             Field declaredField = data.getClass().getDeclaredField(field);
             declaredField.setAccessible(true);
             return declaredField.get(data);
-        } catch (NoSuchFieldException e) {
-            throw new RuntimeException(e);
-
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new ConverException("获取source["+getQuote()+"]的值失败",e);
         }
     }
 
@@ -66,6 +64,30 @@ public class SourceDesc {
             return code;
         }
         return field;
+    }
+
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 获得描述字符串
+     *
+     *     一个bean的属性 -> bean.field
+     *     一个bean -> bean
+     *     一个变量 -> field
+     * @return {@link String }
+     */
+    public String getQuote(){
+        StringBuilder ret = new StringBuilder();
+        if (StrUtil.isNotBlank(code)) {
+            ret.append(code);
+            if (StrUtil.isNotBlank(field)){
+                ret.append(".").append(field);
+            }
+            return ret.toString();
+        }
+        if (StrUtil.isNotBlank(field)) {
+            return field;
+        }
+        return null;
     }
 
     public String getCode() {
