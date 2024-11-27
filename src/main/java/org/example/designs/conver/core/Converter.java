@@ -75,10 +75,12 @@ public class Converter {
                 return true;
             }
 
-            throw new ConverException("targetCode["+targetCode+"]不存在");
+            throw new ConverException("找不到targetCode["+targetCode+"]的source");
 
+        }catch (ConverException e){
+            throw e;
         } catch (Exception e) {
-            throw new ConverException("转换失败",e);
+            throw new ConverException(e);
         }
     }
 

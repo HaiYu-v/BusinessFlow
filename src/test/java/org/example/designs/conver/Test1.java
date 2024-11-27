@@ -28,6 +28,7 @@ public class Test1 {
     public Test1( ) {
     }
 
+
     public double getPrice() {
         return price;
     }

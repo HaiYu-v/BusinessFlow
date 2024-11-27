@@ -15,11 +15,14 @@ import org.example.designs.conver.core.ConverException;
 import org.example.designs.conver.core.Converter;
 import org.example.designs.business_flow.desc.ChainDesc;
 import org.example.designs.task.TaskInfo;
+import org.springframework.expression.spel.ast.MethodReference;
+
 import java.lang.reflect.Parameter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.function.Function;
 
 
 /**
@@ -181,7 +184,10 @@ public class BusinessFlow {
         add(beanType,methodCode,null,null);
         return this;
     }
-
+    public <T> BusinessFlow add(Class<T> beanType, Object methodRef) throws BusinessFlowException {
+//        add(beanType,methodCode,null,null);
+        return this;
+    }
     //实体bean
     public <T> BusinessFlow add(Object bean, String methodCode) throws BusinessFlowException {
         add(bean,methodCode,null,null);
@@ -409,4 +415,5 @@ public class BusinessFlow {
     public void setRet(Object ret) {
         this.ret = ret;
     }
+
 }

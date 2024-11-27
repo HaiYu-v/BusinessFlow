@@ -55,8 +55,8 @@ class ApplicationTests  {
                 "    \"targetCode\":\"test2\",\n" +
                 "    \"rules\":{\n" +
                 "        \"id\":{\"type\":\"1\",\"formula\":\"123\"},\n" +
-                "        \"name1\":{\"type\":\"1\",\"formula\":\"\"price\"\"},\n" +
-                "        \"price\":{\"type\":\"0\",\"source\":[\"price\"]},\n" +
+                "        \"name1\":{\"type\":\"1\",\"formula\":\"2\"},\n" +
+                "        \"price\":{\"type\":\"0\",\"source\":[\"#test1.price1\"]},\n" +
                 "    }\n" +
                 "}";
         Converter.analysis(rule,beanRuleMap);
@@ -69,8 +69,12 @@ class ApplicationTests  {
         try {
             Converter.conver(test2,"test2",beanRuleMap,dataSource);
         } catch (Exception e) {
+//            System.out.println(e.getMessage());
+            System.out.println();
+//            e.fillInStackTrace();
+            System.out.println();
             e.printStackTrace();
-            throw new RuntimeException(e);
+//            throw new RuntimeException(e);
         }
         System.out.println(JSONUtil.toJsonPrettyStr(test2));
 //        System.out.println(DataDesc.class.getCanonicalName());
@@ -82,9 +86,10 @@ class ApplicationTests  {
     void test3(){
         try {
             BusinessFlow businessFlow = BusinessFlow.build("测试业务流性能");
-            for(int i=0 ;i<100000; i++){
+            for(int i=0 ;i<100; i++){
                 businessFlow.add(Chain1.class,"performance");
             }
+
             businessFlow.getGlobalValueCache().put("test2",new Test1(1,"xiaoming",1.0));
             businessFlow
 //                    .add(Chain1.class, "start")
@@ -93,9 +98,9 @@ class ApplicationTests  {
                     .start();
 //            System.out.println(end.getName());
 
-            StringBuilder stringBuilder = new StringBuilder();
-            System.out.println(businessFlow.getInfoJSON());
-            System.out.println(businessFlow.getVisualJSON());
+//            StringBuilder stringBuilder = new StringBuilder();
+//            System.out.println(businessFlow.getInfoJSON());
+//            System.out.println(businessFlow.getVisualJSON());
 
         } catch (BusinessFlowException e) {
             throw new RuntimeException(e);

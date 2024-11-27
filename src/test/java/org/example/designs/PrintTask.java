@@ -34,7 +34,7 @@ class PrintTask extends AbstractTask {
             System.out.print(i+",");
         }
         System.out.println(list);
-        int x = 1/0;
+//        int x = 1/0;
         return  true;
     }
 }

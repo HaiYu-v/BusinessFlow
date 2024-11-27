@@ -45,15 +45,15 @@ public class ConverDesc {
 
     /**
      * -----------------------------------------------------------------------------------------------------------------
-     * 获取目标值
+     * 获取转换后的值
      *
-     * 通过源值，计算获得目标值
-     *
+     * @param dataSource 数据来源
+     * @param retType 返回值类型
      * @return 计算值
+     * @throws Exception
      */
-    public <T> T getConverValue(IDataSource dataSource, Class<T> type) throws Exception {
-        //简单映射
-        try {
+    public <T> T getConverValue(IDataSource dataSource, Class<T> retType) throws Exception {
+            //简单映射
             if(this.type.equals(ConverType.SIMPLE_MAPPING)){
                 return (T)((SourceDesc)(sourceMap.values().toArray()[0])).getValue(dataSource);
             //常量也由公式来赋值
@@ -61,16 +61,13 @@ public class ConverDesc {
                 if(!sourceMap.isEmpty()){
                     throw new ConverException("常量不能有[source]");
                 }
-                return (T)Calculator.compute(sourceMap,formula,dataSource,type);
+                return Calculator.compute(sourceMap,formula,dataSource,retType);
             //公式计算
-            }else if(type.equals(ConverType.FORMULA_CALCULATION)){
-                return (T)Calculator.compute(sourceMap,formula,dataSource,type);
+            }else if(retType.equals(ConverType.FORMULA_CALCULATION)){
+                return Calculator.compute(sourceMap,formula,dataSource,retType);
             } else {
                 throw new ConverException("不支持的转换方式:["+ this.type +"]");
             }
-        } catch (Exception e) {
-            throw new ConverException("数据转换异常",e);
-        }
     }
 
 //    /**

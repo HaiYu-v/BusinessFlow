@@ -9,9 +9,10 @@ import java.lang.reflect.Field;
  * 来源描述
  *
  * <p>
- *     记录一个bean的code和他的一个field
- *     如果field为空，则表示此code指向一个数值，而非bean
- *     如果field不为空，则取此code指向bean的field值
+ *     记录一个bean的code和一个field
+ *     一个bean的属性 -> code != null && field != null
+ *     一个bean -> code != null && field == null
+ *     一个变量 -> code == null && field != null
  * </p>
  *
  * @author HaiYu
@@ -22,16 +23,30 @@ public class SourceDesc {
     private String code;
     private String field;
 
-    public Object getValue(IDataSource dataSource) throws Exception{
-        //file为空，则直接返回code值
-        if(StrUtil.isBlank(field)){
-            return dataSource.get(code);
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 获取值
+     *
+     * @param dataSource 数据源
+     * @return {@link Object }
+     * @throws Exception
+     */
+    public Object getValue(IDataSource dataSource){
+        try {
+            //file为空，则直接返回code对应的bean
+            if(StrUtil.isBlank(field)){
+                return dataSource.get(code);
+            }
+            //filed不为空，则返回对应bean的对应filed
+            Object data = dataSource.get(code);
+            Field declaredField = data.getClass().getDeclaredField(field);
+            declaredField.setAccessible(true);
+            return declaredField.get(data);
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
         }
-        //file不为空，则从data里取值
-        Object data = dataSource.get(code);
-        Field declaredField = data.getClass().getDeclaredField(field);
-        declaredField.setAccessible(true);
-        return declaredField.get(data);
     }
 
     public SourceDesc(String code, String field) {
@@ -46,14 +61,6 @@ public class SourceDesc {
      * @return {@link String }
      */
     public String getKey(){
-//        StringBuilder builder = new StringBuilder();
-//        if(StrUtil.isNotBlank(this.code)){
-//            builder.append(this.code);
-//            if (StrUtil.isNotBlank(this.field)){
-//                builder.append(".").append(this.field);
-//            }
-//        }
-//        return builder.toString();
         if(code!=null){
             return code;
         }

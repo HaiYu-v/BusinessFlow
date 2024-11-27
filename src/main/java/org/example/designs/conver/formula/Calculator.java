@@ -1,5 +1,6 @@
 package org.example.designs.conver.formula;
 
+import org.example.designs.conver.core.ConverException;
 import org.example.designs.conver.core.IDataSource;
 import org.example.designs.conver.desc.SourceDesc;
 import org.springframework.expression.ExpressionParser;
@@ -29,7 +30,7 @@ public class Calculator {
      * @param formula  计算公式
      * @return {@link Object }
      */
-    public static <T> T compute(Map<String, SourceDesc> variates, String formula, IDataSource dataSource,Class<T> type){
+    public static <T> T compute(Map<String, SourceDesc> variates, String formula, IDataSource dataSource,Class<T> type) throws ConverException {
         T ret = null;
         try {
             ExpressionParser parser = new SpelExpressionParser();
@@ -41,7 +42,7 @@ public class Calculator {
             //公式计算
             ret = parser.parseExpression(formula).getValue(context,type);
         } catch (Exception e) {
-            throw new RuntimeException("计算公式["+formula+"]异常",e);
+            throw new ConverException("公式["+formula+"]计算失败，原因是："+e.getMessage());
         }
         return ret;
     }
