@@ -20,7 +20,13 @@ public class BusinessFlowException extends Exception{
     }
 
     public BusinessFlowException(String message, Throwable e) {
-        super(message+"\n-> "+e.getMessage(), e);
+        super(new StringBuilder()
+                .append(message)
+                .append("\n-> ")
+                .append(e.getClass().getName())
+                .append(": ")
+                .append(e.getMessage())
+                .toString());
         this.setStackTrace(e.getStackTrace());
     }
 }

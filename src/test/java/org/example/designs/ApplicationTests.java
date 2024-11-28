@@ -1,6 +1,7 @@
 package org.example.designs;
 
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.json.JSONUtil;
 import org.example.designs.business_flow.Chain1;
 import org.example.designs.business_flow.core.BusinessFlow;
@@ -16,6 +17,8 @@ import org.example.designs.utils.MyReflectUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.List;
 
 
@@ -67,7 +70,7 @@ class ApplicationTests  {
         dataSource.put("test1",test1);
         dataSource.put("price",3);
         try {
-            Converter.conver(test2,"test2",beanRuleMap,dataSource);
+//            Converter.conver(test2,"test2",beanRuleMap,dataSource);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -105,8 +108,33 @@ class ApplicationTests  {
 
     @Test
     void test4(){
-        TestController controller = new TestController();
-        System.out.println(controller.test());
+
+            Double x = 100.0;
+            Object   i = BeanUtil.copyProperties(x, double.class);
+            i = x;
+            System.out.println(i);
+//        TestController controller = new TestController();
+//        System.out.println(controller.test());
+    }
+    public static void func(int x){
+
+    }
+
+    @Test
+    void test5(){
+        BusinessFlow businessFlow = BusinessFlow.build("基本类型转换测试");
+
+        String str = null;
+        try {
+            str = businessFlow
+                    .add(Chain1.class, "start1")
+                    .add(Chain1.class, "conver1")
+                    .start(String.class);
+        } catch (BusinessFlowException e) {
+            e.printStackTrace();
+        }
+        System.out.println(businessFlow.getVisualJSONLog());
+        System.out.println(str);
     }
 
 

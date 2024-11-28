@@ -8,6 +8,7 @@ import org.example.designs.conver.desc.ConverDesc;
 import org.example.designs.conver.rule.FieldRules;
 import org.example.designs.utils.MyReflectUtil;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 
@@ -40,15 +41,39 @@ public class Converter {
      *   - 有rule，则根据rule转换，无rule。
      *   - 无rule，则直接在数据源里匹配key
      *
-     * @param  target      目标data
+     * @param  targetType  目标bean的类型
      * @param  targetCode  目标data的code
      * @param  dataRules data转换规则缓存
      * @param  dataSource  数据源
      * @return 转换是否成功
      * @throws Exception
      */
-    public static boolean conver(Object target, String targetCode, DataRules dataRules, IDataSource dataSource) throws ConverException {
+    public static <T> T conver(Class<T> targetType, String targetCode, DataRules dataRules, IDataSource dataSource,Boolean isThrow) throws ConverException {
         try {
+            //获取source
+            Object source = dataSource.get(targetCode);
+            if(null == source){
+                if(!isThrow) return null;
+                throw new ConverException("找不到sourceCode["+targetCode+"]");
+            }
+            //基础属性
+            try {
+                if(targetType.isPrimitive()){
+                    return (T) source;
+                }
+            } catch (Exception e) {
+                if(!isThrow) return null;
+                throw new ConverException("targetCode["+targetCode+"]无法转成type["+targetType.getName()+"]",e);
+            }
+
+            T target = null;
+            try {
+                target = targetType.newInstance();
+            } catch (Exception e){
+                if(!isThrow) return null;
+                throw new ConverException("type["+targetType.getName()+"]无法实例化",e);
+            }
+
             //有rule
             FieldRules fieldRules = dataRules.get(targetCode);
             if(null != fieldRules){
@@ -56,7 +81,7 @@ public class Converter {
                 Object cur = dataSource.get(targetCode);
                 BeanUtil.copyProperties(cur,target);
 
-                List<Field> fields = MyReflectUtil.getFieldsWithGetterAndSetter(target.getClass());
+                List<Field> fields = MyReflectUtil.getFieldsWithGetterAndSetter(targetType);
                 for(Field field:fields){
                     // 设置字段可访问
                     field.setAccessible(true);
@@ -64,20 +89,20 @@ public class Converter {
                     ConverDesc converDesc = fieldRules.get(field.getName());
                     field.set(target,converDesc.getConverValue(dataSource,field.getType()));
                 }
-                return true;
+                return target;
             }
 
             //无rule，但有code
             if(dataSource.contains(targetCode)){
-                Object cur = dataSource.get(targetCode);
                 //类型相同和类型不相同,都可以简单映射同名字段
-                BeanUtil.copyProperties(cur,target);
-                return true;
+                BeanUtil.copyProperties(source,target);
+                return target;
             }
-
-            throw new ConverException("找不到targetCode["+targetCode+"]的source");
+            if(!isThrow) return null;
+            throw new ConverException("找不到sourceCode["+targetCode+"]");
 
         }catch (Exception e) {
+            if(!isThrow) return null;
             throw new ConverException("target[" + targetCode + "]转换失败",e);
         }
     }

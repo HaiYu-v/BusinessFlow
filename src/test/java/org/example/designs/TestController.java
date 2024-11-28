@@ -4,11 +4,6 @@ import org.example.designs.business_flow.AelecbillRedapplyService;
 import org.example.designs.business_flow.VtChBillService;
 import org.example.designs.business_flow.core.BusinessFlow;
 import org.example.designs.business_flow.core.BusinessFlowException;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * TODO
@@ -47,13 +42,13 @@ public class TestController {
                             , "上传红字确认单", "isSuccess")
                     //启动业务流，并输入此业务流的返回类型
                     .start(Boolean.class);
-            System.out.println(flow.getInfoJSON());
+            System.out.println(flow.getInfoJSONLog());
             if (isSuccess) {
                 return "成功，红字确认单申请开具成功";
             }
             return "失败，失败原因是：...";
         } catch (BusinessFlowException e) {
-            System.out.println(flow.getVisualJSON());
+            System.out.println(flow.getVisualJSONLog());
             e.printStackTrace();
             return "失败，异常是：...";
         }
@@ -74,10 +69,10 @@ public class TestController {
                     .add(AelecbillRedapplyService.class, "redBill_upLoad")
                     //启动业务流，并输入此业务流的返回类型
                     .start();
-            System.out.println(flow.getVisualJSON());
+            System.out.println(flow.getVisualJSONLog());
             return "成功，红字确认单申请开具成功";
         } catch (BusinessFlowException e) {
-            System.out.println(flow.getVisualJSON());
+            System.out.println(flow.getVisualJSONLog());
 
             return "失败，异常是：...";
         }

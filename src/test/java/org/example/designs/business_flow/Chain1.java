@@ -39,6 +39,16 @@ public class Chain1 {
         return test2;
     }
 
+    @Chain(desc = "生成一个数字",retCode = "x")
+    public int start1() throws InterruptedException {
+        return 111;
+    }
+
+    @Chain(desc = "转换为字符串",retCode = "test2",code = "str")
+    public String conver1(@Source int x) throws InterruptedException {
+        return Integer.toString(x);
+    }
+
     @Chain(desc = "性能测试",retCode = "test3")
     public void performance(TemporaryValueCache temporary, GlobalValueCache global) throws InterruptedException {
 //        Thread.sleep(1000);
