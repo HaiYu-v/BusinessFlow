@@ -2,13 +2,11 @@ package org.example.designs.business_flow;
 
 import org.example.designs.business_flow.annotation.Chain;
 import org.example.designs.business_flow.annotation.Source;
-import org.example.designs.business_flow.cache.GlobalValueCache;
-import org.example.designs.business_flow.cache.TemporaryValueCache;
+import org.example.designs.business_flow.cache.GlobalCache;
+import org.example.designs.business_flow.cache.TemporaryCache;
 import org.example.designs.conver.Test1;
 import org.example.designs.conver.Test2;
 import org.springframework.stereotype.Component;
-
-import java.util.UUID;
 
 /**
  * TODO
@@ -51,7 +49,7 @@ public class Chain1 {
     }
 
     @Chain(desc = "性能测试",retCode = "test3")
-    public void performance(TemporaryValueCache temporary, GlobalValueCache global) throws InterruptedException {
+    public void performance(TemporaryCache temporary, GlobalCache global) throws InterruptedException {
 //        Thread.sleep(1000);
 //        System.out.println(temporary);
 //        System.out.println(global);

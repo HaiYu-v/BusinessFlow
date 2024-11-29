@@ -29,6 +29,11 @@ public class DataSource implements IDataSource {
     }
 
     @Override
+    public void clear() {
+        dataMap.clear();
+    }
+
+    @Override
     public boolean contains(String code) {
         return dataMap.containsKey(code);
     }

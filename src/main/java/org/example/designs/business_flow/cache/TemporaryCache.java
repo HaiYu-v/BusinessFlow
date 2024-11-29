@@ -15,7 +15,7 @@ import java.util.Map;
  * @version 1.0.0
  * @date 2024-11-21
  */
-public class TemporaryValueCache implements IDataSource {
+public class TemporaryCache implements IDataSource {
     private Map<String,Object> temporaryMap = new HashMap<>();
     /**
      * -----------------------------------------------------------------------------------------------------------------

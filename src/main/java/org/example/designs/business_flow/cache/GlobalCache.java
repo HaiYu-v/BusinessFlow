@@ -16,7 +16,7 @@ import java.util.Map;
  * @version 1.0.0
  * @date 2024-11-21
  */
-public class GlobalValueCache implements IDataSource {
+public class GlobalCache implements IDataSource {
     //全局map
     private Map<String,Object> globalMap = new HashMap<>();
 
@@ -31,6 +31,11 @@ public class GlobalValueCache implements IDataSource {
     @Override
     public Object put(String key, Object value) {
         return globalMap.put(key,value);
+    }
+
+    @Override
+    public void clear() {
+        globalMap.clear();
     }
 
     public void putAll(Map<String,Object> map){

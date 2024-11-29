@@ -53,7 +53,7 @@ public class DefaultAnalyzer implements IAnalyzer{
             throw new ConverException("JSON格式错误(公式里的字符串用单引号[']表示)",e);
         }
         //目标编码
-        String targetCode = ruleJSON.getStr("targetCode");
+        String sourceCode = ruleJSON.getStr("sourceCode");
         //转换规则
         JSONObject curRules = ruleJSON.getJSONObject("rules");
 
@@ -62,7 +62,7 @@ public class DefaultAnalyzer implements IAnalyzer{
         try {
             curMap = (HashMap<String, JSONObject>) JSONUtil.toBean(curRules, HashMap.class);
         } catch (Exception e) {
-            throw new ConverException("targetCode["+targetCode+"]的转换规则有错误",e);
+            throw new ConverException("sourceCode["+sourceCode+"]的转换规则有错误",e);
         }
         Map<String,ConverDesc> fieldMap = new HashMap<>();
 
@@ -93,7 +93,7 @@ public class DefaultAnalyzer implements IAnalyzer{
         FieldRules fieldRules = AnalysisUtil.buildFieldRules(fieldMap);
 
         //添加到dataRules中
-        dataRules.put(targetCode, fieldRules);
+        dataRules.put(sourceCode, fieldRules);
         return dataRules;
     }
 }

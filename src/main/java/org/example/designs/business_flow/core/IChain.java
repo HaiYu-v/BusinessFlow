@@ -1,7 +1,7 @@
 package org.example.designs.business_flow.core;
 
-import org.example.designs.business_flow.cache.GlobalValueCache;
-import org.example.designs.business_flow.cache.TemporaryValueCache;
+import org.example.designs.business_flow.cache.GlobalCache;
+import org.example.designs.business_flow.cache.TemporaryCache;
 
 /**
  * 业务点接口
@@ -15,5 +15,5 @@ import org.example.designs.business_flow.cache.TemporaryValueCache;
  * @create 2024-11-29
  */
 public interface IChain {
-    Object method(TemporaryValueCache temporaryCache, GlobalValueCache globalCache);
+    Object method(TemporaryCache temporaryCache, GlobalCache globalCache);
 }

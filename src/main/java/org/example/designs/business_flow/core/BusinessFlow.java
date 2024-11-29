@@ -6,8 +6,8 @@ import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.example.designs.business_flow.annotation.Chain;
 import org.example.designs.business_flow.annotation.Source;
-import org.example.designs.business_flow.cache.GlobalValueCache;
-import org.example.designs.business_flow.cache.TemporaryValueCache;
+import org.example.designs.business_flow.cache.GlobalCache;
+import org.example.designs.business_flow.cache.TemporaryCache;
 import org.example.designs.business_flow.context.IContext;
 import org.example.designs.business_flow.context.SpringBeanContext;
 import org.example.designs.business_flow.desc.ChainInfo;
@@ -45,9 +45,9 @@ public class BusinessFlow {
     //bean容器
     static private IContext context = new SpringBeanContext();
     //全局数据的缓存，整条业务流程里的缓存
-    private GlobalValueCache globalValueCache;
+    private GlobalCache globalCache;
     //临时数据的缓存，只传递一个业务点
-    private TemporaryValueCache temporaryValueCache;
+    private TemporaryCache temporaryCache;
     //转换规则缓存
     private DataRules ruleCache;
     //日志是否自动打印
@@ -63,7 +63,7 @@ public class BusinessFlow {
     //业务流描述
     private String desc;
     //业务点列表
-    private Queue<ChainDesc> chainList = new LinkedList<>();
+    private Queue<ChainDesc> chainQueue = new LinkedList<>();
     //起始时间
     private LocalDateTime startTime;
     //结束时间
@@ -78,8 +78,8 @@ public class BusinessFlow {
     private BusinessFlow() {
         this.startupShutdownMonitor = new Object();
         this.chainInfoList = new ArrayList<>();
-        this.globalValueCache = new GlobalValueCache();
-        this.temporaryValueCache = new TemporaryValueCache();
+        this.globalCache = new GlobalCache();
+        this.temporaryCache = new TemporaryCache();
         this.ruleCache = new DataRules();
     }
 
@@ -117,7 +117,7 @@ public class BusinessFlow {
         try {
             //获得业务点
             ChainDesc chainDesc = ChainDesc.build(bean, methodCode, desc, retCode);
-            chainList.offer(chainDesc);
+            chainQueue.offer(chainDesc);
         } catch (Exception e) {
             throw new BusinessFlowException("业务流["+this.desc+"]的method["+methodCode+"]添加失败",e);
         }
@@ -165,8 +165,8 @@ public class BusinessFlow {
             synchronized (startupShutdownMonitor) {
                 this.startTime = LocalDateTime.now();
                 String lastRetCode = null;
-                while (!chainList.isEmpty()) {
-                    chainDesc = chainList.poll();
+                while (!chainQueue.isEmpty()) {
+                    chainDesc = chainQueue.poll();
                     //业务点所需参数
                     parameters = chainDesc.getParameters();
                     //参数赋值
@@ -176,7 +176,7 @@ public class BusinessFlow {
                         throw new BusinessFlowException(MyStrUtil.append("方法[",chainDesc.getMethod().getName(),"]传参失败"),e);
                     }
                     //获取参数后，清除临时缓存
-                    temporaryValueCache.clear();
+                    temporaryCache.clear();
                     //执行业务点,本质上是执行chainDesc的invoke()：execute() -> executeFunction() -> invoke()
                     try {
                         chainDesc.execute();
@@ -189,7 +189,7 @@ public class BusinessFlow {
                     //最后返回值的Code
                     lastRetCode = chainDesc.getRetCode();
                     //返回值送入临时缓存
-                    temporaryValueCache.put(chainDesc.getRetCode(), chainDesc.getRetBean());
+                    temporaryCache.put(chainDesc.getRetCode(), chainDesc.getRetBean());
                 }
                 //是否有返回类型,没有就代表不需要返回值
                 if (null == retType) {
@@ -197,8 +197,7 @@ public class BusinessFlow {
                     return null;
                 }
                 //有返回类型，从全局缓存和临时缓存中获取（优先全局）
-                this.ret = globalValueCache.get(lastRetCode);
-                if (null == this.ret) this.ret = temporaryValueCache.get(lastRetCode);
+                if (null == this.ret) this.ret = temporaryCache.get(lastRetCode);
                 //没有找到返回值
                 if(null == ret){
                     throw new BusinessFlowException(MyStrUtil.append("业务流[",this.desc,"]找不到返回值,retCode为[",lastRetCode,"],类型为[",retType.getName(),"]"));
@@ -212,8 +211,8 @@ public class BusinessFlow {
             throw new BusinessFlowException(MyStrUtil.append("业务流[",this.desc,"]执行出错"),e);
         }finally {
             this.endTime = LocalDateTime.now();
-            if(autoPrintLog) log.info(getInfoJSONLog());
-            if(autoPrintVisualLog) log.info(getVisualJSONLog());
+            if(autoPrintLog) log.info(getInfoLog());
+            if(autoPrintVisualLog) log.info(getVisualLog());
         }
     }
 
@@ -231,10 +230,10 @@ public class BusinessFlow {
      * -----------------------------------------------------------------------------------------------------------------
      * 自动传参
      *
-     * 参数：@Source > 参数名，且@Source能从{@link GlobalValueCache}匹配
-     * - 支持导入全局缓存{@link GlobalValueCache}和 临时缓存{@link TemporaryValueCache}
-     * - 根据{@link Source}从数据源匹配， 优先从{@link GlobalValueCache}匹配
-     * - 根据参数名来匹配参数，仅能从{@link TemporaryValueCache}匹配
+     * 参数：@Source > 参数名，且@Source能从{@link GlobalCache}匹配
+     * - 支持导入全局缓存{@link GlobalCache}和 临时缓存{@link TemporaryCache}
+     * - 根据{@link Source}从数据源匹配， 优先从{@link GlobalCache}匹配
+     * - 根据参数名来匹配参数，仅能从{@link TemporaryCache}匹配
      *
      * @param parameters
      * @return int
@@ -243,33 +242,33 @@ public class BusinessFlow {
         Object[] ret = new Object[parameters.length];
         for (int i = 0; i < parameters.length; i++) {
             Parameter parameter = parameters[i];
-            //获得注解
-            Source source = parameter.getAnnotation(Source.class);
 
             //传入全局数据缓存
-            if(parameter.getType().equals(GlobalValueCache.class)){
-                ret[i] = globalValueCache;
+            if(parameter.getType().equals(GlobalCache.class)){
+                ret[i] = globalCache;
                 continue;
             }
 
             //传入临时数据缓存
-            if(parameter.getType().equals(TemporaryValueCache.class)){
-                ret[i] = temporaryValueCache;
+            if(parameter.getType().equals(TemporaryCache.class)){
+                ret[i] = temporaryCache;
                 continue;
             }
 
+            //获得注解
+            Source source = parameter.getAnnotation(Source.class);
             try { //传参失败则跳过，且赋null值
                 //有@Source 且 value有值
                 if(null != source && StrUtil.isNotBlank(source.value())){
-                    ret[i] = Converter.conver(parameter.getType(),source.value(),ruleCache,globalValueCache,false);
-                    if(null == ret[i]) ret[i] = Converter.conver(parameter.getType(),source.value(),ruleCache,temporaryValueCache,false);
+                    ret[i] = Converter.conver(parameter.getType(),source.value(),ruleCache, globalCache,false);
+                    if(null == ret[i]) ret[i] = Converter.conver(parameter.getType(),source.value(),ruleCache, temporaryCache,false);
                 //有@Source，但无value
                 }else if(null != source){
-                    ret[i] = Converter.conver(parameter.getType(),parameter.getName(),ruleCache,globalValueCache,false);
-                    if(null == ret[i]) ret[i] = Converter.conver(parameter.getType(),parameter.getName(),ruleCache,temporaryValueCache,false);
+                    ret[i] = Converter.conver(parameter.getType(),parameter.getName(),ruleCache, globalCache,false);
+                    if(null == ret[i]) ret[i] = Converter.conver(parameter.getType(),parameter.getName(),ruleCache, temporaryCache,false);
                 //无@Source
                 }else {
-                    ret[i] = Converter.conver(parameter.getType(),parameter.getName(), ruleCache, temporaryValueCache,false);
+                    ret[i] = Converter.conver(parameter.getType(),parameter.getName(), ruleCache, temporaryCache,false);
                 }
             } catch (ConverException e) {
                 log.warn("参数["+parameter.getName()+"]转换失败, 现传空值");
@@ -285,7 +284,7 @@ public class BusinessFlow {
      *
      * @return {@link String }
      */
-    public String getInfoJSONLog(){
+    public String getInfoLog(){
         businessFlowInfo.put("desc",desc);
         businessFlowInfo.put("chainCount", chainInfoList.size());
         businessFlowInfo.put("startTime",startTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
@@ -305,8 +304,8 @@ public class BusinessFlow {
      *
      * @return {@link String }
      */
-    public String getVisualJSONLog(){
-        return JSONUtil.toJsonPrettyStr(getInfoJSONLog());
+    public String getVisualLog(){
+        return JSONUtil.toJsonPrettyStr(getInfoLog());
     }
 
     /**
@@ -334,22 +333,22 @@ public class BusinessFlow {
      * @return {@link Object }
      */
     public Object putTemporary(String key, Object value){
-        return temporaryValueCache.put(key,value);
+        return temporaryCache.put(key,value);
     }
     public void putTemporary(Map<String,Object> dataMap){
-        temporaryValueCache.putAll(dataMap);
+        temporaryCache.putAll(dataMap);
     }
     public Object getTemporary(String key){
-        return temporaryValueCache.get(key);
+        return temporaryCache.get(key);
     }
     public Object putGlobal(String key, Object value){
-        return globalValueCache.put(key,value);
+        return globalCache.put(key,value);
     }
     public void putGlobal(Map<String,Object> dataMap){
-        globalValueCache.putAll(dataMap);
+        globalCache.putAll(dataMap);
     }
     public Object getGlobal(String key){
-        return globalValueCache.get(key);
+        return globalCache.get(key);
     }
 
     /**
@@ -373,12 +372,12 @@ public class BusinessFlow {
         BusinessFlow.context = context;
     }
 
-    public Queue<ChainDesc> getChainList() {
-        return chainList;
+    public Queue<ChainDesc> getChainQueue() {
+        return chainQueue;
     }
 
-    public void setChainList(Queue<ChainDesc> chainList) {
-        this.chainList = chainList;
+    public void setChainQueue(Queue<ChainDesc> chainQueue) {
+        this.chainQueue = chainQueue;
     }
 
     public List<ChainInfo> getChainInfoList() {
@@ -389,20 +388,20 @@ public class BusinessFlow {
         this.chainInfoList = chainInfoList;
     }
 
-    public GlobalValueCache getGlobalValueCache() {
-        return globalValueCache;
+    public GlobalCache getGlobalValueCache() {
+        return globalCache;
     }
 
-    public void setGlobalValueCache(GlobalValueCache globalValueCache) {
-        this.globalValueCache = globalValueCache;
+    public void setGlobalValueCache(GlobalCache globalCache) {
+        this.globalCache = globalCache;
     }
 
-    public TemporaryValueCache getTemporaryValueCache() {
-        return temporaryValueCache;
+    public TemporaryCache getTemporaryValueCache() {
+        return temporaryCache;
     }
 
-    public void setTemporaryValueCache(TemporaryValueCache temporaryValueCache) {
-        this.temporaryValueCache = temporaryValueCache;
+    public void setTemporaryValueCache(TemporaryCache temporaryCache) {
+        this.temporaryCache = temporaryCache;
     }
 
     public DataRules getRuleCache() {

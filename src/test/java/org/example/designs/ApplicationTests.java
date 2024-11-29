@@ -1,11 +1,10 @@
 package org.example.designs;
 
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.json.JSONUtil;
 import org.example.designs.business_flow.Chain1;
-import org.example.designs.business_flow.cache.GlobalValueCache;
-import org.example.designs.business_flow.cache.TemporaryValueCache;
+import org.example.designs.business_flow.cache.GlobalCache;
+import org.example.designs.business_flow.cache.TemporaryCache;
 import org.example.designs.business_flow.core.BusinessFlow;
 import org.example.designs.business_flow.core.BusinessFlowException;
 import org.example.designs.business_flow.core.IChain;
@@ -91,15 +90,15 @@ class ApplicationTests  {
 
             businessFlow.getGlobalValueCache().put("test2",new Test1(1,"xiaoming",1.0));
             businessFlow
-//                    .add(Chain1.class, "start")
-//                    .add(Chain1.class, "conver")
-//                    .add(Chain1.class, "converTest2")
+                    .add(Chain1.class, "start")
+                    .add(Chain1.class, "conver")
+                    .add(Chain1.class, "converTest2")
                     .start();
 //            System.out.println(end.getName());
 
 //            StringBuilder stringBuilder = new StringBuilder();
 //            System.out.println(businessFlow.getInfoJSON());
-//            System.out.println(businessFlow.getVisualJSON());
+            System.out.println(businessFlow.getVisualLog());
 
         } catch (BusinessFlowException e) {
             throw new RuntimeException(e);
@@ -109,8 +108,8 @@ class ApplicationTests  {
 
     @Test
     void test4(){
-//        TestController controller = new TestController();
-//        System.out.println(controller.test());
+        TestController controller = new TestController();
+        System.out.println(controller.test());
     }
     public static void func(int x){
 
@@ -125,8 +124,8 @@ class ApplicationTests  {
             str = businessFlow
                     .add("匿名类测试", "ret", new IChain() {
                         @Override
-                        public Object method(TemporaryValueCache temporaryCache, GlobalValueCache globalCache) {
-                            return "匿名类创建成功";
+                        public Object method(TemporaryCache temporaryCache, GlobalCache globalCache) {
+                            return "匿名类执行";
                         }
                     })
 //                    .add(Chain1.class, "start1")
@@ -135,7 +134,7 @@ class ApplicationTests  {
         } catch (BusinessFlowException e) {
             e.printStackTrace();
         }
-        System.out.println(businessFlow.getVisualJSONLog());
+        System.out.println(businessFlow.getVisualLog());
         System.out.println(str);
     }
 

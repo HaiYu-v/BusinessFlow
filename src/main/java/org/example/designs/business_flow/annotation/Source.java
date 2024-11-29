@@ -1,6 +1,6 @@
 package org.example.designs.business_flow.annotation;
 
-import org.example.designs.business_flow.cache.GlobalValueCache;
+import org.example.designs.business_flow.cache.GlobalCache;
 
 import java.lang.annotation.*;
 
@@ -9,7 +9,7 @@ import java.lang.annotation.*;
  *
  * <p>
  *     1.根据value值，从数据源中自动匹配数据；无value，则根据参数名匹配
- *     2.能从{@link GlobalValueCache}中自动匹配
+ *     2.能从{@link GlobalCache}中自动匹配
  * </p>
  *
  * @author HaiYu

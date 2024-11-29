@@ -17,6 +17,7 @@ public interface IDataSource {
     Object get(String code);
 
     Object put(String code,Object value);
+    public void clear();
 
     boolean contains(String code);
 

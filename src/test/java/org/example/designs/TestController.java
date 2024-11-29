@@ -13,8 +13,7 @@ import org.example.designs.business_flow.core.BusinessFlowException;
  * </p>
  *
  * @author HaiYu
- * @version 1.0.0
- * @date 2024-11-25
+ * @date 2024-11-25@version 1.0.0
  */
 
 
@@ -42,13 +41,13 @@ public class TestController {
                             , "上传红字确认单", "isSuccess")
                     //启动业务流，并输入此业务流的返回类型
                     .start(Boolean.class);
-            System.out.println(flow.getInfoJSONLog());
+            System.out.println(flow.getInfoLog());
             if (isSuccess) {
                 return "成功，红字确认单申请开具成功";
             }
             return "失败，失败原因是：...";
         } catch (BusinessFlowException e) {
-            System.out.println(flow.getVisualJSONLog());
+            System.out.println(flow.getVisualLog());
             e.printStackTrace();
             return "失败，异常是：...";
         }
@@ -69,10 +68,10 @@ public class TestController {
                     .add(AelecbillRedapplyService.class, "redBill_upLoad")
                     //启动业务流，并输入此业务流的返回类型
                     .start();
-            System.out.println(flow.getVisualJSONLog());
+            System.out.println(flow.getVisualLog());
             return "成功，红字确认单申请开具成功";
         } catch (BusinessFlowException e) {
-            System.out.println(flow.getVisualJSONLog());
+            System.out.println(flow.getVisualLog());
 
             return "失败，异常是：...";
         }

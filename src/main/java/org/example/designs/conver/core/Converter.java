@@ -1,14 +1,12 @@
 package org.example.designs.conver.core;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.json.JSONException;
 import org.example.designs.conver.analysis.DefaultAnalyzer;
 import org.example.designs.conver.analysis.IAnalyzer;
 import org.example.designs.conver.desc.ConverDesc;
 import org.example.designs.conver.rule.FieldRules;
 import org.example.designs.utils.MyReflectUtil;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 
@@ -41,69 +39,65 @@ public class Converter {
      *   - 有rule，则根据rule转换，无rule。
      *   - 无rule，则直接在数据源里匹配key
      *
-     * @param  targetType  目标bean的类型
-     * @param  targetCode  目标data的code
+     * @param  sourceType  目标bean的类型
+     * @param  sourceCode  目标data的code
      * @param  dataRules data转换规则缓存
      * @param  dataSource  数据源
      * @return 转换是否成功
      * @throws Exception
      */
-    public static <T> T conver(Class<T> targetType, String targetCode, DataRules dataRules, IDataSource dataSource,Boolean isThrow) throws ConverException {
+    public static <T> T conver(Class<T> sourceType, String sourceCode, DataRules dataRules, IDataSource dataSource,Boolean isThrow) throws ConverException {
         try {
             //获取source
-            Object source = dataSource.get(targetCode);
-            if(null == source){
+            Object sourceCache = dataSource.get(sourceCode);
+            if(null == sourceCache){
                 if(!isThrow) return null;
-                throw new ConverException("找不到sourceCode["+targetCode+"]");
+                throw new ConverException("缓存里找不到sourceCode["+sourceCode+"]");
             }
             //基础属性
             try {
-                if(targetType.isPrimitive()){
-                    return (T) source;
+                if(sourceType.isPrimitive()){
+                    return (T) sourceCache;
                 }
             } catch (Exception e) {
                 if(!isThrow) return null;
-                throw new ConverException("targetCode["+targetCode+"]无法转成type["+targetType.getName()+"]",e);
+                throw new ConverException("sourceCode["+sourceCode+"]无法转成type["+sourceType.getName()+"]",e);
             }
 
-            T target = null;
+            T source = null;
             try {
-                target = targetType.newInstance();
+                source = sourceType.newInstance();
             } catch (Exception e){
                 if(!isThrow) return null;
-                throw new ConverException("type["+targetType.getName()+"]无法实例化",e);
+                throw new ConverException("class["+sourceType.getName()+"]无法实例化",e);
             }
 
             //有rule
-            FieldRules fieldRules = dataRules.get(targetCode);
+            FieldRules fieldRules = dataRules.get(sourceCode);
             if(null != fieldRules){
                 //同名字段先简单映射
-                Object cur = dataSource.get(targetCode);
-                BeanUtil.copyProperties(cur,target);
+                BeanUtil.copyProperties(sourceCache,source);
 
-                List<Field> fields = MyReflectUtil.getFieldsWithGetterAndSetter(targetType);
+                List<Field> fields = MyReflectUtil.getFieldsWithGetterAndSetter(sourceType);
                 for(Field field:fields){
                     // 设置字段可访问
                     field.setAccessible(true);
                     // 修改字段值
                     ConverDesc converDesc = fieldRules.get(field.getName());
-                    field.set(target,converDesc.getConverValue(dataSource,field.getType()));
+                    if(null == converDesc) continue;
+                    field.set(source,converDesc.getConverValue(dataSource,field.getType()));
                 }
-                return target;
+                return source;
             }
 
             //无rule，但有code
-            if(dataSource.contains(targetCode)){
-                //类型相同和类型不相同,都可以简单映射同名字段
-                BeanUtil.copyProperties(source,target);
-                return target;
-            }
-            if(!isThrow) return null;
-            throw new ConverException("找不到sourceCode["+targetCode+"]");
+            //类型相同和类型不相同,都可以简单映射同名字段
+            BeanUtil.copyProperties(sourceCache,source);
+            return source;
 
         }catch (Exception e) {
             if(!isThrow) return null;
-            throw new ConverException("target[" + targetCode + "]转换失败",e);
+            throw new ConverException("source[" + sourceCode + "]转换失败",e);
         }
     }
 
