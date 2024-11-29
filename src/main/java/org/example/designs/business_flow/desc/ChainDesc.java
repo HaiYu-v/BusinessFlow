@@ -4,7 +4,10 @@ import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import org.example.designs.business_flow.annotation.Chain;
 import org.example.designs.business_flow.core.BusinessFlowException;
+import org.example.designs.business_flow.core.IChain;
 import org.example.designs.task.AbstractTask;
+import org.example.designs.utils.MyStrUtil;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -103,6 +106,14 @@ import java.util.Map;
     private static <T> ChainMethodDesc getChainMethod(Class<T> dataType, String methodCode) throws BusinessFlowException {
         Method[] methods = ReflectUtil.getPublicMethods(dataType);
         ChainMethodDesc ret = null;
+        if(IChain.class.isAssignableFrom(dataType)){
+            try {
+                methods[0].setAccessible(true);
+                return new ChainMethodDesc(methods[0],null,null);
+            } catch (Exception e) {
+                throw new BusinessFlowException(MyStrUtil.append("没有找到方法[",methodCode,"]"),e);
+            }
+        }
         for (Method method : methods) {
             if (method.isAnnotationPresent(Chain.class)) {
                 // 获取 Chain 注解实例

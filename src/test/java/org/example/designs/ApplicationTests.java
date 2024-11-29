@@ -4,8 +4,11 @@ package org.example.designs;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.json.JSONUtil;
 import org.example.designs.business_flow.Chain1;
+import org.example.designs.business_flow.cache.GlobalValueCache;
+import org.example.designs.business_flow.cache.TemporaryValueCache;
 import org.example.designs.business_flow.core.BusinessFlow;
 import org.example.designs.business_flow.core.BusinessFlowException;
+import org.example.designs.business_flow.core.IChain;
 import org.example.designs.conver.DataSource;
 import org.example.designs.conver.Test1;
 import org.example.designs.conver.Test2;
@@ -17,8 +20,6 @@ import org.example.designs.utils.MyReflectUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.List;
 
 
@@ -108,11 +109,6 @@ class ApplicationTests  {
 
     @Test
     void test4(){
-
-            Double x = 100.0;
-            Object   i = BeanUtil.copyProperties(x, double.class);
-            i = x;
-            System.out.println(i);
 //        TestController controller = new TestController();
 //        System.out.println(controller.test());
     }
@@ -127,8 +123,14 @@ class ApplicationTests  {
         String str = null;
         try {
             str = businessFlow
-                    .add(Chain1.class, "start1")
-                    .add(Chain1.class, "conver1")
+                    .add("匿名类测试", "ret", new IChain() {
+                        @Override
+                        public Object method(TemporaryValueCache temporaryCache, GlobalValueCache globalCache) {
+                            return "匿名类创建成功";
+                        }
+                    })
+//                    .add(Chain1.class, "start1")
+//                    .add(Chain1.class, "conver1")
                     .start(String.class);
         } catch (BusinessFlowException e) {
             e.printStackTrace();

@@ -46,7 +46,7 @@ public class BusinessFlow {
     static private IContext context = new SpringBeanContext();
     //全局数据的缓存，整条业务流程里的缓存
     private GlobalValueCache globalValueCache;
-    //临时数据的缓存，只传递一次
+    //临时数据的缓存，只传递一个业务点
     private TemporaryValueCache temporaryValueCache;
     //转换规则缓存
     private DataRules ruleCache;
@@ -95,6 +95,11 @@ public class BusinessFlow {
         BusinessFlow businessFlow = new BusinessFlow();
         businessFlow.setDesc(desc);
         return businessFlow;
+    }
+
+    public BusinessFlow add(String desc,String retCode,IChain chain) throws BusinessFlowException {
+        add(chain,"method",desc,retCode);
+        return this;
     }
 
     /**
