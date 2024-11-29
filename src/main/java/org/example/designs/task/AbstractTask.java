@@ -139,7 +139,7 @@ public abstract class AbstractTask {
         try {
             if(beforeExecute != null)  beforeExecute.beforeExecute(this);
         } catch (Exception ex) {
-            log.error(ex.getMessage(),ex);
+//            log.error(ex.getMessage(),ex);
             beforeException = ex;
         }
 
@@ -148,7 +148,7 @@ public abstract class AbstractTask {
         try {
             simpleExecute(params);
         } catch (Exception ex) {
-            log.error(ex.getMessage(),ex);
+//            log.error(ex.getMessage(),ex);
             e = ex;
         }
 
@@ -158,7 +158,7 @@ public abstract class AbstractTask {
         try {
            if (null != afterExecute) isThrow = afterExecute.afterExecute(this,e);
         } catch (Exception ex) {
-            log.error(ex.getMessage(),ex);
+//            log.error(ex.getMessage(),ex);
            aftereException = ex;
         }
 
