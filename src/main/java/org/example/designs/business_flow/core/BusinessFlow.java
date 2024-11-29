@@ -15,7 +15,10 @@ import org.example.designs.conver.core.DataRules;
 import org.example.designs.conver.core.ConverException;
 import org.example.designs.conver.core.Converter;
 import org.example.designs.business_flow.desc.ChainDesc;
+import org.example.designs.task.TaskException;
 import org.example.designs.task.TaskInfo;
+import org.example.designs.utils.MyStrUtil;
+
 import java.lang.reflect.Parameter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -162,11 +165,19 @@ public class BusinessFlow {
                     //业务点所需参数
                     parameters = chainDesc.getParameters();
                     //参数赋值
-                    chainDesc.setParams(importParams(parameters));
+                    try {
+                        chainDesc.setParams(importParams(parameters));
+                    } catch (Exception e) {
+                        throw new BusinessFlowException(MyStrUtil.append("方法[",chainDesc.getMethod().getName(),"]传参失败"),e);
+                    }
                     //获取参数后，清除临时缓存
                     temporaryValueCache.clear();
                     //执行业务点,本质上是执行chainDesc的invoke()：execute() -> executeFunction() -> invoke()
-                    chainDesc.execute();
+                    try {
+                        chainDesc.execute();
+                    } catch (TaskException e) {
+                        throw new BusinessFlowException(MyStrUtil.append("方法[",chainDesc.getMethod().getName(),"]执行失败"),e);
+                    }
                     //获取执行信息
                     TaskInfo info = chainDesc.getInfo();
                     chainInfoList.add(new ChainInfo(parameters, chainDesc.getRetBean(), info));
@@ -179,19 +190,21 @@ public class BusinessFlow {
                 if (null == retType) {
                     this.ret = null;
                     return null;
-                //没有找到返回值
-                } else if (null == temporaryValueCache.get(lastRetCode) && null == globalValueCache.get(lastRetCode)) {
-                    throw new BusinessFlowException("业务流["+this.desc+"]找不到返回值,retCode为[" + lastRetCode + "],类型为[" + retType.getName() + "]");
                 }
+                //有返回类型，从全局缓存和临时缓存中获取（优先全局）
                 this.ret = globalValueCache.get(lastRetCode);
                 if (null == this.ret) this.ret = temporaryValueCache.get(lastRetCode);
+                //没有找到返回值
+                if(null == ret){
+                    throw new BusinessFlowException(MyStrUtil.append("业务流[",this.desc,"]找不到返回值,retCode为[",lastRetCode,"],类型为[",retType.getName(),"]"));
+                }
                 return (T) ret;
             }
         } catch (Exception e) {
             //获取执行信息
             TaskInfo info = chainDesc.getInfo();
             chainInfoList.add(new ChainInfo(parameters, chainDesc.getRetBean(), info));
-            throw new BusinessFlowException("业务流["+this.desc+"]执行出错",e);
+            throw new BusinessFlowException(MyStrUtil.append("业务流[",this.desc,"]执行出错"),e);
         }finally {
             this.endTime = LocalDateTime.now();
             if(autoPrintLog) log.info(getInfoJSONLog());
@@ -227,11 +240,6 @@ public class BusinessFlow {
             Parameter parameter = parameters[i];
             //获得注解
             Source source = parameter.getAnnotation(Source.class);
-//            try {
-//                ret[i] = (parameter.getType().isPrimitive()) ? new Object() : parameter.getType().newInstance();
-//            } catch (Exception e) {
-//                throw new BusinessFlowException("param["+parameter.getName()+"]实例化失败",e);
-//            }
 
             //传入全局数据缓存
             if(parameter.getType().equals(GlobalValueCache.class)){
@@ -268,22 +276,6 @@ public class BusinessFlow {
 
     /**
      * -----------------------------------------------------------------------------------------------------------------
-     * 给业务流添加信息,用于打印时显示
-     *
-     * @param key
-     * @param value
-     * @return {@link Object }
-     */
-    public Object putInfo(String key, Object value){
-        return businessFlowInfo.put(key,value);
-    }
-
-    public void putInfo(Map<String,Object> infoMap){
-       businessFlowInfo.putAll(infoMap);
-    }
-
-    /**
-     * -----------------------------------------------------------------------------------------------------------------
      * 获取JSON格式的日志信息
      *
      * @return {@link String }
@@ -310,6 +302,49 @@ public class BusinessFlow {
      */
     public String getVisualJSONLog(){
         return JSONUtil.toJsonPrettyStr(getInfoJSONLog());
+    }
+
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 给业务流添加信息,用于打印时显示
+     *
+     * @param key
+     * @param value
+     * @return {@link Object }
+     */
+    public Object putInfo(String key, Object value){
+        return businessFlowInfo.put(key,value);
+    }
+
+    public void putInfo(Map<String,Object> infoMap){
+        businessFlowInfo.putAll(infoMap);
+    }
+
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 临时和全局缓存的put和get
+     *
+     * @param key
+     * @param value
+     * @return {@link Object }
+     */
+    public Object putTemporary(String key, Object value){
+        return temporaryValueCache.put(key,value);
+    }
+    public void putTemporary(Map<String,Object> dataMap){
+        temporaryValueCache.putAll(dataMap);
+    }
+    public Object getTemporary(String key){
+        return temporaryValueCache.get(key);
+    }
+    public Object putGlobal(String key, Object value){
+        return globalValueCache.put(key,value);
+    }
+    public void putGlobal(Map<String,Object> dataMap){
+        globalValueCache.putAll(dataMap);
+    }
+    public Object getGlobal(String key){
+        return globalValueCache.get(key);
     }
 
     /**

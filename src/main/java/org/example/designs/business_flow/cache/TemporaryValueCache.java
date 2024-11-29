@@ -30,6 +30,9 @@ public class TemporaryValueCache implements IDataSource {
         return temporaryMap.put(key,value);
     }
 
+    public void putAll(Map<String,Object> map){
+        temporaryMap.putAll(map);
+    }
     /**
      * -----------------------------------------------------------------------------------------------------------------
      * 是否有
@@ -80,4 +83,6 @@ public class TemporaryValueCache implements IDataSource {
     public void clear(){
         temporaryMap.clear();
     }
+
+
 }

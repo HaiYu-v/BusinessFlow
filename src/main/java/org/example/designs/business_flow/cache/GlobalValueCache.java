@@ -33,6 +33,10 @@ public class GlobalValueCache implements IDataSource {
         return globalMap.put(key,value);
     }
 
+    public void putAll(Map<String,Object> map){
+        globalMap.putAll(map);
+    }
+
     /**
      * -----------------------------------------------------------------------------------------------------------------
      * 是否有

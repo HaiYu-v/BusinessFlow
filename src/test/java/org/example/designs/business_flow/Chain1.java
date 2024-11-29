@@ -41,6 +41,7 @@ public class Chain1 {
 
     @Chain(desc = "生成一个数字",retCode = "x")
     public int start1() throws InterruptedException {
+        int x = 1/0;
         return 111;
     }
 
