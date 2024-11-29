@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.designs.task.strategy.after.IAfterExecute;
 import org.example.designs.task.strategy.after.fail.Throw;
 import org.example.designs.task.strategy.before.IBeforeExecute;
+import org.example.designs.utils.MyStrUtil;
+
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -33,8 +35,6 @@ public abstract class AbstractTask {
 
 //    //任务ID，唯一
 //    protected Integer id;
-//    //任务名
-//    protected String name;
 //    //优先级
 //    protected Integer sort;
 //    //任务的描述
@@ -81,7 +81,7 @@ public abstract class AbstractTask {
      * @return boolean
      * @throws TaskException
      */
-    public boolean simpleExecute() throws TaskException {
+    public boolean simpleExecute() throws Exception {
         return simpleExecute(null);
     }
 
@@ -93,7 +93,7 @@ public abstract class AbstractTask {
      * @return boolean
      * @throws TaskException
      */
-    public boolean simpleExecute(Map<String,Object> params) throws TaskException {
+    public boolean simpleExecute(Map<String,Object> params) throws Exception {
         //修改状态为"任务开始"
         taskInfo.state= TaskStatusEnum.EXECUTING;
         try {
@@ -106,7 +106,7 @@ public abstract class AbstractTask {
             }
         } catch (Exception e1) {
             taskInfo.state = TaskStatusEnum.EXCEPTION;
-            throw new TaskException(e1);
+            throw e1;
         }
         return true;
     }
@@ -167,7 +167,7 @@ public abstract class AbstractTask {
 
         //判断是否需要抛出异常
         if(e != null && isThrow){
-            throw new TaskException(e);
+            throw new TaskException(MyStrUtil.append("id为[",String.valueOf(taskInfo.id),"]的任务[", taskInfo.desc,"]执行异常"),e);
         }else if(beforeException != null && aftereException != null){
             throw new TaskException((taskInfo.id!=null ? "Task:"+taskInfo.id+", " : "")+"beforeExecute and afterExecute error");
         }else if(beforeException != null){
@@ -232,13 +232,6 @@ public abstract class AbstractTask {
         taskInfo.id = id;
     }
 
-    public String getName() {
-        return taskInfo.name;
-    }
-
-    public void setName(String name) {
-        taskInfo.name = name;
-    }
 
     public Integer getSort() {
         return taskInfo.sort;

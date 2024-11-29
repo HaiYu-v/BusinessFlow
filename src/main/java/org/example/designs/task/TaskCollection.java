@@ -44,12 +44,12 @@ public class TaskCollection<T extends AbstractTask> {
         //执行任务重命名策略
 //        renameStrategy.AutoIncrementRename(task);
 
-        if (tasks.containsKey(task.getName())) {
+        if (tasks.containsKey(task.getDesc())) {
             new BulkExecuteException("任务重名").printStackTrace();
             return null;
         }
-        tasks.put(task.getName(), task);
-        return task.getName();
+        tasks.put(task.getDesc(), task);
+        return task.getDesc();
     }
 
     public int add(Collection<T> tasks) {
@@ -89,7 +89,7 @@ public class TaskCollection<T extends AbstractTask> {
      */
     public String remove(String name) {
         AbstractTask task = tasks.remove(name);
-        return task == null ?null :task.getName();
+        return task == null ?null :task.getDesc();
     }
 
     /**

@@ -18,8 +18,8 @@ public class SelfRename implements IBeforeExecute {
 
     @Override
     public void beforeExecute(AbstractTask task) {
-        if(task.getName() == null || task.getName().isEmpty()){
-            task.setName(prefix + AutoIncrementRename.getStart());
+        if(task.getDesc() == null || task.getDesc().isEmpty()){
+            task.setDesc(prefix + AutoIncrementRename.getStart());
         }
     }
 }

@@ -19,7 +19,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class TaskInfo {
     public String desc;
     public Integer id;
-    public String name;
     public TaskStatusEnum state;
     public Integer sort;
     public LocalDateTime startTime;
@@ -29,10 +28,9 @@ public class TaskInfo {
 
     public TaskInfo() {
     }
-    public TaskInfo(String desc, Integer id, String name, TaskStatusEnum state, Integer sort, LocalDateTime startTime, LocalDateTime endTime, Long runningTime, AtomicInteger countExecute) {
+    public TaskInfo(String desc, Integer id, TaskStatusEnum state, Integer sort, LocalDateTime startTime, LocalDateTime endTime, Long runningTime, AtomicInteger countExecute) {
         this.desc = desc;
         this.id = id;
-        this.name = name;
         this.state = state;
         this.sort = sort;
         this.startTime = startTime;
@@ -44,7 +42,6 @@ public class TaskInfo {
     public TaskInfo(TaskInfo info) {
         this.desc = info.desc;
         this.id = info.id;
-        this.name = info.name;
         this.state = info.state;
         this.sort = info.sort;
         this.startTime = info.startTime;
@@ -66,7 +63,6 @@ public class TaskInfo {
         StringBuilder info = new StringBuilder("{");
         info.append("\"desc\":\"").append(desc == null ? "null" : desc).append("\",");
         info.append("\"id\":\"").append(id == null ? "null" : id).append("\",");
-        info.append("\"name\":\"").append(name == null ? "null" : name).append("\",");
         info.append("\"state\":\"").append(state == null ? "null" : state.getMessage()).append("\",");
         info.append("\"startTime\":\"").append(startTime == null ? "null" : startTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append("\",");
         info.append("\"endTime\":\"").append(endTime == null ? "null" : endTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append("\",");
@@ -87,13 +83,6 @@ public class TaskInfo {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public TaskStatusEnum getState() {
         return state;

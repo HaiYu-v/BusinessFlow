@@ -33,7 +33,7 @@ public class AutoIncrementRename implements IBeforeExecute {
 
     @Override
     public void beforeExecute(AbstractTask task) {
-        task.setName(prefix + start.getAndIncrement());
+        task.setDesc(prefix + start.getAndIncrement());
     }
 
     public static int getStart() {

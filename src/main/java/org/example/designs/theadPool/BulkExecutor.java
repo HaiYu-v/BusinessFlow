@@ -156,8 +156,8 @@ public class BulkExecutor<T extends AbstractTask> {
         } catch (Exception e) {
             throw new BulkExecuteException(e);
         }
-        if(task.getState() == TaskStatusEnum.FAILED) failTasks.add(task.getName());
-        if(task.getState() == TaskStatusEnum.SUCCESS) successTasks.add(task.getName());
+        if(task.getState() == TaskStatusEnum.FAILED) failTasks.add(task.getDesc());
+        if(task.getState() == TaskStatusEnum.SUCCESS) successTasks.add(task.getDesc());
         //任务结束
         this.endTime = LocalDateTime.now();
         return task.getState() == TaskStatusEnum.SUCCESS;

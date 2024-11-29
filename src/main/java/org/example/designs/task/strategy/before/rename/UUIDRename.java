@@ -22,6 +22,6 @@ public class UUIDRename implements IBeforeExecute {
 
     @Override
     public void beforeExecute(AbstractTask task) {
-        task.setName(prefix + UUID.randomUUID());
+        task.setDesc(prefix + UUID.randomUUID());
     }
 }
