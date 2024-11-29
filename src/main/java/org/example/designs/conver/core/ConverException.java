@@ -1,5 +1,7 @@
 package org.example.designs.conver.core;
 
+import org.example.designs.utils.MyStrUtil;
+
 /**
  * 转换异常
  *
@@ -16,10 +18,6 @@ public class ConverException extends Exception{
         super(message);
     }
 
-    public ConverException(Exception e) {
-        super(e);
-    }
-
     /**
      * -----------------------------------------------------------------------------------------------------------------
      * 继承源异常的栈帧和消息
@@ -31,13 +29,12 @@ public class ConverException extends Exception{
      * @param e
      */
     public ConverException(String message, Exception e) {
-        super(new StringBuilder()
-                .append(message)
-                .append("\n-> ")
-                .append(e.getClass().getName())
-                .append(": ")
-                .append(e.getMessage())
-                .toString());
+        super(MyStrUtil.append(
+                message
+                ,"\n-> "
+                ,e.getClass().getName()
+                ,": "
+                ,e.getMessage()));
         this.setStackTrace(e.getStackTrace());
     }
 }

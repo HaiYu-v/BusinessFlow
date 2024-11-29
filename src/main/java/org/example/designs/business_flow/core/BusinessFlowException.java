@@ -15,9 +15,6 @@ public class BusinessFlowException extends Exception{
     public BusinessFlowException(String message){
         super(message);
     }
-    public BusinessFlowException(Exception e){
-        super(e);
-    }
 
     public BusinessFlowException(String message, Throwable e) {
         super(new StringBuilder()

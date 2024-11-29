@@ -1,5 +1,7 @@
 package org.example.designs.task;
 
+import org.example.designs.utils.MyStrUtil;
+
 /**
  * 任务异常
  *
@@ -16,7 +18,14 @@ public class TaskException extends Exception{
         super(message);
     }
 
-    public TaskException(Exception e) {
-        super(e);
+
+    public TaskException(String message, Exception e) {
+        super(MyStrUtil.append(
+                message
+                ,"\n-> "
+                ,e.getClass().getName()
+                ,": "
+                ,e.getMessage()));
+        this.setStackTrace(e.getStackTrace());
     }
 }
