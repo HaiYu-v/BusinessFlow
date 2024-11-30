@@ -167,7 +167,7 @@ public abstract class AbstractTask {
 
         //判断是否需要抛出异常
         if(e != null && isThrow){
-            throw new TaskException(MyStrUtil.append("id为[",String.valueOf(taskInfo.id),"]的任务[", taskInfo.desc,"]执行异常"),e);
+            throw new TaskException(String.format("id为[%d]的任务[%s]执行异常",taskInfo.id,taskInfo.desc),e);
         }else if(beforeException != null && aftereException != null){
             throw new TaskException((taskInfo.id!=null ? "Task:"+taskInfo.id+", " : "")+"beforeExecute and afterExecute error");
         }else if(beforeException != null){

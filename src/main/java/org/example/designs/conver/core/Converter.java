@@ -39,51 +39,62 @@ public class Converter {
      *   - 有rule，则根据rule转换，无rule。
      *   - 无rule，则直接在数据源里匹配key
      *
-     * @param  sourceType  目标bean的类型
+     * @param  targetType  目标bean的类型
      * @param  sourceCode  目标data的code
      * @param  dataRules data转换规则缓存
      * @param  dataSource  数据源
      * @return 转换是否成功
      * @throws Exception
      */
-    public static <T> T conver(Class<T> sourceType, String sourceCode, DataRules dataRules, IDataSource dataSource,Boolean isThrow) throws ConverException {
+    public static <T> T conver(Class<T> targetType, String sourceCode, DataRules dataRules, IDataSource dataSource,Boolean isThrow) throws ConverException {
         try {
+            //数据源为空
+            if(null == dataSource){
+                if(!isThrow) return null;
+                throw new ConverException(String.format("数据源为空"));
+            }
+
             //获取source
             Object sourceCache = dataSource.get(sourceCode);
             if(null == sourceCache){
                 if(!isThrow) return null;
-                throw new ConverException("缓存里找不到sourceCode["+sourceCode+"]");
+                throw new ConverException(String.format("数据源里找不到source[%s]",sourceCode));
             }
             //基础属性
             try {
-                if(sourceType.isPrimitive()){
+                if(targetType.isPrimitive()){
                     return (T) sourceCache;
                 }
             } catch (Exception e) {
                 if(!isThrow) return null;
-                throw new ConverException("sourceCode["+sourceCode+"]无法转成type["+sourceType.getName()+"]",e);
+                throw new ConverException(String.format("基本类型[%s]无法转成[%s]",sourceCache.getClass().getName(),targetType.getName()),e);
             }
 
+            //创建一个对象
             T source = null;
             try {
-                source = sourceType.newInstance();
+                source = targetType.newInstance();
             } catch (Exception e){
                 if(!isThrow) return null;
-                throw new ConverException("class["+sourceType.getName()+"]无法实例化",e);
+                throw new ConverException(String.format("class[%s]无法实例化",targetType.getName()),e);
             }
 
-            //有rule
-            FieldRules fieldRules = dataRules.get(sourceCode);
-            if(null != fieldRules){
-                //同名字段先简单映射
-                BeanUtil.copyProperties(sourceCache,source);
+            //规则集是否为空
+            FieldRules fieldRules = null;
+            if(null != dataRules) fieldRules = dataRules.get(sourceCode);
 
-                List<Field> fields = MyReflectUtil.getFieldsWithGetterAndSetter(sourceType);
+            //有rule
+            if(null != fieldRules){
+//                //同名字段先简单映射
+//                BeanUtil.copyProperties(sourceCache,source);
+
+                List<Field> fields = MyReflectUtil.getFieldsWithGetterAndSetter(targetType);
                 for(Field field:fields){
                     // 设置字段可访问
                     field.setAccessible(true);
                     // 修改字段值
                     ConverDesc converDesc = fieldRules.get(field.getName());
+                    //跳过没有转换规则的字段
                     if(null == converDesc) continue;
                     field.set(source,converDesc.getConverValue(dataSource,field.getType()));
                 }
@@ -97,7 +108,7 @@ public class Converter {
 
         }catch (Exception e) {
             if(!isThrow) return null;
-            throw new ConverException("source[" + sourceCode + "]转换失败",e);
+            throw new ConverException(String.format("source[%s]无法转成[%s]",sourceCode,targetType.getName()),e);
         }
     }
 

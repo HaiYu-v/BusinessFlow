@@ -29,11 +29,9 @@ public class ConverException extends Exception{
      * @param e
      */
     public ConverException(String message, Exception e) {
-        super(MyStrUtil.append(
+        super(String.format("%s\n-> %s: %s",
                 message
-                ,"\n-> "
                 ,e.getClass().getName()
-                ,": "
                 ,e.getMessage()));
         this.setStackTrace(e.getStackTrace());
     }

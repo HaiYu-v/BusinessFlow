@@ -55,7 +55,7 @@ class ApplicationTests  {
     void test2() throws ConverException {
         DataRules beanRuleMap = new DataRules();
         String rule = "{\n" +
-                "    \"targetCode\":\"test2\",\n" +
+                "    \"sourceCode\":\"test1\",\n" +
                 "    \"rules\":{\n" +
                 "        \"id\":{\"type\":\"1\",\"formula\":\"123\"},\n" +
                 "        \"name1\":{\"type\":\"1\",\"formula\":\"#price + 1\"},\n" +
@@ -64,13 +64,12 @@ class ApplicationTests  {
                 "}";
         Converter.analysis(rule,beanRuleMap);
         DataSource dataSource = new DataSource();
-
-        Test1 test1 = new Test1(1, "test1", 2.0);
-        Test2 test2 = new Test2();
-        dataSource.put("test1",test1);
         dataSource.put("price",3);
+        Test1 test1 = new Test1(1, "test1", 2.0);
+        dataSource.put("test1",test1);
+        Test2 test2 = null;
         try {
-//            Converter.conver(test2,"test2",beanRuleMap,dataSource);
+            test2 = Converter.conver(Test2.class,"test1",beanRuleMap,dataSource,true);
         } catch (Exception e) {
             e.printStackTrace();
         }

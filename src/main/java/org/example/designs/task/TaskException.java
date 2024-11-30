@@ -20,11 +20,9 @@ public class TaskException extends Exception{
 
 
     public TaskException(String message, Exception e) {
-        super(MyStrUtil.append(
+        super(String.format("%s\n-> %s: %s",
                 message
-                ,"\n-> "
                 ,e.getClass().getName()
-                ,": "
                 ,e.getMessage()));
         this.setStackTrace(e.getStackTrace());
     }

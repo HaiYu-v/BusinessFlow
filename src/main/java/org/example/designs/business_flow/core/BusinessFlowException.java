@@ -17,13 +17,10 @@ public class BusinessFlowException extends Exception{
     }
 
     public BusinessFlowException(String message, Throwable e) {
-        super(new StringBuilder()
-                .append(message)
-                .append("\n-> ")
-                .append(e.getClass().getName())
-                .append(": ")
-                .append(e.getMessage())
-                .toString());
+        super(String.format("%s\n-> %s: %s",
+                message
+                ,e.getClass().getName()
+                ,e.getMessage()));
         this.setStackTrace(e.getStackTrace());
     }
 }

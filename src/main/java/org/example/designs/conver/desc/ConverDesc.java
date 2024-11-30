@@ -70,22 +70,6 @@ public class ConverDesc {
             }
     }
 
-//    /**
-//     * -----------------------------------------------------------------------------------------------------------------
-//     * 构建方法
-//     *
-//     * @param json converJSON字符串
-//     * @return {@link ConverDesc }
-//     */
-//    public static ConverDesc build(String json){
-//        JSONObject converJSON = JSONUtil.parseObj(json);
-//        String type = converJSON.getStr("type");
-//        String code = converJSON.getStr("code");
-//        String field = converJSON.getStr("field");
-//        String formula = converJSON.getStr("formula");
-//        return new ConverDesc(type,code,field,formula);
-//    }
-
     /**
      * -----------------------------------------------------------------------------------------------------------------
      * 添加Source

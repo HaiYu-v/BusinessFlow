@@ -173,7 +173,7 @@ public class BusinessFlow {
                     try {
                         chainDesc.setParams(importParams(parameters));
                     } catch (Exception e) {
-                        throw new BusinessFlowException(MyStrUtil.append("方法[",chainDesc.getMethod().getName(),"]传参失败"),e);
+                        throw new BusinessFlowException(String.format("方法[%s]传参失败",chainDesc.getMethod().getName()),e);
                     }
                     //获取参数后，清除临时缓存
                     temporaryCache.clear();
@@ -181,7 +181,7 @@ public class BusinessFlow {
                     try {
                         chainDesc.execute();
                     } catch (TaskException e) {
-                        throw new BusinessFlowException(MyStrUtil.append("方法[",chainDesc.getMethod().getName(),"]执行失败"),e);
+                        throw new BusinessFlowException(String.format("方法[%s]执行失败",chainDesc.getMethod().getName()),e);
                     }
                     //获取执行信息
                     TaskInfo info = chainDesc.getInfo();
@@ -200,7 +200,7 @@ public class BusinessFlow {
                 if (null == this.ret) this.ret = temporaryCache.get(lastRetCode);
                 //没有找到返回值
                 if(null == ret){
-                    throw new BusinessFlowException(MyStrUtil.append("业务流[",this.desc,"]找不到返回值,retCode为[",lastRetCode,"],类型为[",retType.getName(),"]"));
+                    throw new BusinessFlowException(String.format("业务流[%s]找不到返回值,retCode为[%s],类型为[%s]",this.desc,lastRetCode,retType.getName()));
                 }
                 return (T) ret;
             }
@@ -208,7 +208,7 @@ public class BusinessFlow {
             //获取执行信息
             TaskInfo info = chainDesc.getInfo();
             chainInfoList.add(new ChainInfo(parameters, chainDesc.getRetBean(), info));
-            throw new BusinessFlowException(MyStrUtil.append("业务流[",this.desc,"]执行出错"),e);
+            throw new BusinessFlowException(String.format("业务流[%s]执行出错",this.desc),e);
         }finally {
             this.endTime = LocalDateTime.now();
             if(autoPrintLog) log.info(getInfoLog());
@@ -271,7 +271,7 @@ public class BusinessFlow {
                     ret[i] = Converter.conver(parameter.getType(),parameter.getName(), ruleCache, temporaryCache,false);
                 }
             } catch (ConverException e) {
-                log.warn("参数["+parameter.getName()+"]转换失败, 现传空值");
+                log.warn(String.format("参数[%s]转换失败, 现传空值",parameter.getName()));
                 ret[i] = null;
             }
         }

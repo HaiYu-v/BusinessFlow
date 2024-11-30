@@ -33,7 +33,7 @@ public class Chain1 {
     }
 
     @Chain(desc = "转换为test2",retCode = "test2",code = "converTest2")
-    public Test2 conver(@Source Test2 test2) throws InterruptedException {
+    public Test1 conver2(@Source("test1") Test1 test2) throws InterruptedException {
         return test2;
     }
 

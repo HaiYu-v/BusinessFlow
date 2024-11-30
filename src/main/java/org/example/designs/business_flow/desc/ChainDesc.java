@@ -111,7 +111,7 @@ import java.util.Map;
                 methods[0].setAccessible(true);
                 return new ChainMethodDesc(methods[0],null,null);
             } catch (Exception e) {
-                throw new BusinessFlowException(MyStrUtil.append("没有找到方法[",methodCode,"]"),e);
+                throw new BusinessFlowException(String.format("没有找到方法[%s]",methodCode),e);
             }
         }
         for (Method method : methods) {
