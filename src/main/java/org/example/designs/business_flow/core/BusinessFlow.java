@@ -17,7 +17,6 @@ import org.example.designs.conver.core.Converter;
 import org.example.designs.business_flow.desc.ChainDesc;
 import org.example.designs.task.TaskException;
 import org.example.designs.task.TaskInfo;
-import org.example.designs.utils.MyStrUtil;
 
 import java.lang.reflect.Parameter;
 import java.time.LocalDateTime;
@@ -173,7 +172,7 @@ public class BusinessFlow {
                     try {
                         chainDesc.setParams(importParams(parameters));
                     } catch (Exception e) {
-                        throw new BusinessFlowException(String.format("方法[%s]传参失败",chainDesc.getMethod().getName()),e);
+                        throw new BusinessFlowException(String.format("业务点[%s][%s]传参失败",chainDesc.getMethod().getName(),chainDesc.getDesc()),e);
                     }
                     //获取参数后，清除临时缓存
                     temporaryCache.clear();
@@ -181,7 +180,7 @@ public class BusinessFlow {
                     try {
                         chainDesc.execute();
                     } catch (TaskException e) {
-                        throw new BusinessFlowException(String.format("方法[%s]执行失败",chainDesc.getMethod().getName()),e);
+                        throw new BusinessFlowException(String.format("业务点[%s][%s]执行失败",chainDesc.getMethod().getName(),chainDesc.getDesc()),e);
                     }
                     //获取执行信息
                     TaskInfo info = chainDesc.getInfo();

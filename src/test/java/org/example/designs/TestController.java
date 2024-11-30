@@ -71,6 +71,7 @@ public class TestController {
             System.out.println(flow.getVisualLog());
             return "成功，红字确认单申请开具成功";
         } catch (BusinessFlowException e) {
+            e.printStackTrace();
             System.out.println(flow.getVisualLog());
 
             return "失败，异常是：...";
