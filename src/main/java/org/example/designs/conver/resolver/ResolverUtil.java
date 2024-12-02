@@ -1,4 +1,4 @@
-package org.example.designs.conver.analysis;
+package org.example.designs.conver.resolver;
 
 import org.example.designs.conver.converter.ConverType;
 import org.example.designs.conver.core.ConverException;
@@ -20,7 +20,7 @@ import java.util.Map;
  * @version 1.0.0
  * @date 2024-11-22
  */
-public class AnalysisUtil {
+public class ResolverUtil {
     /**
      * -----------------------------------------------------------------------------------------------------------------
      * 构建SourceDesc

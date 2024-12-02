@@ -1,8 +1,8 @@
 package org.example.designs.conver.core;
 
 import cn.hutool.core.bean.BeanUtil;
-import org.example.designs.conver.analysis.DefaultAnalyzer;
-import org.example.designs.conver.analysis.IAnalyzer;
+import org.example.designs.conver.resolver.DefaultResolver;
+import org.example.designs.conver.resolver.IResolver;
 import org.example.designs.conver.desc.ConverDesc;
 import org.example.designs.conver.rule.FieldRules;
 import org.example.designs.utils.MyReflectUtil;
@@ -28,7 +28,7 @@ import java.util.List;
  */
 public class Converter {
 
-    private static IAnalyzer analyzer = new DefaultAnalyzer();
+    private static IResolver analyzer = new DefaultResolver();
 
 
     /**
@@ -129,11 +129,11 @@ public class Converter {
         return true;
     }
 
-    public static IAnalyzer getAnalyzer() {
+    public static IResolver getAnalyzer() {
         return analyzer;
     }
 
-    public static void setAnalyzer(IAnalyzer analyzer) {
+    public static void setAnalyzer(IResolver analyzer) {
         Converter.analyzer = analyzer;
     }
 }

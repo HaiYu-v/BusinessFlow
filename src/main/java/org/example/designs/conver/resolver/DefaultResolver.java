@@ -1,4 +1,4 @@
-package org.example.designs.conver.analysis;
+package org.example.designs.conver.resolver;
 
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -25,7 +25,7 @@ import java.util.Map;
  * @version 1.0.0
  * @date 2024-11-22
  */
-public class DefaultAnalyzer implements IAnalyzer{
+public class DefaultResolver implements IResolver {
 
     /**
      * -----------------------------------------------------------------------------------------------------------------
@@ -81,16 +81,16 @@ public class DefaultAnalyzer implements IAnalyzer{
 
             List<SourceDesc> sourceDescList = new ArrayList<>();
             for (String s : list) {
-                sourceDescList.add(AnalysisUtil.buildSourceDesc(s));
+                sourceDescList.add(ResolverUtil.buildSourceDesc(s));
             }
 
             //解析ConverDesc
-            ConverDesc converDesc = AnalysisUtil.buildConverDesc(
+            ConverDesc converDesc = ResolverUtil.buildConverDesc(
                             ConverType.ValueOf(conver.getStr("type"))
                             ,sourceDescList,conver.getStr("formula"));
             fieldMap.put(field,converDesc);
         }
-        FieldRules fieldRules = AnalysisUtil.buildFieldRules(fieldMap);
+        FieldRules fieldRules = ResolverUtil.buildFieldRules(fieldMap);
 
         //添加到dataRules中
         dataRules.put(sourceCode, fieldRules);

@@ -1,8 +1,6 @@
-package org.example.designs.conver.analysis;
+package org.example.designs.conver.resolver;
 
-import org.example.designs.conver.core.ConverException;
 import org.example.designs.conver.core.DataRules;
-import org.example.designs.conver.rule.FieldRules;
 
 /**
  * 解析器接口
@@ -15,7 +13,7 @@ import org.example.designs.conver.rule.FieldRules;
  * @version 1.0.0
  * @date 2024-11-22
  */
-public interface IAnalyzer {
+public interface IResolver {
     /**
      * -----------------------------------------------------------------------------------------------------------------
      * 解析rule
