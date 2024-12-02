@@ -1,6 +1,5 @@
 package org.example.designs.state_machine.core;
 
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
