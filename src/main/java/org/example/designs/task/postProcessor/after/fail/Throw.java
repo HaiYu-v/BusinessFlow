@@ -1,7 +1,7 @@
-package org.example.designs.task.strategy.after.fail;
+package org.example.designs.task.postProcessor.after.fail;
 
 import org.example.designs.task.AbstractTask;
-import org.example.designs.task.strategy.after.IAfterExecute;
+import org.example.designs.task.postProcessor.after.IAfterPostProcessor;
 
 /**
  * @Program: 11.designs
@@ -10,7 +10,7 @@ import org.example.designs.task.strategy.after.IAfterExecute;
  * @Name: TODO
  * @Desc: TODO
  */
-public class Throw implements IAfterExecute {
+public class Throw implements IAfterPostProcessor {
     @Override
     public boolean afterExecute(AbstractTask task, Exception e) {
         return true;

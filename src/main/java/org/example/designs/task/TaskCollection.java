@@ -2,8 +2,8 @@ package org.example.designs.task;
 
 
 
-import org.example.designs.task.strategy.before.IBeforeExecute;
-import org.example.designs.task.strategy.before.rename.SelfRename;
+import org.example.designs.task.postProcessor.before.IBeforePostProcessor;
+import org.example.designs.task.postProcessor.before.rename.SelfRename;
 import org.example.designs.theadPool.BulkExecuteException;
 
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ public class TaskCollection<T extends AbstractTask> {
 
     private HashMap<String, T> tasks;
     //任务的命名策略
-    private IBeforeExecute renameStrategy = new SelfRename();
+    private IBeforePostProcessor renameStrategy = new SelfRename();
 
     public TaskCollection() {
         tasks = new HashMap<>();
@@ -103,11 +103,11 @@ public class TaskCollection<T extends AbstractTask> {
     }
 
 
-    public IBeforeExecute getRenameStrategy() {
+    public IBeforePostProcessor getRenameStrategy() {
         return renameStrategy;
     }
 
-    public void setRenameStrategy(IBeforeExecute renameStrategy) {
+    public void setRenameStrategy(IBeforePostProcessor renameStrategy) {
         this.renameStrategy = renameStrategy;
     }
 

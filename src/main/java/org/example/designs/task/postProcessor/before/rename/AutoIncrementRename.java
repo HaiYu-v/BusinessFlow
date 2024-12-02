@@ -1,7 +1,7 @@
-package org.example.designs.task.strategy.before.rename;
+package org.example.designs.task.postProcessor.before.rename;
 
 import org.example.designs.task.AbstractTask;
-import org.example.designs.task.strategy.before.IBeforeExecute;
+import org.example.designs.task.postProcessor.before.IBeforePostProcessor;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @Name: TODO
  * @Desc: TODO
  */
-public class AutoIncrementRename implements IBeforeExecute {
+public class AutoIncrementRename implements IBeforePostProcessor {
     private static AtomicInteger start = new AtomicInteger(1);
     private String prefix = "Task:";
 

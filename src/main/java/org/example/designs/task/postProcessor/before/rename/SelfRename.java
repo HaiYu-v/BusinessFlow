@@ -1,7 +1,7 @@
-package org.example.designs.task.strategy.before.rename;
+package org.example.designs.task.postProcessor.before.rename;
 
 import org.example.designs.task.AbstractTask;
-import org.example.designs.task.strategy.before.IBeforeExecute;
+import org.example.designs.task.postProcessor.before.IBeforePostProcessor;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @Name: TODO
  * @Desc: TODO
  */
-public class SelfRename implements IBeforeExecute {
+public class SelfRename implements IBeforePostProcessor {
     private static AtomicLong start = new AtomicLong(1L);
     private String prefix = "UnknownTask:";
 

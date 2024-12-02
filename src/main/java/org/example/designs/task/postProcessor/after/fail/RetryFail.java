@@ -1,9 +1,9 @@
-package org.example.designs.task.strategy.after.fail;
+package org.example.designs.task.postProcessor.after.fail;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.designs.task.AbstractTask;
 import org.example.designs.task.TaskStatusEnum;
-import org.example.designs.task.strategy.after.IAfterExecute;
+import org.example.designs.task.postProcessor.after.IAfterPostProcessor;
 
 
 
@@ -15,7 +15,7 @@ import org.example.designs.task.strategy.after.IAfterExecute;
  * @Desc: 任务失败重试
  */
 @Slf4j
-public class RetryFail implements IAfterExecute {
+public class RetryFail implements IAfterPostProcessor {
 
     //重试次数
     private int retryCount = 2;

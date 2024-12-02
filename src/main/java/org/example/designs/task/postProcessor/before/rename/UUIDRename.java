@@ -1,7 +1,7 @@
-package org.example.designs.task.strategy.before.rename;
+package org.example.designs.task.postProcessor.before.rename;
 
 import org.example.designs.task.AbstractTask;
-import org.example.designs.task.strategy.before.IBeforeExecute;
+import org.example.designs.task.postProcessor.before.IBeforePostProcessor;
 
 import java.util.UUID;
 
@@ -12,7 +12,7 @@ import java.util.UUID;
  * @Name: 使用UUID来重命名任务
  * @Desc: TODO
  */
-public class UUIDRename implements IBeforeExecute {
+public class UUIDRename implements IBeforePostProcessor {
     private String prefix = "AbstractTask:";
 
     public UUIDRename(String prefix) {

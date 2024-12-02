@@ -4,9 +4,9 @@ package org.example.designs.task;
 
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.designs.task.strategy.after.IAfterExecute;
-import org.example.designs.task.strategy.after.fail.Throw;
-import org.example.designs.task.strategy.before.IBeforeExecute;
+import org.example.designs.task.postProcessor.after.IAfterPostProcessor;
+import org.example.designs.task.postProcessor.after.fail.Throw;
+import org.example.designs.task.postProcessor.before.IBeforePostProcessor;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -30,27 +30,26 @@ import java.util.concurrent.atomic.AtomicInteger;
 public abstract class AbstractTask {
     //ID自增，保证全局唯一
     private static AtomicInteger NextId  = new AtomicInteger(0);
-    protected TaskInfo taskInfo;
-
-//    //任务ID，唯一
-//    protected Integer id;
-//    //优先级
-//    protected Integer sort;
-//    //任务的描述
-//    protected String desc;
-//    //执行次数
-//    protected AtomicInteger countExecute = new AtomicInteger(0);
-//    //任务状态
-//    protected TaskStatusEnum state = TaskStatusEnum.UN_EXECUTED;
-//    //开始时间
-//    protected LocalDateTime startTime;
-//    //结束时间
-//    protected LocalDateTime endTime;
-
     //执行前的操作
-    protected IBeforeExecute beforeExecute;
+    protected IBeforePostProcessor beforeExecute;
     //执行后的操作
-    protected IAfterExecute afterExecute = new Throw();
+    protected IAfterPostProcessor afterExecute = new Throw();
+    //任务信息
+    protected TaskInfo taskInfo;
+    //      //任务ID，唯一
+    //    protected Integer id;
+    //    //优先级
+    //    protected Integer sort;
+    //    //任务的描述
+    //    protected String desc;
+    //    //执行次数
+    //    protected AtomicInteger countExecute = new AtomicInteger(0);
+    //    //任务状态
+    //    protected TaskStatusEnum state = TaskStatusEnum.UN_EXECUTED;
+    //    //开始时间
+    //    protected LocalDateTime startTime;
+    //    //结束时间
+    //    protected LocalDateTime endTime;
 
 
     public AbstractTask() {
@@ -138,7 +137,6 @@ public abstract class AbstractTask {
         try {
             if(beforeExecute != null)  beforeExecute.beforeExecute(this);
         } catch (Exception ex) {
-//            log.error(ex.getMessage(),ex);
             beforeException = ex;
         }
 
@@ -147,7 +145,6 @@ public abstract class AbstractTask {
         try {
             simpleExecute(params);
         } catch (Exception ex) {
-//            log.error(ex.getMessage(),ex);
             e = ex;
         }
 
@@ -157,7 +154,6 @@ public abstract class AbstractTask {
         try {
            if (null != afterExecute) isThrow = afterExecute.afterExecute(this,e);
         } catch (Exception ex) {
-//            log.error(ex.getMessage(),ex);
            aftereException = ex;
         }
 
@@ -203,19 +199,19 @@ public abstract class AbstractTask {
     }
 
 
-    public IBeforeExecute getBeforeExecute() {
+    public IBeforePostProcessor getBeforeExecute() {
         return beforeExecute;
     }
 
-    public void setBeforeExecute(IBeforeExecute beforeExecute) {
+    public void setBeforeExecute(IBeforePostProcessor beforeExecute) {
         this.beforeExecute = beforeExecute;
     }
 
-    public IAfterExecute getAfterExecute() {
+    public IAfterPostProcessor getAfterExecute() {
         return afterExecute;
     }
 
-    public void setAfterExecute(IAfterExecute afterExecute) {
+    public void setAfterExecute(IAfterPostProcessor afterExecute) {
         this.afterExecute = afterExecute;
     }
 
