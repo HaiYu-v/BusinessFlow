@@ -4,10 +4,10 @@ package org.example.designs.theadPool;
 
 import org.example.designs.task.AbstractTask;
 import org.example.designs.task.TaskStatusEnum;
-import org.example.designs.task.strategy.after.IAfterExecute;
-import org.example.designs.task.strategy.after.fail.RetryFail;
-import org.example.designs.task.strategy.before.IBeforeExecute;
-import org.example.designs.task.strategy.before.rename.AutoIncrementRename;
+import org.example.designs.task.postProcessor.after.IAfterPostProcessor;
+import org.example.designs.task.postProcessor.after.fail.RetryFail;
+import org.example.designs.task.postProcessor.before.IBeforePostProcessor;
+import org.example.designs.task.postProcessor.before.rename.AutoIncrementRename;
 import org.example.designs.task.TaskCollection;
 
 import java.time.LocalDateTime;
@@ -40,9 +40,9 @@ public class BulkExecutor<T extends AbstractTask> {
     //重试任务集合
     private List<String> retryTasks = new ArrayList<>();
     //任务执行前策略
-    private IBeforeExecute beforeStrategy = new AutoIncrementRename();
+    private IBeforePostProcessor beforeStrategy = new AutoIncrementRename();
     //任务执行失败后的策略
-    private IAfterExecute errorStrategy = new RetryFail();
+    private IAfterPostProcessor errorStrategy = new RetryFail();
 
     /** ---------------------------------------------------------------------------------------------------------------------
      * @Method  : 构造方法
@@ -275,19 +275,19 @@ public class BulkExecutor<T extends AbstractTask> {
         this.retryTasks = retryTasks;
     }
 
-    public IBeforeExecute getBeforeStrategy() {
+    public IBeforePostProcessor getBeforeStrategy() {
         return beforeStrategy;
     }
 
-    public void setBeforeStrategy(IBeforeExecute beforeStrategy) {
+    public void setBeforeStrategy(IBeforePostProcessor beforeStrategy) {
         this.beforeStrategy = beforeStrategy;
     }
 
-    public IAfterExecute getErrorStrategy() {
+    public IAfterPostProcessor getErrorStrategy() {
         return errorStrategy;
     }
 
-    public void setErrorStrategy(IAfterExecute errorStrategy) {
+    public void setErrorStrategy(IAfterPostProcessor errorStrategy) {
         this.errorStrategy = errorStrategy;
     }
 }

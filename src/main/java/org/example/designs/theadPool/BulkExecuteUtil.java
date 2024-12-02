@@ -2,7 +2,7 @@ package org.example.designs.theadPool;
 
 
 import org.example.designs.task.AbstractTask;
-import org.example.designs.task.strategy.after.IAfterExecute;
+import org.example.designs.task.postProcessor.after.IAfterPostProcessor;
 import org.example.designs.task.TaskCollection;
 
 /**
@@ -22,14 +22,14 @@ public class BulkExecuteUtil {
         return new BulkExecutor();
     }
 
-    public static <T extends AbstractTask> BulkExecutor<T> getExecutor(TaskCollection<T> taskCollection, IAfterExecute strategy){
+    public static <T extends AbstractTask> BulkExecutor<T> getExecutor(TaskCollection<T> taskCollection, IAfterPostProcessor strategy){
         BulkExecutor<T> executor = new BulkExecutor<T>(taskCollection);
         executor.setErrorStrategy(strategy);
         return executor;
     }
 
 
-    public static BulkExecutor getExecutor(IAfterExecute strategy){
+    public static BulkExecutor getExecutor(IAfterPostProcessor strategy){
         BulkExecutor executor = new BulkExecutor();
         executor.setErrorStrategy(strategy);
         return executor;
