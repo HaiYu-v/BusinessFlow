@@ -17,7 +17,6 @@ import org.example.designs.conver.core.Converter;
 import org.example.designs.business_flow.desc.ChainDesc;
 import org.example.designs.task.TaskException;
 import org.example.designs.task.TaskInfo;
-
 import java.lang.reflect.Parameter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -67,8 +66,6 @@ public class BusinessFlow {
     private LocalDateTime startTime;
     //结束时间
     private LocalDateTime endTime;
-    //业务流最终返回值
-    private Object ret;
     //业务执行信息列表
     private List<ChainInfo> chainInfoList;
 
@@ -153,21 +150,22 @@ public class BusinessFlow {
      * -----------------------------------------------------------------------------------------------------------------
      * 启动业务流（有返回值）
      *
-     * @param retType 业务流返回值类型
      * @return {@link BusinessFlow }
      * @throws BusinessFlowException Data异常
      */
-    public <T> T start(Class<T> retType) throws BusinessFlowException {
+    public BusinessFlow start() throws BusinessFlowException {
         ChainDesc chainDesc = null;
         Parameter[] parameters = null;
         try {
             synchronized (startupShutdownMonitor) {
                 this.startTime = LocalDateTime.now();
-                String lastRetCode = null;
                 while (!chainQueue.isEmpty()) {
+                    //获得业务点
                     chainDesc = chainQueue.poll();
+
                     //业务点所需参数
                     parameters = chainDesc.getParameters();
+
                     //参数赋值
                     try {
                         chainDesc.setParams(importParams(parameters));
@@ -176,32 +174,24 @@ public class BusinessFlow {
                     }
                     //获取参数后，清除临时缓存
                     temporaryCache.clear();
+
                     //执行业务点,本质上是执行chainDesc的invoke()：execute() -> executeFunction() -> invoke()
                     try {
                         chainDesc.execute();
                     } catch (TaskException e) {
                         throw new BusinessFlowException(String.format("业务点[%s][%s]执行失败",chainDesc.getMethod().getName(),chainDesc.getDesc()),e);
                     }
+
                     //获取执行信息
                     TaskInfo info = chainDesc.getInfo();
                     chainInfoList.add(new ChainInfo(parameters, chainDesc.getRetBean(), info));
-                    //最后返回值的Code
-                    lastRetCode = chainDesc.getRetCode();
+
                     //返回值送入临时缓存
-                    temporaryCache.put(chainDesc.getRetCode(), chainDesc.getRetBean());
+                    if(null != chainDesc.getRetBean()){
+                        temporaryCache.put(chainDesc.getRetCode(), chainDesc.getRetBean());
+                    }
                 }
-                //是否有返回类型,没有就代表不需要返回值
-                if (null == retType) {
-                    this.ret = null;
-                    return null;
-                }
-                //有返回类型，从全局缓存和临时缓存中获取（优先全局）
-                if (null == this.ret) this.ret = temporaryCache.get(lastRetCode);
-                //没有找到返回值
-                if(null == ret){
-                    throw new BusinessFlowException(String.format("业务流[%s]找不到返回值,retCode为[%s],类型为[%s]",this.desc,lastRetCode,retType.getName()));
-                }
-                return (T) ret;
+                return this;
             }
         } catch (Exception e) {
             //获取执行信息
@@ -215,15 +205,7 @@ public class BusinessFlow {
         }
     }
 
-    /**
-     * -----------------------------------------------------------------------------------------------------------------
-     * 启动业务流（无返回值）
-     *
-     * @throws BusinessFlowException Data异常
-     */
-    public void start() throws BusinessFlowException {
-            start(null);
-    }
+
 
     /**
      * -----------------------------------------------------------------------------------------------------------------
@@ -289,7 +271,6 @@ public class BusinessFlow {
         businessFlowInfo.put("startTime",startTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         businessFlowInfo.put("endTime",endTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         businessFlowInfo.put("runningTime", ChronoUnit.MILLIS.between(startTime, endTime));
-        businessFlowInfo.put("ret",(null == this.ret?"null":ret));
         businessFlowInfo.put("chainInfo", chainInfoList);
         JSONConfig config = JSONConfig.create()
                 .setDateFormat("yyyy-MM-dd HH:mm:ss")
@@ -447,13 +428,7 @@ public class BusinessFlow {
         this.endTime = endTime;
     }
 
-    public Object getRet() {
-        return ret;
-    }
 
-    public void setRet(Object ret) {
-        this.ret = ret;
-    }
 
     public boolean isAutoPrintLog() {
         return autoPrintLog;
@@ -469,5 +444,21 @@ public class BusinessFlow {
 
     public void setAutoPrintVisualLog(boolean autoPrintVisualLog) {
         this.autoPrintVisualLog = autoPrintVisualLog;
+    }
+
+    public GlobalCache getGlobalCache() {
+        return globalCache;
+    }
+
+    public void setGlobalCache(GlobalCache globalCache) {
+        this.globalCache = globalCache;
+    }
+
+    public TemporaryCache getTemporaryCache() {
+        return temporaryCache;
+    }
+
+    public void setTemporaryCache(TemporaryCache temporaryCache) {
+        this.temporaryCache = temporaryCache;
     }
 }
