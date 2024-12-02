@@ -19,12 +19,12 @@ import org.springframework.stereotype.Service;
 public class VtChBillService {
 
     @Chain(desc = "Dto转销项开票明细",retCode = "vtChBill")
-    public int converDto() throws InterruptedException {
+    public void converDto() throws InterruptedException {
 //        throw new InterruptedException("任务失败");
 
-        Thread.sleep(300);
-        System.out.println("converDto");
-        return 1;
+//        Thread.sleep(300);
+//        System.out.println("converDto");
+//        return 1;
     }
 
     @Chain(desc = "数电红字确认单申请主表",retCode = "redApply")
@@ -39,7 +39,6 @@ public class VtChBillService {
     public void converRedApply_B() throws InterruptedException {
         Thread.sleep(300);
         System.out.println("converRedApply_B");
-
     }
 
     @Chain(desc = "数电红字确认单申请主子表合并",retCode = "redApplyAsso")
