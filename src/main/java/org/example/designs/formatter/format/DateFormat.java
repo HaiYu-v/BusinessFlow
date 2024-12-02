@@ -1,4 +1,4 @@
-package org.example.designs.format.formatter;
+package org.example.designs.formatter.format;
 
 /**
  * 日期格式器
@@ -7,6 +7,7 @@ package org.example.designs.format.formatter;
  *     1.年，月，日，时，分，秒
  *     2.年月日是否要[-]
  *     3.时分秒是否要[:]
+ *     4.是否要转成字符串
  * </p>
  *
  * @author HaiYu

@@ -1,4 +1,4 @@
-package org.example.designs.format.formatter;
+package org.example.designs.formatter.format;
 
 /**
  * 格式器接口

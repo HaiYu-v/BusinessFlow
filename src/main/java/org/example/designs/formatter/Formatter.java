@@ -1,6 +1,6 @@
-package org.example.designs.format;
+package org.example.designs.formatter;
 
-import org.example.designs.format.formatter.IFormat;
+import org.example.designs.formatter.format.IFormat;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +11,7 @@ import java.util.Map;
  * <p>
  *     1.数字格式化
  *     2.日期格式化
- *     3.字符串格式化
+ *     不抛异常，只返回空值
  * </p>
  *
  * @author HaiYu
@@ -26,7 +26,8 @@ public class Formatter {
         this.formatMap = new HashMap<>();
     }
 
-    public void register(String desc, Class<?> dataType , Class<?> retType, IFormat format) {
+    public void register(String desc, Class<?> retType) {
+
     }
 
     /**
