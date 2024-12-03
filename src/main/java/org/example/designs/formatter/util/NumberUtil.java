@@ -126,19 +126,7 @@ public class NumberUtil {
         return str.matches("\\d+(\\.\\d+)?%");
     }
 
-    /**
-     * -----------------------------------------------------------------------------------------------------------------
-     * 是不是浮点数
-     *
-     * @param str
-     * @return {@link Boolean }
-     */
-    public static Boolean isFloatingPoint (String str){
-        if (str == null || str.isEmpty()) {
-            return false;
-        }
-        return str.matches("[+-]?(\\d+(\\.\\d*)?|\\.\\d+)([eE][+-]?\\d+)?");
-    }
+
 
 
 }

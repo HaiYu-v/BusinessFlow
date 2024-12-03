@@ -1,5 +1,6 @@
 package org.example.designs.formatter.util;
 
+import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
@@ -15,18 +16,38 @@ import java.text.ParseException;
  * @date 2024-12-03
  */
 public class TypeUtil {
+    private boolean isCeil = true;
+    private boolean isRound = false;
     //String -> Integer
-    public static Integer toInt(String data){
+    public static Integer toInt(String data,boolean isCeil){
         if(isPercentage(data)){
             Double n = parsePercentageWithNumberFormat(data);
-            return (null == n ? null : n.intValue());
+            return toInt(n,isCeil);
+        }
+
+        if(isFloatingPoint(data)){
+            Double n = Double.valueOf(data);
+            return toInt(n,isCeil);
         }
         return Integer.valueOf(data);
     }
 
     //Number -> Integer
-    public static Integer toInt(Number data){
+    public static Integer toInt(Number data,boolean isCeil){
+        int ret = data.intValue();
+
+        if((data instanceof Double) || (data instanceof Float) || (data instanceof BigDecimal)){
+
+        }
         return data.intValue();
+    }
+
+    public static Double toDouble(String data,boolean isCeil){
+
+    }
+
+    public static Double toDouble(Number data,boolean isCeil){
+
     }
 
     /**
@@ -43,6 +64,13 @@ public class TypeUtil {
         return str.matches("\\d+(\\.\\d+)?%");
     }
 
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 百分比字符串转Double
+     *
+     * @param percentageStr
+     * @return {@link Double }
+     */
     public static Double parsePercentageWithNumberFormat(String percentageStr) {
         try {
             // 创建百分比解析器
@@ -55,5 +83,19 @@ public class TypeUtil {
             // 处理解析错误
             return null;
         }
+    }
+
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 浮点数字符串转Double
+     *
+     * @param str
+     * @return {@link Boolean }
+     */
+    public static Boolean isFloatingPoint (String str){
+        if (str == null || str.isEmpty()) {
+            return false;
+        }
+        return str.matches("[+-]?(\\d+(\\.\\d*)?|\\.\\d+)([eE][+-]?\\d+)?");
     }
 }
