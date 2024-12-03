@@ -82,11 +82,11 @@ public class NumberUtil {
             return (R) Double.valueOf(data);
         }
 
-//        if(type.equals(BigDecimal.class)){
+//        if(type.equals(BigDecimalFormat.class)){
 //            //处理百分比
 //            if(isPercentage(data)){
 //                data = data.substring(0,data.length()-1);
-//                return (R) (Long.valueOf(new BigDecimal(data).divide(100)));
+//                return (R) (Long.valueOf(new BigDecimalFormat(data).divide(100)));
 //            }
 //            //处理浮点数
 //            if(isFloatingPoint(data)){

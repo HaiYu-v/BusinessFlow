@@ -11,6 +11,12 @@ package org.example.designs.formatter.format;
  * @version 1.0.0
  * @date 2024-12-02
  */
-public class IntegerFormat {
+public class IntegerFormat implements IFormat<Integer, Integer> {
+
+    @Override
+    public Integer format(Integer data) {
+        return 0;
+    }
+
 
 }

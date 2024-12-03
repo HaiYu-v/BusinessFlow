@@ -1,5 +1,7 @@
 package org.example.designs.formatter.format;
 
+import java.time.LocalDate;
+
 /**
  * 日期格式器
  *
@@ -14,5 +16,9 @@ package org.example.designs.formatter.format;
  * @version 1.0.0
  * @date 2024-12-02
  */
-public class DateFormat {
+public class DateFormat implements IFormat<LocalDate, LocalDate>{
+    @Override
+    public LocalDate format(LocalDate data) {
+        return null;
+    }
 }
