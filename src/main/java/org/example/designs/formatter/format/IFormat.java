@@ -1,5 +1,7 @@
 package org.example.designs.formatter.format;
 
+import org.example.designs.formatter.FormatException;
+
 /**
  * 格式器接口
  *
@@ -12,5 +14,5 @@ package org.example.designs.formatter.format;
  * @create 2024-12-02
  */
 public interface IFormat<T,R> {
-    R format(T data);
+    R format(T data) throws FormatException;
 }

@@ -115,4 +115,33 @@ public class NumberUtil {
         }
         return true;
     }
+
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 整数取整
+     *
+     * @param number
+     * @param digits
+     * @return {@link Integer }
+     */
+    public static Integer IntegerRound(Integer number, Integer digits) {
+        // 处理边界情况
+        if (digits <= 0) {
+            return 0;
+        }
+
+        // 最大可保留位数
+        int maxDigits = String.valueOf(Math.abs(number)).length();
+
+        // 如果要求保留位数大于实际位数，返回原数
+        if (digits >= maxDigits) {
+            return number;
+        }
+
+        // 计算截断因子
+        long factor = (long) Math.pow(10, maxDigits - digits);
+
+        // 安全的截断处理
+        return (int) ((number / factor) * factor);
+    }
 }
