@@ -23,9 +23,7 @@ public class TestController {
         try {
             flow = BusinessFlow
                     //整个业务流的描述
-                    .build("数电红字确认单申请开具");
-
-            boolean isSuccess = flow
+                    .build("数电红字确认单申请开具")
                     //add参数：方法提供bean（业务处理者），方法名（处理方法），描述，方法返回值key
                     .add(VtChBillService.class, "converDto"
                             , "Dto转销项开票明细", "vtChBill")
@@ -38,11 +36,8 @@ public class TestController {
                     .add(AelecbillRedapplyService.class, "redBill_upLoad"
                             , "上传红字确认单", "isSuccess")
                     //启动业务流，并输入此业务流的返回类型
-                    .start(Boolean.class);
+                    .start();
             System.out.println(flow.getInfoLog());
-            if (isSuccess) {
-                return "成功，红字确认单申请开具成功";
-            }
             return "失败，失败原因是：...";
         } catch (BusinessFlowException e) {
             System.out.println(flow.getVisualLog());

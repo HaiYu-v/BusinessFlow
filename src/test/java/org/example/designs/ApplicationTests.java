@@ -15,7 +15,7 @@ import org.example.designs.conver.Test2;
 import org.example.designs.conver.core.ConverException;
 import org.example.designs.conver.core.Converter;
 import org.example.designs.conver.core.DataRules;
-import org.example.designs.task.strategy.after.fail.UnThrow;
+import org.example.designs.task.postProcessor.after.fail.UnThrow;
 import org.example.designs.utils.MyReflectUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -116,27 +116,30 @@ class ApplicationTests  {
     }
 
     @Test
-    void test5(){
-        BusinessFlow businessFlow = BusinessFlow.build("基本类型转换测试");
+    void test5() {
 
-        String str = null;
+
+        BusinessFlow businessFlow = null;
         try {
-            str = businessFlow
+            businessFlow = BusinessFlow
+                    .build("基本类型转换测试")
                     .add("匿名类测试", "ret", new IChain() {
                         @Override
                         public Object method(TemporaryCache temporaryCache, GlobalCache globalCache) {
                             return "匿名类执行";
                         }
-                    })
+                    });
 //                    .add(Chain1.class, "start1")
 //                    .add(Chain1.class, "conver1")
-                    .start(String.class);
+
         } catch (BusinessFlowException e) {
             e.printStackTrace();
+        } finally {
+            System.out.println(businessFlow.getVisualLog());
         }
-        System.out.println(businessFlow.getVisualLog());
-        System.out.println(str);
     }
+
+
 
 
     private String getMethodName(MyFunction myFunction){
