@@ -1,6 +1,7 @@
 package org.example.designs.formatter.format.number;
 
 import org.example.designs.formatter.FormatException;
+import org.example.designs.formatter.format.AbsFormat;
 import org.example.designs.formatter.format.IFormat;
 import org.example.designs.formatter.util.NumberUtil;
 
@@ -18,22 +19,14 @@ import java.math.RoundingMode;
  * @version 1.0.0
  * @date 2024-12-04
  */
-public abstract class NumberFormat<F extends NumberFormat,R extends Number> implements IFormat<Object,R> {
+public abstract class NumberFormat<F extends NumberFormat,R extends Number>
+        extends AbsFormat<F,R>
+        implements IFormat<Object,R> {
 
-    //可以为null
-    protected boolean butNull = false;
-    //支持字符串
-    protected boolean unString = false;
     //这是负数
     protected boolean toNegative = false;
     //这是正数
     protected boolean toPositive = false;
-    //最大值
-    protected R max = null;
-    //最小值
-    protected R min = null;
-    //默认值
-    protected R defaultValue = null;
     //整数位数（默认十位）
     protected int digit = 10;
     //直接取整（默认）
@@ -60,7 +53,10 @@ public abstract class NumberFormat<F extends NumberFormat,R extends Number> impl
             String str = (String) data;
             if(!str.isEmpty()) ret = formatString(str);
         }else {
-            throw new FormatException(String.format("不支持类型[%s]",data.getClass().getName()));
+            if(null == data && butNull){
+                return null;
+            }
+            throw new FormatException(String.format("不支持类型[%s]",(null == data?"null":data.getClass().getName())));
         }
 
         //判断为空
@@ -81,17 +77,7 @@ public abstract class NumberFormat<F extends NumberFormat,R extends Number> impl
     protected abstract R formatFloat(Float data) throws FormatException;
 
 
-    //可为null
-    public F butNull(){
-        this.butNull = true;
-        return (F) this;
-    }
 
-    //不支持字符串
-    public F unString(){
-        this.unString = true;
-        return (F) this;
-    }
 
     //转正数
     public F toPositive(){
@@ -102,24 +88,6 @@ public abstract class NumberFormat<F extends NumberFormat,R extends Number> impl
     //转负数
     public F toNegative(){
         this.toNegative = true;
-        return (F) this;
-    }
-
-    //最大值
-    public F max(R max){
-        this.max = max;
-        return (F) this;
-    }
-
-    //最小值
-    public F min(R min){
-        this.min = min;
-        return (F) this;
-    }
-
-    //默认值
-    public F defaultValue(R defaultValue){
-        this.defaultValue = defaultValue;
         return (F) this;
     }
 

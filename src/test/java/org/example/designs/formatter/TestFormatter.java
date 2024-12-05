@@ -1,10 +1,19 @@
 package org.example.designs.formatter;
 
-import org.example.designs.formatter.format.IntegerFormat;
+import org.example.designs.formatter.format.dateTime.TimeFormat;
+import org.example.designs.formatter.format.number.BigDecimalFormat;
+import org.example.designs.formatter.format.dateTime.DateTimeFormat;
+import org.example.designs.formatter.format.number.DoubleFormat;
+import org.example.designs.formatter.format.number.IntegerFormat;
+import org.example.designs.formatter.util.NumberUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 
 /**
  * 格式器的测试类
@@ -19,21 +28,132 @@ import java.math.BigDecimal;
  */
 @SpringBootTest
 public class TestFormatter {
+
+    @Test
+    void NumberUtilTest(){
+        System.out.println(NumberUtil.IntegerRound(153, 12, RoundingMode.HALF_UP));
+        System.out.println(Double.MAX_VALUE);
+    }
+
     @Test
     void intTest(){
-        System.out.println(IntegerFormat.build().format(null));
-        System.out.println(IntegerFormat.build().format(123));
-        System.out.println(IntegerFormat.build().format(123L));
-        System.out.println(IntegerFormat.build().format(234.5F));
-        System.out.println(IntegerFormat.build().format(35.523424));
-        System.out.println(IntegerFormat.build().format(new BigDecimal(123.2332535235235252352352)));
-        System.out.println(IntegerFormat.build().format("23424"));
-        System.out.println(IntegerFormat.build().format("23424.234"));
-        System.out.println(IntegerFormat.build().format("117%"));
+        try {
+            //double
+            System.out.println("===================double==========================");
+            System.out.println(IntegerFormat.build().format(123L));
+            System.out.println(IntegerFormat.build().format(13.5F));
+            System.out.println(IntegerFormat.build().format(2147483646.523424));
+            System.out.println(IntegerFormat.build().format(new BigDecimal(123.2332535235235252352352)));
+            //string
+            System.out.println("===================string==========================");
+            System.out.println(IntegerFormat.build().format("2147483646.523424"));
+            System.out.println(IntegerFormat.build().digit(5).format("23424.234"));
+            System.out.println(IntegerFormat.build().toNegative().format("117%"));
+            System.out.println(IntegerFormat.build().isNatural().format("242.234"));
+            System.out.println(IntegerFormat.build().isNatural().scale(4).format("242.234"));
+            //integer
+            System.out.println("===================integer==========================");
+            System.out.println(IntegerFormat.build().format(null));
+            System.out.println(IntegerFormat.build().scale(2).digit(10).format(123));
+            System.out.println(IntegerFormat.build().toPositive().format(-123));
+
+
+        } catch (FormatException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
     void doubleTest(){
+        try {
+            //double
+            System.out.println("===================double==========================");
+            System.out.println(BigDecimalFormat.build().scale(3,2).format(123.244));
 
+            //整数和小数位
+            System.out.println(DoubleFormat.build().scale(2).digit(3).format(123.244));
+            //三种约小数的方式
+            System.out.println(DoubleFormat.build().scale(2).format(123.245));
+            System.out.println(DoubleFormat.build().isRound(2).format(123.244));
+            System.out.println(DoubleFormat.build().isRound(2).format(123.245));
+            System.out.println(DoubleFormat.build().isCeil(2).format(123.245));
+            //字符串
+            System.out.println("===================string==========================");
+            //整数和小数位
+            System.out.println(DoubleFormat.build().scale(2).digit(3).format("123.244"));
+            //三种约小数的方式
+            System.out.println(DoubleFormat.build().scale(2).format("123.245"));
+            System.out.println(DoubleFormat.build().isRound(2).format("123.244"));
+            System.out.println(DoubleFormat.build().isRound(2).format("123.245"));
+            System.out.println(DoubleFormat.build().isCeil(2).format("123.245"));
+            System.out.println(DoubleFormat.build().isCeil(2).format("24.5%"));
+
+        } catch (FormatException e) {
+            e.printStackTrace();
+        }
     }
+
+    @Test
+    void bigDecimalTest(){
+        try {
+            //double
+            System.out.println("===================double==========================");
+            //整数和小数位
+            System.out.println(BigDecimalFormat.build().scale(3,2).format(123.244));
+            System.out.println(BigDecimalFormat.build().scale(2).digit(3).format(123.244));
+            //三种约小数的方式
+            System.out.println(BigDecimalFormat.build().scale(2).format(123.245));
+            System.out.println(BigDecimalFormat.build().isRound(2).format(123.244));
+            System.out.println(BigDecimalFormat.build().isRound(2).format(123.245));
+            System.out.println(BigDecimalFormat.build().isCeil(2).format(123.245));
+            //字符串
+            System.out.println("===================string==========================");
+            //整数和小数位
+            System.out.println(BigDecimalFormat.build().scale(2).digit(3).format("123.244"));
+            //三种约小数的方式
+            System.out.println(BigDecimalFormat.build().scale(2).format("123.245"));
+            System.out.println(BigDecimalFormat.build().isRound(2).format("123.244"));
+            System.out.println(BigDecimalFormat.build().isRound(2).format("123.245"));
+            System.out.println(BigDecimalFormat.build().isCeil(2).format("123.245"));
+            System.out.println(BigDecimalFormat.build().isCeil(2).format("24.5%"));
+
+        } catch (FormatException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void DateTimeTest(){
+        try {
+            //date
+            System.out.println("===================date==========================");
+            System.out.println(DateTimeFormat.build().format(LocalDate.now()));
+            System.out.println(DateTimeFormat.build().format(LocalDateTime.now()));
+            //string
+            System.out.println("===================string==========================");
+            System.out.println(DateTimeFormat.build().format("2024-12-03"));
+            System.out.println(DateTimeFormat.build().format("2024-12-03 12:12:12"));
+        }catch (FormatException e){
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void TimeTest(){
+        try {
+            //date
+            System.out.println("===================date==========================");
+            System.out.println(TimeFormat.build().format(LocalDate.now()));
+            System.out.println(TimeFormat.build().toStr(LocalDate.now()));
+            System.out.println(TimeFormat.build().toStr(LocalDateTime.now()));
+            System.out.println(TimeFormat.build().strFormat("hh:mm:ss").toStr(LocalDateTime.now()));
+            //string
+            System.out.println("===================string==========================");
+
+        }catch (FormatException e){
+            e.printStackTrace();
+        }
+    }
+
+
 }

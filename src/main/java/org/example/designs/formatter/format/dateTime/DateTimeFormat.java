@@ -24,7 +24,6 @@ import java.util.Date;
  * @date 2024-12-02
  */
 public class DateTimeFormat implements IFormat<Object, LocalDateTime> {
-    private
 
     //可以为null
     private boolean butNull = false;
@@ -116,22 +115,23 @@ public class DateTimeFormat implements IFormat<Object, LocalDateTime> {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd HHmmss");
         DateTimeFormatter dateTimeWithDashFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-        // 根据输入字符串匹配对应的格式并解析为 LocalDateTime
-        if (input.matches(datePattern)) {
-            return LocalDateTime.parse(input + "000000", dateTimeFormatter); // 日期+时间补零
-        } else if (input.matches(dateWithDashPattern)) {
-            return LocalDateTime.parse(input + " 000000", dateTimeWithDashFormatter); // 日期+时间补零
-        } else if (input.matches(timePattern)) {
-            return LocalDateTime.parse("1970-01-01 " + input, dateTimeFormatter); // 时间+默认日期
-        } else if (input.matches(timeWithColonPattern)) {
-            return LocalDateTime.parse("1970-01-01 " + input, dateTimeWithDashFormatter); // 时间+默认日期
-        } else if (input.matches(dateTimePattern)) {
-            return LocalDateTime.parse(input, dateTimeFormatter); // 日期时间格式
-        } else if (input.matches(dateTimeWithDashPattern)) {
-            return LocalDateTime.parse(input, dateTimeWithDashFormatter); // 日期时间格式
-        } else {
-            throw new IllegalArgumentException("Invalid date/time format");
-        }
+//        // 根据输入字符串匹配对应的格式并解析为 LocalDateTime
+//        if (input.matches(datePattern)) {
+//            return LocalDateTime.parse(input + "000000", dateTimeFormatter); // 日期+时间补零
+//        } else if (input.matches(dateWithDashPattern)) {
+//            return LocalDateTime.parse(input + " 000000", dateTimeWithDashFormatter); // 日期+时间补零
+//        } else if (input.matches(timePattern)) {
+//            return LocalDateTime.parse("1970-01-01 " + input, dateTimeFormatter); // 时间+默认日期
+//        } else if (input.matches(timeWithColonPattern)) {
+//            return LocalDateTime.parse("1970-01-01 " + input, dateTimeWithDashFormatter); // 时间+默认日期
+//        } else if (input.matches(dateTimePattern)) {
+//            return LocalDateTime.parse(input, dateTimeFormatter); // 日期时间格式
+//        } else if (input.matches(dateTimeWithDashPattern)) {
+//            return LocalDateTime.parse(input, dateTimeWithDashFormatter); // 日期时间格式
+//        } else {
+//            throw new IllegalArgumentException("Invalid date/time format");
+//        }
+        return null;
     }
 
     private LocalDateTime formatInt(Integer data) throws FormatException{
