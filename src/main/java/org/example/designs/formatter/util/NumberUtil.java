@@ -1,5 +1,7 @@
 package org.example.designs.formatter.util;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
@@ -64,7 +66,7 @@ public class NumberUtil {
         if (str == null || str.isEmpty()) {
             return false;
         }
-        return str.matches("^[-+]?((\\d+\\.?\\d*)|(\\.\\d+))([eE][-+]?\\d+)?$");
+        return str.matches("^[-+]?(\\d+\\.\\d*)([eE][-+]?\\d+)?$");
     }
 
     /**
@@ -76,7 +78,7 @@ public class NumberUtil {
      */
     public static boolean isInteger(String str) {
         if (str == null) return false;
-        return str.matches("^[+-]?\\d+$");
+        return str.matches("^[-+]?\\d{1,10}$");
     }
 
     /**
@@ -121,27 +123,39 @@ public class NumberUtil {
      * 整数取整
      *
      * @param number
-     * @param digits
+     * @param scale
      * @return {@link Integer }
      */
-    public static Integer IntegerRound(Integer number, Integer digits) {
-        // 处理边界情况
-        if (digits <= 0) {
+    public static Integer IntegerRound(Integer number, Integer scale, RoundingMode mode) {
+        if(null == number){
+            return null;
+        }
+
+        int digit = getDigitCount(number.longValue());
+
+        if(null == scale || scale>digit ||scale<0){
+            scale = digit;
+        }
+
+        return BigDecimal.valueOf(number)
+                .divide(BigDecimal.valueOf(Math.pow(10,digit-scale)), 0, mode)
+                .multiply(BigDecimal.valueOf(Math.pow(10,digit-scale)))
+                .intValue();
+    }
+
+
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 获取整数位数
+     *
+     * @param number
+     * @return int
+     */
+    public static int getDigitCount(Long number) {
+        if (number == 0) return 1;
+        if (null == number || number < 1){
             return 0;
         }
-
-        // 最大可保留位数
-        int maxDigits = String.valueOf(Math.abs(number)).length();
-
-        // 如果要求保留位数大于实际位数，返回原数
-        if (digits >= maxDigits) {
-            return number;
-        }
-
-        // 计算截断因子
-        long factor = (long) Math.pow(10, maxDigits - digits);
-
-        // 安全的截断处理
-        return (int) ((number / factor) * factor);
+        return (int) Math.log10(Math.abs(number)) + 1;
     }
 }

@@ -4,6 +4,7 @@ import org.example.designs.formatter.FormatException;
 import org.example.designs.formatter.util.NumberUtil;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * 浮点数格式器
@@ -16,14 +17,22 @@ import java.math.BigDecimal;
  * @version 1.0.0
  * @date 2024-12-03
  */
-public class DoubleFormat extends NumberFormat<Double> implements IFormat<Object, Double>{
+public class DoubleFormat extends NumberFormat implements IFormat<Object, Double>{
 
     //最大值
     private Double max = Double.MAX_VALUE;
     //最小值
     private Double min = Double.MIN_VALUE;
-    private int IntegerScale = 2;
-    private int DoubleScale = 2;
+    //默认值
+    private Double defaultValue = null;
+
+    //直接取整（默认）
+    //还支持四舍五入和向上取整
+    protected RoundingMode decimalRoundMode = RoundingMode.FLOOR;
+
+    //小数保留位数(默认十五位)
+    protected int decimalScale = 15;
+
     @Override
     public Double format(Object data) throws FormatException {
         Double ret = defaultValue;
@@ -45,17 +54,24 @@ public class DoubleFormat extends NumberFormat<Double> implements IFormat<Object
         if(null == ret) return null;
         if(ret > max) throw new FormatException(String.format("[%s]超过最大值[%s]",ret,max));
         if(ret < min) throw new FormatException(String.format("[%s]超过最小值[%s]",ret,min));
+        if(digit>19 || digit<0){
+            throw new FormatException(String.format("位数[%d]超过double(支持到long)范围",digit));
+        }
+        if(NumberUtil.getDigitCount(ret.longValue()) > digit) throw new FormatException(String.format("[%d]的位数超过[%d]",ret,digit));
+
         return ret;
     }
 
     private Double formatDouble(Double data) throws FormatException {
-        BigDecimal cur = new BigDecimal(data);
-        if(isCeil){
-        }else if(isRound){
-            return formatInt((int)Math.round(data));
-        }else {
-            return formatInt(data.intValue());
-        }
+//        BigDecimal cur = new BigDecimal(data);
+//        if(isCeil){
+//            return cur.setScale(DoubleScale, BigDecimal.ROUND_CEILING)
+//        }else if(isRound){
+//            return formatInt((int)Math.round(data));
+//        }else {
+//            return formatInt(data.intValue());
+//        }
+        return null;
     }
 
 
@@ -109,17 +125,7 @@ public class DoubleFormat extends NumberFormat<Double> implements IFormat<Object
         return this;
     }
 
-    public DoubleFormat isRound(){
-        this.isRound = true;
-        this.isCeil = false;
-        return this;
-    }
 
-    public DoubleFormat isCeil(){
-        this.isRound = false;
-        this.isCeil = true;
-        return this;
-    }
 
     public DoubleFormat toNegative(){
         this.toNegative = true;
@@ -149,6 +155,38 @@ public class DoubleFormat extends NumberFormat<Double> implements IFormat<Object
 
     public DoubleFormat toPositive(){
         this.toPositive = true;
+        return this;
+    }
+
+    public DoubleFormat isRound(){
+        decimalRoundMode = RoundingMode.HALF_UP;
+        return this;
+    }
+
+    public DoubleFormat isCeil(){
+        decimalRoundMode = RoundingMode.CEILING;
+        return this;
+    }
+
+    public DoubleFormat isRound(int scale){
+        decimalScale = scale;
+        decimalRoundMode = RoundingMode.HALF_UP;
+        return this;
+    }
+
+    public DoubleFormat isCeil(int scale){
+        decimalScale = scale;
+        decimalRoundMode = RoundingMode.CEILING;
+        return this;
+    }
+
+    public DoubleFormat scale(int scale){
+        decimalScale = scale;
+        return this;
+    }
+
+    public DoubleFormat digit(int digit){
+        this.digit = digit;
         return this;
     }
 }

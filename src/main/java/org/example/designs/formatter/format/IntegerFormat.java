@@ -4,6 +4,7 @@ import org.example.designs.formatter.FormatException;
 import org.example.designs.formatter.util.NumberUtil;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * 整数格式器
@@ -16,7 +17,7 @@ import java.math.BigDecimal;
  * @version 1.0.0
  * @date 2024-12-02
  */
-public class IntegerFormat extends NumberFormat<Integer> implements IFormat<Object, Integer> {
+public class IntegerFormat extends NumberFormat implements IFormat<Object, Integer> {
 
     //这是自然数
     private boolean toNatural = false;
@@ -28,8 +29,14 @@ public class IntegerFormat extends NumberFormat<Integer> implements IFormat<Obje
     private Integer max = Integer.MAX_VALUE;
     //最小值
     private Integer min = Integer.MIN_VALUE;
-    //保留位数(默认十位)
-    private int scale = 10;
+    //默认值
+    private Integer defaultValue = null;
+    //直接取整（默认）
+    //还支持四舍五入和向上取整
+    protected RoundingMode integerRoundMode = RoundingMode.FLOOR;
+
+    //保留位数
+    protected int integerScale = -1;
 
     @Override
     public Integer format(Object data) throws FormatException {
@@ -53,11 +60,15 @@ public class IntegerFormat extends NumberFormat<Integer> implements IFormat<Obje
         if(null == ret) return null;
         if(ret > max) throw new FormatException(String.format("[%d]超过最大值[%d]",ret,max));
         if(ret < min) throw new FormatException(String.format("[%d]超过最小值[%d]",ret,min));
+        if(digit>10 || digit<0){
+            throw new FormatException(String.format("位数[%d]超过int范围",digit));
+        }
+        if(NumberUtil.getDigitCount(ret.longValue()) > digit) throw new FormatException(String.format("[%d]的位数超过[%d]",ret,digit));
         return ret;
     }
 
     private Integer formatInt(Integer data) throws FormatException {
-        data = NumberUtil.IntegerRound(data,scale);
+        data = NumberUtil.IntegerRound(data,integerScale, integerRoundMode);
         if(toNegative && toPositive) throw new FormatException(String.format("[%d]不能既是正数，又是负数",data));
         if(toNegative && toPrime) throw new FormatException(String.format("[%d]不能既是质数，又是负数",data));
         if(toNegative && toNatural) throw new FormatException(String.format("[%d]不能既是自然数，又是负数",data));
@@ -70,14 +81,10 @@ public class IntegerFormat extends NumberFormat<Integer> implements IFormat<Obje
 
     private Integer formatDouble(Double data) throws FormatException {
         if(unDouble) throw new FormatException(String.format("data[%f]不能是浮点数",data));
-
-        if(isCeil){
-            return formatInt((int)Math.ceil(data));
-        }else if(isRound){
-            return formatInt((int)Math.round(data));
-        }else {
-            return formatInt(data.intValue());
+        if(data > Integer.MAX_VALUE || data < Integer.MIN_VALUE){
+            throw new FormatException(String.format("[%f]超过int范围",data));
         }
+        return formatInt(data.intValue());
     }
 
     private Integer formatString(String data) throws FormatException {
@@ -93,10 +100,13 @@ public class IntegerFormat extends NumberFormat<Integer> implements IFormat<Obje
         }
 
         if(NumberUtil.isInteger(data)){
+            Long longInt = Long.parseLong(data);
+            if(longInt > Integer.MAX_VALUE || longInt < Integer.MIN_VALUE){
+                throw new FormatException(String.format("[%s]超过int范围",data));
+            }
             return formatInt(Integer.parseInt(data));
         }
-
-        return null;
+        throw new FormatException(String.format("[%s]不是浮点数，不是百分比，也不是Integer",data));
     }
 
     private Integer formatBigDecimal(BigDecimal data) throws FormatException {
@@ -130,18 +140,6 @@ public class IntegerFormat extends NumberFormat<Integer> implements IFormat<Obje
     public IntegerFormat unAll(){
         this.unString = true;
         this.unDouble = true;
-        return this;
-    }
-
-    public IntegerFormat isRound(){
-        this.isRound = true;
-        this.isCeil = false;
-        return this;
-    }
-
-    public IntegerFormat isCeil(){
-        this.isRound = false;
-        this.isCeil = true;
         return this;
     }
 
@@ -181,13 +179,42 @@ public class IntegerFormat extends NumberFormat<Integer> implements IFormat<Obje
         return this;
     }
 
-    public IntegerFormat scale(int scale){
-        this.scale = scale;
-        return this;
-    }
+
 
     public IntegerFormat toPositive(){
         this.toPositive = true;
+        return this;
+    }
+
+    public IntegerFormat isRound(){
+        this.integerRoundMode = RoundingMode.HALF_UP;
+        return this;
+    }
+
+    public IntegerFormat isCeil(){
+        this.integerRoundMode = RoundingMode.CEILING;
+        return this;
+    }
+
+    public IntegerFormat isRound(int scale){
+        this.integerScale = scale;
+        this.integerRoundMode = RoundingMode.HALF_UP;
+        return this;
+    }
+
+    public IntegerFormat isCeil(int scale){
+        this.integerScale = scale;
+        this.integerRoundMode = RoundingMode.CEILING;
+        return this;
+    }
+
+    public IntegerFormat scale(int scale){
+        this.integerScale = scale;
+        return this;
+    }
+
+    public IntegerFormat digit(int digit){
+        this.digit = digit;
         return this;
     }
 
