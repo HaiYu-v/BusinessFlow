@@ -24,14 +24,15 @@ public class BigDecimalFormat extends NumberFormat<BigDecimalFormat, BigDecimal>
     public static BigDecimalFormat build(){
         return new BigDecimalFormat()
                 .max(new BigDecimal(Long.MAX_VALUE))
-                .min(new BigDecimal(Long.MIN_VALUE));
+                .min(new BigDecimal(Long.MIN_VALUE))
+                .scale(15);
     }
 
     @Override
     protected BigDecimal formatBigDecimal(BigDecimal data) throws FormatException {
         //判断位数
-        if(digit>19 || digit<0){
-            throw new FormatException(String.format("位数[%f]超过double范围(只支持到long)",digit));
+        if(digit>10 || digit<0){
+            throw new FormatException(String.format("位数[%f]超过double范围(只支持到int)",digit));
         }
 
         //负数跟其它数的冲突
@@ -57,6 +58,8 @@ public class BigDecimalFormat extends NumberFormat<BigDecimalFormat, BigDecimal>
 
     @Override
     protected BigDecimal formatDouble(Double data) throws FormatException {
+        if(BigDecimal.valueOf(data).toString().length()>17)
+            throw new FormatException(String.format("Double只能保证16位数的精度[%s]",data));
         return formatBigDecimal(BigDecimal.valueOf(data));
     }
 
@@ -66,12 +69,15 @@ public class BigDecimalFormat extends NumberFormat<BigDecimalFormat, BigDecimal>
 
         //浮点数
         if(NumberUtil.isFloatingPoint(data)){
-            return formatBigDecimal(new BigDecimal(data));
+            return formatDouble(Double.valueOf(data));
         }
 
         //百分比
         if(NumberUtil.isPercentage(data)){
-            return formatBigDecimal(BigDecimal.valueOf(NumberUtil.parsePercentageWithNumberFormat(data)));
+            if(unPercent)
+                throw new FormatException(String.format("data[%s]不能是百分比",data));
+
+            return formatDouble(Double.valueOf(NumberUtil.parsePercentageWithNumberFormat(data)));
         }
 
         //整数
@@ -92,7 +98,9 @@ public class BigDecimalFormat extends NumberFormat<BigDecimalFormat, BigDecimal>
     }
     @Override
     protected BigDecimal formatFloat(Float data) throws FormatException {
-        return formatBigDecimal(BigDecimal.valueOf(data.doubleValue()));
+        if(data.toString().length()>7)
+            throw new FormatException(String.format("Float只能保证6位数的精度[%s]",data));
+        return formatBigDecimal(new BigDecimal(data.toString()));
     }
 
     public BigDecimalFormat scale(int digit,int scale){
@@ -100,4 +108,5 @@ public class BigDecimalFormat extends NumberFormat<BigDecimalFormat, BigDecimal>
         this.scale = scale;
         return this;
     }
+
 }

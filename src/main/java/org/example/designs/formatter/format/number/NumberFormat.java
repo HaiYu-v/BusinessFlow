@@ -20,9 +20,13 @@ import java.math.RoundingMode;
  * @date 2024-12-04
  */
 public abstract class NumberFormat<F extends NumberFormat,R extends Number>
-        extends AbsFormat<F,R>
-        implements IFormat<Object,R> {
-
+        extends AbsFormat<F,R> {
+    //百分比保留位数
+    protected int percentScale = 2;
+    //转成百分比
+    protected boolean toPercent = false;
+    //不支持百分比
+    protected boolean unPercent = false;
     //这是负数
     protected boolean toNegative = false;
     //这是正数
@@ -33,7 +37,8 @@ public abstract class NumberFormat<F extends NumberFormat,R extends Number>
     //还支持四舍五入和向上取整
     protected RoundingMode roundMode = RoundingMode.FLOOR;
     //保留位数
-    protected int scale = -1;
+    protected Integer scale = null;
+
 
     @Override
     public R format(Object data) throws FormatException {
@@ -44,7 +49,7 @@ public abstract class NumberFormat<F extends NumberFormat,R extends Number>
         }else if(data instanceof Long){
             ret = formatLong((Long) data);
         }else if(data instanceof Float){
-            return formatFloat((Float) data);
+            ret = formatFloat((Float) data);
         }else if(data instanceof Double){
             ret = formatDouble((Double) data);
         }else if(data instanceof BigDecimal){
@@ -75,8 +80,6 @@ public abstract class NumberFormat<F extends NumberFormat,R extends Number>
     protected abstract R formatBigDecimal(BigDecimal data) throws FormatException;
     protected abstract R formatLong(Long data) throws FormatException;
     protected abstract R formatFloat(Float data) throws FormatException;
-
-
 
 
     //转正数
@@ -129,5 +132,32 @@ public abstract class NumberFormat<F extends NumberFormat,R extends Number>
         return (F) this;
     }
 
+    //不支持百分比
+    public F unPercent(){
+        this.unPercent = true;
+        return (F) this;
+    }
+    //转成百分比
+    public F toPercent(){
+        this.toPercent = true;
+        return (F) this;
+    }
+    //转成百分比
+    public F toPercentScale(int scale){
+        this.percentScale = scale;
+        return (F) this;
+    }
+
+    @Override
+    public String toStr(Object data) throws FormatException {
+        R ret = format(data);
+        if(toPercent){
+            if(percentScale <0 || percentScale>12)
+                throw new FormatException(String.format("百分比保留位数[%d]超过范围",percentScale));
+            Double percent = ret.doubleValue() * 100;
+            return String.format("%."+percentScale+"f%%",percent);
+        }
+        return ret.toString();
+    }
 
 }

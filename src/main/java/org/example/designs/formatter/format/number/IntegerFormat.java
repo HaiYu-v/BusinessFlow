@@ -42,7 +42,8 @@ public class IntegerFormat extends NumberFormat<IntegerFormat,Integer>{
     public static IntegerFormat build() {
         return new IntegerFormat()
                 .max(Integer.MAX_VALUE)
-                .min(Integer.MIN_VALUE);
+                .min(Integer.MIN_VALUE)
+                .scale(10);
     }
 
     @Override
@@ -101,6 +102,9 @@ public class IntegerFormat extends NumberFormat<IntegerFormat,Integer>{
         }
         //百分比
         if(NumberUtil.isPercentage(data)){
+            if(unPercent)
+                throw new FormatException(String.format("data[%s]不能是百分比",data));
+
             return formatDouble(NumberUtil.parsePercentageWithNumberFormat(data));
         }
 
@@ -150,4 +154,6 @@ public class IntegerFormat extends NumberFormat<IntegerFormat,Integer>{
         this.isPrime = true;
         return this;
     }
+
+
 }

@@ -1,6 +1,10 @@
 package org.example.designs.formatter.format;
 
+import org.example.designs.formatter.FormatException;
+
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * TODO
@@ -13,10 +17,10 @@ import java.time.LocalDateTime;
  * @version 1.0.0
  * @date 2024-12-05
  */
-public class AbsFormat<F extends AbsFormat,R> {
+public abstract class AbsFormat<F extends AbsFormat,R> implements IFormat<Object,R>{
     //可以为null
     protected boolean butNull = false;
-    //支持字符串
+    //不支持字符串
     protected boolean unString = false;
     //最大值
     protected R max = null;
@@ -24,6 +28,9 @@ public class AbsFormat<F extends AbsFormat,R> {
     protected R min = null;
     //默认值
     protected R defaultValue = null;
+
+    public abstract R format(Object data) throws FormatException;
+    public abstract String toStr(Object data) throws FormatException;
 
     //可为null
     public F butNull(){
