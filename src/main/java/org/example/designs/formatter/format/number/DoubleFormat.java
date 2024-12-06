@@ -30,12 +30,10 @@ public class DoubleFormat extends NumberFormat<DoubleFormat,Double>{
 
     @Override
     protected Double formatBigDecimal(BigDecimal data) throws FormatException {
-
         //判断位数
         if(digit>19 || digit<0){
             throw new FormatException(String.format("位数[%f]超过double范围(只支持到long)",digit));
         }
-
         //负数跟其它数的冲突
         if(toNegative && toPositive)
             throw new FormatException(String.format("[%f]不能既是正数，又是负数",data));

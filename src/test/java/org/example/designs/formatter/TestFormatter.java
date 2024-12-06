@@ -5,15 +5,19 @@ import org.example.designs.formatter.format.number.BigDecimalFormat;
 import org.example.designs.formatter.format.dateTime.DateTimeFormat;
 import org.example.designs.formatter.format.number.DoubleFormat;
 import org.example.designs.formatter.format.number.IntegerFormat;
+import org.example.designs.formatter.util.DateTimeUtil;
 import org.example.designs.formatter.util.NumberUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.Time;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
+import java.util.regex.Pattern;
 
 /**
  * 格式器的测试类
@@ -64,11 +68,44 @@ public class TestFormatter {
     }
 
     @Test
+    void test() throws FormatException {
+
+        System.out.println(DateTimeUtil.toLocalTime("12:34"));
+        System.out.println(DateTimeUtil.toLocalTime("12:34:56"));
+        System.out.println(DateTimeUtil.toLocalTime("12:34:56.789"));
+        System.out.println(DateTimeUtil.toLocalTime("1234"));
+        System.out.println(DateTimeUtil.toLocalTime("123456"));
+        System.out.println(DateTimeUtil.toLocalTime("123456789"));
+        System.out.println();
+        System.out.println(DateTimeUtil.toLocalDate("20240229"));
+        System.out.println(DateTimeUtil.toLocalDate("2024-02-29"));
+        System.out.println();
+        System.out.println(DateTimeUtil.toLocalDateTime("202402291234"));
+        System.out.println(DateTimeUtil.toLocalDateTime("20240229123456"));
+        System.out.println(DateTimeUtil.toLocalDateTime("20240229123456789"));
+        System.out.println(DateTimeUtil.toLocalDateTime("20240229T1234"));
+        System.out.println(DateTimeUtil.toLocalDateTime("20240229T123456"));
+        System.out.println(DateTimeUtil.toLocalDateTime("20240229T123456789"));
+        System.out.println(DateTimeUtil.toLocalDateTime("2024-02-29 12:34"));
+        System.out.println(DateTimeUtil.toLocalDateTime("2024-02-29 12:34:56"));
+        System.out.println(DateTimeUtil.toLocalDateTime("2024-02-29 12:34:56.789"));
+        System.out.println(DateTimeUtil.toLocalDateTime("2024-02-29T12:34"));
+        System.out.println(DateTimeUtil.toLocalDateTime("2024-02-29T12:34:56"));
+        System.out.println(DateTimeUtil.toLocalDateTime("2024-02-29T12:34:56.789"));
+
+
+    }
+    @Test
     void doubleTest(){
         try {
             //double
             System.out.println("===================double==========================");
-            System.out.println(BigDecimalFormat.build().scale(3,2).format(123.244));
+
+
+            System.out.println(new BigDecimal(0.123456789123456789).add(new BigDecimal(123456789)));
+            System.out.println(BigDecimalFormat.build().scale(10,8).isCeil().format(new BigDecimal(123456789.1234567)));
+//            System.out.println(BigDecimalFormat.build().scale(3,2).format(123.244));
+            System.out.println(BigDecimalFormat.build().toPercentScale(12).toPercent().toStr(123456789.2432424242342342342342412312344));
 
             //整数和小数位
             System.out.println(DoubleFormat.build().scale(2).digit(3).format(123.244));
@@ -143,9 +180,12 @@ public class TestFormatter {
         try {
             //date
             System.out.println("===================date==========================");
-            System.out.println(TimeFormat.build().format(LocalDate.now()));
-            System.out.println(TimeFormat.build().toStr(LocalDate.now()));
+            System.out.println(TimeFormat.build().toStr(1L));
+            System.out.println(TimeFormat.build().toStr(System.currentTimeMillis()));
+            System.out.println(TimeFormat.build().toStr(Instant.now()));
             System.out.println(TimeFormat.build().toStr(LocalDateTime.now()));
+            System.out.println(TimeFormat.build().toStr(new Time(System.currentTimeMillis())));
+            System.out.println(TimeFormat.build().toStr(Duration.ofHours(1).plusMinutes(30)));
             System.out.println(TimeFormat.build().strFormat("hh:mm:ss").toStr(LocalDateTime.now()));
             //string
             System.out.println("===================string==========================");

@@ -104,7 +104,6 @@ public class IntegerFormat extends NumberFormat<IntegerFormat,Integer>{
         if(NumberUtil.isPercentage(data)){
             if(unPercent)
                 throw new FormatException(String.format("data[%s]不能是百分比",data));
-
             return formatDouble(NumberUtil.parsePercentageWithNumberFormat(data));
         }
 

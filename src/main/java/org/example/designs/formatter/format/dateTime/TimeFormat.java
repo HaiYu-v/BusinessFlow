@@ -2,9 +2,8 @@ package org.example.designs.formatter.format.dateTime;
 
 import org.example.designs.formatter.FormatException;
 import org.example.designs.formatter.format.AbsFormat;
-import org.example.designs.formatter.format.IFormat;
+import org.example.designs.formatter.util.DateTimeUtil;
 
-import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.*;
@@ -21,7 +20,7 @@ import java.time.format.DateTimeFormatter;
  * @version 1.0.0
  * @date 2024-12-05
  */
-public class TimeFormat extends AbsFormat<TimeFormat, LocalTime> implements IFormat<Object, LocalTime> {
+public class TimeFormat extends AbsFormat<TimeFormat, LocalTime>{
     private String strFormat = "HH:mm:ss";
 
 
@@ -34,18 +33,25 @@ public class TimeFormat extends AbsFormat<TimeFormat, LocalTime> implements IFor
                 .defaultValue(LocalTime.now());
     }
 
+    @Override
     public String toStr(Object data) throws FormatException {
-        LocalTime format = format(data);
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(strFormat);
-        return format.format(dateFormatter);
+        String ret = null;
+        try {
+            LocalTime localTime = format(data);
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(strFormat);
+            ret = localTime.format(dateFormatter);
+        } catch (FormatException e) {
+            throw new FormatException(String.format("时间格式[%s]无效",strFormat),e);
+        }
+        return ret;
     }
 
     @Override
     public LocalTime format(Object data) throws FormatException {
         LocalTime ret = this.defaultValue;
 
-        if(data instanceof Integer) {
-            ret = formatInt((Integer) data);
+        if(data instanceof Long) {
+            ret = formatLong((Long) data);
         }else if(data instanceof String){
             String str = (String) data;
             if(!str.isEmpty()) ret = formatString(str);
@@ -61,8 +67,31 @@ public class TimeFormat extends AbsFormat<TimeFormat, LocalTime> implements IFor
             ret = formatInstant((Instant) data);
         }else if(data instanceof Duration){
             ret = formatDuration((Duration) data);
+        }else {
+            if(null == data && butNull){
+                return null;
+            }
+            throw new FormatException(String.format("不支持类型[%s]",(null == data?"null":data.getClass().getName())));
         }
+        //判断为空
+        if(null == ret && !butNull)
+            throw new FormatException("数据为null且无默认值");
+        if(ret.isBefore(min))
+            throw new FormatException(String.format("[%s]小于最小值[%s]",ret,min));
+        if(ret.isAfter(max))
+            throw new FormatException(String.format("[%s]大于最大值[%s]",ret,max));
         return ret;
+    }
+
+    private LocalTime formatString(String str) throws FormatException {
+        String[] strings = str.split("T| ");
+        String date = strings[strings.length-1];
+        if(DateTimeUtil.isTime(date)){
+
+        }else if(DateTimeUtil.isTimeSeparator(date)){
+
+        }
+        return null;
     }
 
     private LocalTime formatDuration(Duration data) {
@@ -72,7 +101,7 @@ public class TimeFormat extends AbsFormat<TimeFormat, LocalTime> implements IFor
 
 
     private LocalTime formatInstant(Instant data) {
-        return formatLocalTime(LocalTime.from(data));
+        return formatLocalTime(data.atZone(ZoneId.systemDefault()).toLocalTime());
     }
 
     private LocalTime formatTimestamp(Timestamp data) {
@@ -84,13 +113,11 @@ public class TimeFormat extends AbsFormat<TimeFormat, LocalTime> implements IFor
         return data;
     }
 
-    private LocalTime formatInt(Integer data) {
-        return null;
+    private LocalTime formatLong(Long data) {
+        return formatInstant(Instant.ofEpochMilli(data));
     }
 
-    private LocalTime formatString(String str) {
-        return null;
-    }
+
     private LocalTime formatLocalDateTime(LocalDateTime data) {
         return formatLocalTime(data.toLocalTime());
     }

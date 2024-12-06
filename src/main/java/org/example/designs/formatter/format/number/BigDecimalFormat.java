@@ -31,8 +31,8 @@ public class BigDecimalFormat extends NumberFormat<BigDecimalFormat, BigDecimal>
     @Override
     protected BigDecimal formatBigDecimal(BigDecimal data) throws FormatException {
         //判断位数
-        if(digit>10 || digit<0){
-            throw new FormatException(String.format("位数[%f]超过double范围(只支持到int)",digit));
+        if(digit>19 || digit<0){
+            throw new FormatException(String.format("位数[%f]超过double范围(只支持到long)",digit));
         }
 
         //负数跟其它数的冲突

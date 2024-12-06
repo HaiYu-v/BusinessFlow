@@ -1,6 +1,7 @@
 package org.example.designs.formatter.format.dateTime;
 
 import org.example.designs.formatter.FormatException;
+import org.example.designs.formatter.format.AbsFormat;
 import org.example.designs.formatter.format.IFormat;
 
 import java.sql.Timestamp;
@@ -23,7 +24,7 @@ import java.util.Date;
  * @version 1.0.0
  * @date 2024-12-02
  */
-public class DateTimeFormat implements IFormat<Object, LocalDateTime> {
+public class DateTimeFormat extends AbsFormat<DateTimeFormat, LocalDateTime> {
 
     //可以为null
     private boolean butNull = false;
@@ -88,6 +89,12 @@ public class DateTimeFormat implements IFormat<Object, LocalDateTime> {
         return ret;
     }
 
+    @Override
+    public String toStr(Object data) throws FormatException {
+
+        return "";
+    }
+
     private LocalDateTime formatLong(Long data) throws FormatException {
         return formatInstant(Instant.ofEpochSecond(data));
     }
@@ -102,10 +109,10 @@ public class DateTimeFormat implements IFormat<Object, LocalDateTime> {
         String dateWithDashPattern = "^\\d{4}-\\d{2}-\\d{2}$"; // yyyy-MM-dd
         String timePattern = "^([01]?[0-9]|2[0-3])([0-5]?[0-9])([0-5]?[0-9])$"; // HHmmss
         String timeWithColonPattern = "^([01]?[0-9]|2[0-3]):([0-5]?[0-9]):([0-5]?[0-9])$"; // HH:mm:ss
-        String dateTimePattern = "^\\d{4}\\d{2}\\d{2} \\d{6}$"; // yyyyMMdd HHmmss
-        String dateTimeWithDashPattern = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$"; // yyyy-MM-dd HH:mm:ss
 
 
+        String dateTimePattern = "^\\d{4}\\d{2}\\d{2}[ T]?\\d{6,9}$"; // yyyyMMdd HHmmss或yyyyMMddTHHmmss
+        String dateTimeWithDashPattern = "^\\d{4}-\\d{2}-\\d{2}[ T]\\d{2}:\\d{2}:\\d{2}(:\\d{3})?$"; // yyyy-MM-ddTHH:mm:ss
 
         // 定义格式化器
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
