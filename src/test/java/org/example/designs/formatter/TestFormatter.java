@@ -86,6 +86,9 @@ public class TestFormatter {
         System.out.println(DateTimeUtil.toLocalDateTime("20240229T1234"));
         System.out.println(DateTimeUtil.toLocalDateTime("20240229T123456"));
         System.out.println(DateTimeUtil.toLocalDateTime("20240229T123456789"));
+        System.out.println(DateTimeUtil.toLocalDateTime("20240229 1234"));
+        System.out.println(DateTimeUtil.toLocalDateTime("20240229 123456"));
+        System.out.println(DateTimeUtil.toLocalDateTime("20240229 123456789"));
         System.out.println(DateTimeUtil.toLocalDateTime("2024-02-29 12:34"));
         System.out.println(DateTimeUtil.toLocalDateTime("2024-02-29 12:34:56"));
         System.out.println(DateTimeUtil.toLocalDateTime("2024-02-29 12:34:56.789"));
