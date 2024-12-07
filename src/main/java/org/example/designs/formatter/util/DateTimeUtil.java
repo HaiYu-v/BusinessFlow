@@ -3,6 +3,7 @@ package org.example.designs.formatter.util;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.Year;
 import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
 
@@ -18,29 +19,35 @@ import java.util.regex.Pattern;
  * @date 2024-12-06
  */
 public class DateTimeUtil {
-    private static final String TIME_PATTERN
+    public static final String TIME_PATTERN
             = "^([01]\\d|2[0-3])([0-5]\\d)(([0-5]\\d)(\\d{3})?)?$";
-    private static final String TIME_PATTERN_SEPARATOR
+    public static final String TIME_PATTERN_SEPARATOR
             = "^([01]\\d|2[0-3]):([0-5]\\d)(:([0-5]\\d)(\\.\\d{3})?)?$";
 
-    private static final String DATE_PATTERN
-            = "^(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]|[0-9][1-9][0-9]{2}|[1-9][0-9]{3})(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01]))$";
+    public static final String DATE_PATTERN
+            = "^(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]|[0-9][1-9][0-9]{2}|[1-9][0-9]{3})?(0[1-9]|1[0-2])?(0[1-9]|[12]\\d|3[01]))$";
 
-    private static final String DATE_PATTERN_SEPARATOR
-            = "^(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]|[0-9][1-9][0-9]{2}|[1-9][0-9]{3})-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01]))$";
+    public static final String DATE_PATTERN_SEPARATOR
+            = "^((([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]|[0-9][1-9][0-9]{2}|[1-9][0-9]{3})-)?(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01]))$";
 
-    private static final String DATETIME_PATTERN
-            = "^(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]|[0-9][1-9][0-9]{2}|[1-9][0-9]{3})(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01]))" +
+    public static final String DATETIME_PATTERN
+            = "^(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]|[0-9][1-9][0-9]{2}|[1-9][0-9]{3})?(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01]))" +
             "[ T]?([01]\\d|2[0-3])([0-5]\\d)(([0-5]\\d)(\\d{3})?)?$"; // yyyyMMdd HHmmss或yyyyMMddTHHmmss
-    private static final String DATETIME_PATTERN_SEPARATOR
-            = "^(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]|[0-9][1-9][0-9]{2}|[1-9][0-9]{3})-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01]))" +
+    public static final String DATETIME_PATTERN_SEPARATOR
+            = "^((([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]|[0-9][1-9][0-9]{2}|[1-9][0-9]{3})-)?(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01]))" +
             "[ T]([01]\\d|2[0-3]):([0-5]\\d)(:([0-5]\\d)(\\.\\d{3})?)?$"; // yyyy-MM-ddTHH:mm:ss
+
+    private static final String DATETIME_PATTERN1
+            = "^(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01])" +
+            "[ T]([01]\\d|2[0-3])([0-5]\\d)$";
+    private static final String DATETIME_PATTERN2
+            = "^(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]|[0-9][1-9][0-9]{2}|[1-9][0-9]{3})?(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01]))" +
+            "[ T]([01]\\d|2[0-3])([0-5]\\d)$";
 
     public static final String TIME_FORMAT = "HHmm[ss[SSS]]";
     public static final String TIME_FORMAT_SEPARATOR = "HH:mm[:ss[.SSS]]";
-    public static final String DATE_FORMAT1 = "MMdd";
     public static final String DATE_FORMAT = "yyyyMMdd";
-    public static final String DATE_FORMAT_SEPARATOR = "[yyyy-]MM-dd";
+    public static final String DATE_FORMAT_SEPARATOR = "yyyy-MM-dd";
     public static final String DATETIME_FORMAT1 = "yyyyMMddHHmm";
     public static final String DATETIME_FORMAT2 = "yyyyMMddHHmmss";
     public static final String DATETIME_FORMAT3 = "yyyyMMddHHmmssSSS";
@@ -67,7 +74,7 @@ public class DateTimeUtil {
     public static boolean isDateTime(String dateTimeStr) {
         if(null == dateTimeStr || dateTimeStr.isEmpty()) return false;
         return Pattern.compile(DATETIME_PATTERN).matcher(dateTimeStr).matches()
-                || isLeapYearDate(dateTimeStr.substring(0,8));
+                || isLeapYearDate(dateTimeStr.length()>8?dateTimeStr.substring(0,8) : null);
     }
     public static boolean isDateTimeSeparator(String dateTimeStr) {
         if(null == dateTimeStr || dateTimeStr.isEmpty()) return false;
@@ -101,10 +108,12 @@ public class DateTimeUtil {
     public static LocalDate toLocalDate(String dateStr){
         if(isDate(dateStr)){
             if(dateStr.length() == 4)
-                return LocalDate.parse(dateStr, DateTimeFormatter.ofPattern(DATE_FORMAT1));
+                dateStr = Year.now()+dateStr;
             return LocalDate.parse(dateStr, DateTimeFormatter.ofPattern(DATE_FORMAT));
         }
         if(isDateSeparator(dateStr)){
+            if(dateStr.length() == 5)
+                dateStr = new StringBuilder().append(Year.now()).append("-").append(dateStr).toString();
             return LocalDate.parse(dateStr, DateTimeFormatter.ofPattern(DATE_FORMAT_SEPARATOR));
         }
         return null;
@@ -119,6 +128,9 @@ public class DateTimeUtil {
      */
     public static LocalDateTime toLocalDateTime(String dateTimeStr){
         if(isDateTime(dateTimeStr)){
+            if (dateTimeStr.length()==8 || dateTimeStr.length()==10)
+                dateTimeStr = Year.now()+dateTimeStr;
+
             if (dateTimeStr.length()==12)
                 return LocalDateTime.parse(dateTimeStr, DateTimeFormatter.ofPattern(DATETIME_FORMAT1));
             if (dateTimeStr.length()==14)
@@ -128,6 +140,8 @@ public class DateTimeUtil {
             return LocalDateTime.parse(dateTimeStr, DateTimeFormatter.ofPattern(DATETIME_FORMAT));
         }
         if(isDateTimeSeparator(dateTimeStr)){
+            if(dateTimeStr.length()==11|| dateTimeStr.length()==14)
+                dateTimeStr = new StringBuilder().append(Year.now()).append("-").append(dateTimeStr).toString();
             return LocalDateTime.parse(dateTimeStr, DateTimeFormatter.ofPattern(DATETIME_FORMAT_SEPARATOR));
         }
         return null;

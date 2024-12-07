@@ -36,11 +36,11 @@ public class TimeFormat extends AbsFormat<TimeFormat, LocalTime>{
     @Override
     public String toStr(Object data) throws FormatException {
         String ret = null;
+        LocalTime localTime = format(data);
         try {
-            LocalTime localTime = format(data);
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(strFormat);
             ret = localTime.format(dateFormatter);
-        } catch (FormatException e) {
+        } catch (Exception e) {
             throw new FormatException(String.format("时间格式[%s]无效",strFormat),e);
         }
         return ret;
@@ -84,14 +84,15 @@ public class TimeFormat extends AbsFormat<TimeFormat, LocalTime>{
     }
 
     private LocalTime formatString(String str) throws FormatException {
-        String[] strings = str.split("T| ");
-        String date = strings[strings.length-1];
-        if(DateTimeUtil.isTime(date)){
 
-        }else if(DateTimeUtil.isTimeSeparator(date)){
-
+        if(DateTimeUtil.isDateTime(str) || DateTimeUtil.isDateTimeSeparator(str)){
+            return formatLocalDateTime(DateTimeUtil.toLocalDateTime(str));
         }
-        return null;
+
+         if(DateTimeUtil.isTime(str) || DateTimeUtil.isTimeSeparator(str)){
+            return formatLocalTime(DateTimeUtil.toLocalTime(str));
+        }
+        throw new FormatException(String.format("[%s]不是有效的时间字符串",str));
     }
 
     private LocalTime formatDuration(Duration data) {
