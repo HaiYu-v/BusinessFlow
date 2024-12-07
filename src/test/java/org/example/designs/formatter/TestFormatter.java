@@ -1,8 +1,8 @@
 package org.example.designs.formatter;
 
-import org.example.designs.formatter.format.dateTime.TimeFormat;
-import org.example.designs.formatter.format.number.BigDecimalFormat;
+import org.example.designs.formatter.format.dateTime.DateFormat;
 import org.example.designs.formatter.format.dateTime.DateTimeFormat;
+import org.example.designs.formatter.format.number.BigDecimalFormat;
 import org.example.designs.formatter.format.number.DoubleFormat;
 import org.example.designs.formatter.format.number.IntegerFormat;
 import org.example.designs.formatter.util.DateTimeUtil;
@@ -169,67 +169,143 @@ public class TestFormatter {
             e.printStackTrace();
         }
     }
-
-    @Test
-    void DateTimeTest(){
-        try {
-            //date
-            System.out.println("===================date==========================");
-            System.out.println(DateTimeFormat.build().format(LocalDate.now()));
-            System.out.println(DateTimeFormat.build().format(LocalDateTime.now()));
-            //string
-            System.out.println("===================string==========================");
-            System.out.println(DateTimeFormat.build().format("2024-12-03"));
-            System.out.println(DateTimeFormat.build().format("2024-12-03 12:12:12"));
-        }catch (FormatException e){
-            e.printStackTrace();
-        }
-    }
+    
 
     @Test
     void TimeTest(){
         try {
             //date
             System.out.println("===================date==========================");
-            System.out.println(TimeFormat.build().toStr(1L));
-            System.out.println(TimeFormat.build().toStr(System.currentTimeMillis()));
-            System.out.println(TimeFormat.build().toStr(Instant.now()));
-            System.out.println(TimeFormat.build().toStr(LocalDateTime.now()));
-            System.out.println(TimeFormat.build().toStr(new Time(System.currentTimeMillis())));
-            System.out.println(TimeFormat.build().toStr(Duration.ofHours(1).plusMinutes(30)));
-            System.out.println(TimeFormat.build().strFormat("hh:mm:ss").toStr(LocalDateTime.now()));
+            System.out.println(DateTimeFormat.build().toStr(1L));
+            System.out.println(DateTimeFormat.build().toStr(System.currentTimeMillis()));
+            System.out.println(DateTimeFormat.build().toStr(Instant.now()));
+            System.out.println(DateTimeFormat.build().toStr(LocalDateTime.now()));
+            System.out.println(DateTimeFormat.build().toStr(new Time(System.currentTimeMillis())));
+            System.out.println(DateTimeFormat.build().toStr(Duration.ofHours(1).plusMinutes(30)));
+            System.out.println(DateTimeFormat.build().strFormat("hh:mm:ss").toStr(LocalDateTime.now()));
             //string
             System.out.println("===================string==========================");
-            System.out.println(TimeFormat.build().toStr("12:34"));
-            System.out.println(TimeFormat.build().toStr("12:34:56"));
-            System.out.println(TimeFormat.build().toStr("12:34:56.789"));
-            System.out.println(TimeFormat.build().toStr("1234"));
-            System.out.println(TimeFormat.build().toStr("123456"));
-            System.out.println(TimeFormat.build().toStr("123456789"));
-//            System.out.println();
-//            System.out.println(TimeFormat.build().toStr("20240229"));
-//            System.out.println(TimeFormat.build().toStr("2024-02-29"));
+            System.out.println(DateTimeFormat.build().toStr("12:34"));
+            System.out.println(DateTimeFormat.build().toStr("12:34:56"));
+            System.out.println(DateTimeFormat.build().toStr("12:34:56.789"));
+            System.out.println(DateTimeFormat.build().toStr("1234"));
+            System.out.println(DateTimeFormat.build().toStr("123456"));
+            System.out.println(DateTimeFormat.build().toStr("123456789"));
             System.out.println();
-            System.out.println(TimeFormat.build().toStr("202402291234"));
-            System.out.println(TimeFormat.build().toStr("20240229123456"));
-            System.out.println(TimeFormat.build().toStr("20240229123456789"));
-            System.out.println(TimeFormat.build().toStr("20240229T1234"));
-            System.out.println(TimeFormat.build().toStr("20240229T123456"));
-            System.out.println(TimeFormat.build().toStr("20240229T123456789"));
-            System.out.println(TimeFormat.build().toStr("20240229 1234"));
-            System.out.println(TimeFormat.build().toStr("20240229 123456"));
-            System.out.println(TimeFormat.build().toStr("20240229 123456789"));
-            System.out.println(TimeFormat.build().toStr("2024-02-29 12:34"));
-            System.out.println(TimeFormat.build().toStr("2024-02-29 12:34:56"));
-            System.out.println(TimeFormat.build().toStr("2024-02-29 12:34:56.789"));
-            System.out.println(TimeFormat.build().toStr("2024-02-29T12:34"));
-            System.out.println(TimeFormat.build().toStr("2024-02-29T12:34:56"));
-            System.out.println(TimeFormat.build().toStr("2024-02-29T12:34:56.789"));
-            System.out.println(TimeFormat.build().toStr("02291234"));
-            System.out.println(TimeFormat.build().toStr("0229123456"));
-            System.out.println(TimeFormat.build().toStr("02-29 12:34"));
-            System.out.println(TimeFormat.build().toStr("02-29 12:34:56"));
+            System.out.println(DateTimeFormat.build().toStr("202402291234"));
+            System.out.println(DateTimeFormat.build().toStr("20240229123456"));
+            System.out.println(DateTimeFormat.build().toStr("20240229123456789"));
+            System.out.println(DateTimeFormat.build().toStr("20240229T1234"));
+            System.out.println(DateTimeFormat.build().toStr("20240229T123456"));
+            System.out.println(DateTimeFormat.build().toStr("20240229T123456789"));
+            System.out.println(DateTimeFormat.build().toStr("20240229 1234"));
+            System.out.println(DateTimeFormat.build().toStr("20240229 123456"));
+            System.out.println(DateTimeFormat.build().toStr("20240229 123456789"));
+            System.out.println(DateTimeFormat.build().toStr("2024-02-29 12:34"));
+            System.out.println(DateTimeFormat.build().toStr("2024-02-29 12:34:56"));
+            System.out.println(DateTimeFormat.build().toStr("2024-02-29 12:34:56.789"));
+            System.out.println(DateTimeFormat.build().toStr("2024-02-29T12:34"));
+            System.out.println(DateTimeFormat.build().toStr("2024-02-29T12:34:56"));
+            System.out.println(DateTimeFormat.build().toStr("2024-02-29T12:34:56.789"));
+            System.out.println(DateTimeFormat.build().toStr("02291234"));
+            System.out.println(DateTimeFormat.build().toStr("0229123456"));
+            System.out.println(DateTimeFormat.build().toStr("02-29 12:34"));
+            System.out.println(DateTimeFormat.build().toStr("02-29 12:34:56"));
 
+        }catch (FormatException e){
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void DateTest(){
+        try {
+            //date
+            System.out.println("===================date==========================");
+            System.out.println(DateFormat.build().toStr(1L));
+            System.out.println(DateFormat.build().toStr(System.currentTimeMillis()));
+            System.out.println(DateFormat.build().toStr(Instant.now()));
+            System.out.println(DateFormat.build().toStr(LocalDateTime.now()));
+//            System.out.println(DateFormat.build().toStr(new Time(System.currentTimeMillis())));
+//            System.out.println(DateFormat.build().toStr(Duration.ofHours(1).plusMinutes(30)));
+            System.out.println(DateFormat.build().strFormat("yyyy-MM-dd").toStr(LocalDateTime.now()));
+            //string
+            System.out.println("===================string==========================");
+            System.out.println(DateFormat.build().toStr("20240229"));
+            System.out.println(DateFormat.build().toStr("0229"));
+            System.out.println(DateFormat.build().toStr("02-29"));
+            System.out.println(DateFormat.build().toStr("2024-02-29"));
+            System.out.println();
+            System.out.println(DateFormat.build().toStr("202402291234"));
+            System.out.println(DateFormat.build().toStr("20240229123456"));
+            System.out.println(DateFormat.build().toStr("20240229123456789"));
+            System.out.println(DateFormat.build().toStr("20240229T1234"));
+            System.out.println(DateFormat.build().toStr("20240229T123456"));
+            System.out.println(DateFormat.build().toStr("20240229T123456789"));
+            System.out.println(DateFormat.build().toStr("20240229 1234"));
+            System.out.println(DateFormat.build().toStr("20240229 123456"));
+            System.out.println(DateFormat.build().toStr("20240229 123456789"));
+            System.out.println(DateFormat.build().toStr("2024-02-29 12:34"));
+            System.out.println(DateFormat.build().toStr("2024-02-29 12:34:56"));
+            System.out.println(DateFormat.build().toStr("2024-02-29 12:34:56.789"));
+            System.out.println(DateFormat.build().toStr("2024-02-29T12:34"));
+            System.out.println(DateFormat.build().toStr("2024-02-29T12:34:56"));
+            System.out.println(DateFormat.build().toStr("2024-02-29T12:34:56.789"));
+            System.out.println(DateFormat.build().toStr("02291234"));
+            System.out.println(DateFormat.build().toStr("0229123456"));
+            System.out.println(DateFormat.build().toStr("02-29 12:34"));
+            System.out.println(DateFormat.build().toStr("02-29 12:34:56"));
+
+        }catch (FormatException e){
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void DateTimeTest(){
+        try {
+            //date
+            System.out.println("===================date==========================");
+            System.out.println(DateTimeFormat.build().toStr(1L));
+            System.out.println(DateTimeFormat.build().toStr(System.currentTimeMillis()));
+            System.out.println(DateTimeFormat.build().toStr(Instant.now()));
+            System.out.println(DateTimeFormat.build().toStr(LocalDateTime.now()));
+            System.out.println(DateTimeFormat.build().toStr(new Time(System.currentTimeMillis())));
+            System.out.println(DateTimeFormat.build().toStr(Duration.ofHours(1).plusMinutes(30)));
+            System.out.println(DateTimeFormat.build().strFormat("yyyy-MM-dd hh:mm:ss").toStr(LocalDateTime.now()));
+            //string
+            System.out.println("===================string==========================");
+            System.out.println(DateTimeFormat.build().toStr("12:34"));
+            System.out.println(DateTimeFormat.build().toStr("12:34:56"));
+            System.out.println(DateTimeFormat.build().toStr("12:34:56.789"));
+            System.out.println(DateTimeFormat.build().toStr("1234"));
+            System.out.println(DateTimeFormat.build().toStr("123456"));
+            System.out.println(DateTimeFormat.build().toStr("123456789"));
+            System.out.println();
+            System.out.println(DateTimeFormat.build().toStr("20240229"));
+            System.out.println(DateTimeFormat.build().toStr("0229"));
+            System.out.println(DateTimeFormat.build().toStr("02-29"));
+            System.out.println(DateTimeFormat.build().toStr("2024-02-29"));
+            System.out.println();
+            System.out.println(DateTimeFormat.build().toStr("202402291234"));
+            System.out.println(DateTimeFormat.build().toStr("20240229123456"));
+            System.out.println(DateTimeFormat.build().toStr("20240229123456789"));
+            System.out.println(DateTimeFormat.build().toStr("20240229T1234"));
+            System.out.println(DateTimeFormat.build().toStr("20240229T123456"));
+            System.out.println(DateTimeFormat.build().toStr("20240229T123456789"));
+            System.out.println(DateTimeFormat.build().toStr("20240229 1234"));
+            System.out.println(DateTimeFormat.build().toStr("20240229 123456"));
+            System.out.println(DateTimeFormat.build().toStr("20240229 123456789"));
+            System.out.println(DateTimeFormat.build().toStr("2024-02-29 12:34"));
+            System.out.println(DateTimeFormat.build().toStr("2024-02-29 12:34:56"));
+            System.out.println(DateTimeFormat.build().toStr("2024-02-29 12:34:56.789"));
+            System.out.println(DateTimeFormat.build().toStr("2024-02-29T12:34"));
+            System.out.println(DateTimeFormat.build().toStr("2024-02-29T12:34:56"));
+            System.out.println(DateTimeFormat.build().toStr("2024-02-29T12:34:56.789"));
+            System.out.println(DateTimeFormat.build().toStr("02291234"));
+            System.out.println(DateTimeFormat.build().toStr("0229123456"));
+            System.out.println(DateTimeFormat.build().toStr("02-29 12:34"));
+            System.out.println(DateTimeFormat.build().toStr("02-29 12:34:56"));
         }catch (FormatException e){
             e.printStackTrace();
         }

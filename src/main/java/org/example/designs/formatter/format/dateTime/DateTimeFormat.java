@@ -3,7 +3,9 @@ package org.example.designs.formatter.format.dateTime;
 import org.example.designs.formatter.FormatException;
 import org.example.designs.formatter.format.AbsFormat;
 import org.example.designs.formatter.format.IFormat;
+import org.example.designs.formatter.util.DateTimeUtil;
 
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -26,16 +28,8 @@ import java.util.Date;
  */
 public class DateTimeFormat extends AbsFormat<DateTimeFormat, LocalDateTime> {
 
-    //可以为null
-    private boolean butNull = false;
-    //支持字符串
-    private boolean unString = false;
-    //最大值
-    private LocalDateTime max = LocalDateTime.MAX;
-    //最小值
-    private LocalDateTime min = LocalDateTime.MIN;
-    //默认值
-    private LocalDateTime defaultValue = LocalDateTime.now();
+    private String strFormat = "yyyy-MM-dd HH:mm:ss";
+
     //时区(默认中国)
     private ZoneId zone = ZoneId.of("Asia/Shanghai");
     //日期和时间使用T分隔
@@ -43,40 +37,66 @@ public class DateTimeFormat extends AbsFormat<DateTimeFormat, LocalDateTime> {
     //不需要‘-’，连接号
     private boolean unHasDash = false;
 
-    private DateTimeFormat() {
+    private DateTimeFormat(){}
+
+    public static DateTimeFormat build(){
+        return new DateTimeFormat()
+                .min(LocalDateTime.MIN)
+                .max(LocalDateTime.MAX)
+                .defaultValue(LocalDateTime.now());
     }
 
-    public static DateTimeFormat build() {
-        return new DateTimeFormat();
+    @Override
+    public String toStr(Object data) throws FormatException {
+        String ret = null;
+        LocalDateTime localDate = format(data);
+        try {
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(strFormat);
+            ret = localDate.format(dateFormatter);
+        } catch (Exception e) {
+            throw new FormatException(String.format("日期格式[%s]无效",strFormat),e);
+        }
+        return ret;
     }
 
     @Override
     public LocalDateTime format(Object data) throws FormatException {
         LocalDateTime ret = defaultValue;
+        try {
+            if(data instanceof Integer){
+                ret = formatInt((Integer)data);
+            }else if(data instanceof Long) {
+                ret = formatLong((Long) data);
+            }else if(data instanceof String){
+                String str = (String) data;
+                if(!str.isEmpty()) ret = formatString(str);
+            }else if(data instanceof LocalTime){
+                ret = formatLocalTime((LocalTime) data);
+            } else if(data instanceof Time){
+                ret = formatTime((Time) data);
+            }else if(data instanceof LocalDateTime){
+                ret = formatLocalDateTime((LocalDateTime) data);
+            }else if(data instanceof Timestamp){
+                ret = formatTimestamp((Timestamp) data);
+            }else if(data instanceof Instant){
+                ret = formatInstant((Instant) data);
+            }else if(data instanceof Duration){
+                ret = formatDuration((Duration) data);
+            }else if(data instanceof LocalDate){
+                ret = formatLocalDate((LocalDate) data);
+            } else if(data instanceof Date){
+                ret = formatDate((Date) data);
+            } else if(data instanceof ZonedDateTime){
+                ret = formatZonedDateTime((ZonedDateTime) data);
+            }else {
+                if(null == data && butNull){
+                    return null;
+                }
+                throw new FormatException(String.format("不支持类型[%s]",(null == data?"null":data.getClass().getName())));
+            }
 
-        if(data instanceof Integer) {
-            ret = formatInt((Integer) data);
-        }else if(data instanceof Long){
-            ret = formatLong((Long) data);
-        }else if(data instanceof String){
-            String str = (String) data;
-            if(!str.isEmpty()) ret = formatString(str);
-        } else if (data instanceof LocalDate) {
-            ret = formatLocalDate((LocalDate) data);
-        } else if (data instanceof LocalTime) {
-            ret = formatLocalTime((LocalTime) data);
-        } else if (data instanceof LocalDateTime) {
-            ret = formatLocalDateTime((LocalDateTime) data);
-        } else if (data instanceof ZonedDateTime) {
-            ret = formatZonedDateTime((ZonedDateTime) data);
-        } else if (data instanceof Instant) {
-            ret = formatInstant((Instant) data);
-        }else if(data instanceof Timestamp){
-            ret = formatTimestamp((Timestamp) data);
-        } else if (data instanceof Date) {
-            ret = formatDate((Date) data);
-        }else {
-            throw new FormatException(String.format("不支持类型[%s]",data.getClass().getName()));
+        } catch (Exception e) {
+            throw new FormatException(String.format("[%s]转换失败",data),e);
         }
 
         //判断为空
@@ -89,58 +109,32 @@ public class DateTimeFormat extends AbsFormat<DateTimeFormat, LocalDateTime> {
         return ret;
     }
 
-    @Override
-    public String toStr(Object data) throws FormatException {
+    private LocalDateTime formatString(String str) throws FormatException {
 
-        return "";
+        try {
+            if(DateTimeUtil.isTime(str) || DateTimeUtil.isTimeSeparator(str)){
+                return formatLocalTime(DateTimeUtil.toLocalTime(str));
+            }
+
+            if(DateTimeUtil.isDate(str) || DateTimeUtil.isDateSeparator(str)){
+                return formatLocalDate(DateTimeUtil.toLocalDate(str));
+            }
+
+            if(DateTimeUtil.isDateTime(str) || DateTimeUtil.isDateTimeSeparator(str)){
+                return formatLocalDateTime(DateTimeUtil.toLocalDateTime(str));
+            }
+        } catch (Exception e) {
+            throw new FormatException(String.format("[%s]不是有效的时间字符串",str),e);
+        }
+        throw new FormatException(String.format("[%s]不是有效的时间字符串",str));
     }
-
     private LocalDateTime formatLong(Long data) throws FormatException {
-        return formatInstant(Instant.ofEpochSecond(data));
+        return formatInstant(Instant.ofEpochMilli(data));
     }
 
     private LocalDateTime formatZonedDateTime(ZonedDateTime data) throws FormatException{
         return data.toLocalDateTime();
     }
-
-    private LocalDateTime formatString(String str) throws FormatException {
-        // 正则表达式
-        String datePattern = "^\\d{4}\\d{2}\\d{2}$"; // yyyyMMdd
-        String dateWithDashPattern = "^\\d{4}-\\d{2}-\\d{2}$"; // yyyy-MM-dd
-        String timePattern = "^([01]?[0-9]|2[0-3])([0-5]?[0-9])([0-5]?[0-9])$"; // HHmmss
-        String timeWithColonPattern = "^([01]?[0-9]|2[0-3]):([0-5]?[0-9]):([0-5]?[0-9])$"; // HH:mm:ss
-
-
-        String dateTimePattern = "^\\d{4}\\d{2}\\d{2}[ T]?\\d{6,9}$"; // yyyyMMdd HHmmss或yyyyMMddTHHmmss
-        String dateTimeWithDashPattern = "^\\d{4}-\\d{2}-\\d{2}[ T]\\d{2}:\\d{2}:\\d{2}(:\\d{3})?$"; // yyyy-MM-ddTHH:mm:ss
-
-        // 定义格式化器
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-        DateTimeFormatter dateWithDashFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HHmmss");
-        DateTimeFormatter timeWithColonFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd HHmmss");
-        DateTimeFormatter dateTimeWithDashFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-//        // 根据输入字符串匹配对应的格式并解析为 LocalDateTime
-//        if (input.matches(datePattern)) {
-//            return LocalDateTime.parse(input + "000000", dateTimeFormatter); // 日期+时间补零
-//        } else if (input.matches(dateWithDashPattern)) {
-//            return LocalDateTime.parse(input + " 000000", dateTimeWithDashFormatter); // 日期+时间补零
-//        } else if (input.matches(timePattern)) {
-//            return LocalDateTime.parse("1970-01-01 " + input, dateTimeFormatter); // 时间+默认日期
-//        } else if (input.matches(timeWithColonPattern)) {
-//            return LocalDateTime.parse("1970-01-01 " + input, dateTimeWithDashFormatter); // 时间+默认日期
-//        } else if (input.matches(dateTimePattern)) {
-//            return LocalDateTime.parse(input, dateTimeFormatter); // 日期时间格式
-//        } else if (input.matches(dateTimeWithDashPattern)) {
-//            return LocalDateTime.parse(input, dateTimeWithDashFormatter); // 日期时间格式
-//        } else {
-//            throw new IllegalArgumentException("Invalid date/time format");
-//        }
-        return null;
-    }
-
     private LocalDateTime formatInt(Integer data) throws FormatException{
         return formatString(data.toString());
     }
@@ -150,23 +144,33 @@ public class DateTimeFormat extends AbsFormat<DateTimeFormat, LocalDateTime> {
     }
 
     private LocalDateTime formatDate(Date data) throws FormatException{
-        return formatZonedDateTime(ZonedDateTime.ofInstant(data.toInstant(), zone));
+        return formatInstant(data.toInstant());
     }
 
     private LocalDateTime formatInstant(Instant data) throws FormatException{
-        return formatZonedDateTime(ZonedDateTime.ofInstant(data, zone));
+        return formatZonedDateTime(data.atZone(zone));
     }
 
     private LocalDateTime formatLocalDateTime(LocalDateTime data) throws FormatException{
         return formatZonedDateTime(data.atZone(zone));
     }
     private LocalDateTime formatLocalTime(LocalTime data) throws FormatException{
-        return formatZonedDateTime(ZonedDateTime.from(data));
+        return formatLocalDateTime(LocalDateTime.of(LocalDate.now(),data));
     }
-
+    private LocalDateTime formatTime(Time time) throws FormatException {
+        return formatLocalTime(time.toLocalTime());
+    }
     private LocalDateTime formatLocalDate(LocalDate data) throws FormatException{
-        return formatZonedDateTime(data.atStartOfDay(zone));
+        return formatLocalDateTime(LocalDateTime.of(data,LocalTime.MIDNIGHT));
     }
 
+    private LocalDateTime formatDuration(Duration data)  throws FormatException {
+        LocalTime startTime = LocalTime.MIDNIGHT;
+        return formatLocalTime(startTime.plus(data));
+    }
 
+    public DateTimeFormat strFormat(String strFormat){
+        this.strFormat = strFormat;
+        return this;
+    }
 }
