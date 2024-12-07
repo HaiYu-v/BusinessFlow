@@ -85,12 +85,16 @@ public class TimeFormat extends AbsFormat<TimeFormat, LocalTime>{
 
     private LocalTime formatString(String str) throws FormatException {
 
-        if(DateTimeUtil.isDateTime(str) || DateTimeUtil.isDateTimeSeparator(str)){
-            return formatLocalDateTime(DateTimeUtil.toLocalDateTime(str));
-        }
+        try {
+            if(DateTimeUtil.isDateTime(str) || DateTimeUtil.isDateTimeSeparator(str)){
+                return formatLocalDateTime(DateTimeUtil.toLocalDateTime(str));
+            }
 
-         if(DateTimeUtil.isTime(str) || DateTimeUtil.isTimeSeparator(str)){
-            return formatLocalTime(DateTimeUtil.toLocalTime(str));
+            if(DateTimeUtil.isTime(str) || DateTimeUtil.isTimeSeparator(str)){
+               return formatLocalTime(DateTimeUtil.toLocalTime(str));
+           }
+        } catch (Exception e) {
+            throw new FormatException(String.format("[%s]不是有效的时间字符串",str),e);
         }
         throw new FormatException(String.format("[%s]不是有效的时间字符串",str));
     }
