@@ -2,15 +2,16 @@ package org.example.designs.formatter.format;
 
 import org.example.designs.formatter.FormatException;
 
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
+
 
 /**
- * TODO
+ * 基础的抽象格式器
  *
  * <p>
- *     TODO
+ *     提供的格式约束条件
+ *     1. 可为空
+ *     2. 不可为字符串
+ *     3. 最大,最小,默认值
  * </p>
  *
  * @author HaiYu

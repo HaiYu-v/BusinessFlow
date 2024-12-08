@@ -2,7 +2,6 @@ package org.example.designs.formatter.format.dateTime;
 
 import org.example.designs.formatter.FormatException;
 import org.example.designs.formatter.format.AbsFormat;
-import org.example.designs.formatter.format.IFormat;
 import org.example.designs.formatter.util.DateTimeUtil;
 
 import java.sql.Time;
@@ -29,13 +28,8 @@ import java.util.Date;
 public class DateTimeFormat extends AbsFormat<DateTimeFormat, LocalDateTime> {
 
     private String strFormat = "yyyy-MM-dd HH:mm:ss";
-
     //时区(默认中国)
     private ZoneId zone = ZoneId.of("Asia/Shanghai");
-    //日期和时间使用T分隔
-    private boolean hasT = false;
-    //不需要‘-’，连接号
-    private boolean unHasDash = false;
 
     private DateTimeFormat(){}
 
@@ -171,6 +165,11 @@ public class DateTimeFormat extends AbsFormat<DateTimeFormat, LocalDateTime> {
 
     public DateTimeFormat strFormat(String strFormat){
         this.strFormat = strFormat;
+        return this;
+    }
+
+    public DateTimeFormat zone(ZoneId zoneId){
+        this.zone = zoneId;
         return this;
     }
 }
