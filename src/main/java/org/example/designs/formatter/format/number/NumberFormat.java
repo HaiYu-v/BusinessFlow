@@ -2,17 +2,24 @@ package org.example.designs.formatter.format.number;
 
 import org.example.designs.formatter.FormatException;
 import org.example.designs.formatter.format.AbsFormat;
-import org.example.designs.formatter.format.IFormat;
 import org.example.designs.formatter.util.NumberUtil;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 /**
- * TODO
+ * 数字的抽象格式器
  *
  * <p>
- *     TODO
+ *     - 约束条件
+ *      - 转成百分比，不支持百分比，保留位数
+ *      - 正负数
+ *      - 整数位数（默认十位）
+ *      - 保留位数，直接取整
+ *
+ *     - 泛型
+ *      - F 子类格式器类型，父类的泛型是子类，用于实现父子类方法之间的链式调用
+ *      - R 返回类型，格式化后，返回的数据类型
  * </p>
  *
  * @author HaiYu
@@ -40,6 +47,14 @@ public abstract class NumberFormat<F extends NumberFormat,R extends Number>
     protected Integer scale = null;
 
 
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 格式化方法
+     *
+     * @param data 传入数据
+     * @return {@link R } 返回格式化后的值
+     * @throws FormatException 格式化异常
+     */
     @Override
     public R format(Object data) throws FormatException {
         R ret = defaultValue;

@@ -91,6 +91,7 @@ public class NumberTest {
             System.out.println("===================double==========================");
             //整数和小数位
             System.out.println(BigDecimalFormat.build().scale(3,2).format(123.244));
+            System.out.println(BigDecimalFormat.build().unPrecision().format(123456789.123456789123456789));
             System.out.println(BigDecimalFormat.build().scale(2).digit(3).format(123.244));
             //三种约小数的方式
             System.out.println(BigDecimalFormat.build().scale(2).format(123.245));

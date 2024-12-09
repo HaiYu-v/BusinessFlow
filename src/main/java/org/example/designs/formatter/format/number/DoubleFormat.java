@@ -9,7 +9,10 @@ import java.math.BigDecimal;
  * 浮点数格式器
  *
  * <p>
- *     最大最小值只支持到Long
+ *     - 约束条件
+ *      - 大小只支持到Long
+ *      - double只能保证16位数的精确（可以修改unPrecision来取消这个限制）
+ *      - float 只能保证6位数的精确
  * </p>
  *
  * @author HaiYu
@@ -18,6 +21,9 @@ import java.math.BigDecimal;
  */
 public class DoubleFormat extends NumberFormat<DoubleFormat,Double>{
 
+
+    //不保证精度
+    private boolean unPrecision = false;
 
     private DoubleFormat (){}
 
@@ -58,7 +64,7 @@ public class DoubleFormat extends NumberFormat<DoubleFormat,Double>{
     @Override
     protected Double formatDouble(Double data) throws FormatException {
         if(BigDecimal.valueOf(data).toString().length()>17)
-            throw new FormatException(String.format("Double只能保证16位数的精度[%s]",data));
+            if(!unPrecision) throw new FormatException(String.format("Double只能保证16位数的精度[%s]",data));
         return formatBigDecimal(BigDecimal.valueOf(data));
     }
 
@@ -98,14 +104,34 @@ public class DoubleFormat extends NumberFormat<DoubleFormat,Double>{
     @Override
     protected Double formatFloat(Float data) throws FormatException {
         if(data.toString().length()>7)
-            throw new FormatException(String.format("Float只能保证6位数的精度[%s]",data));
+            if(!unPrecision) throw new FormatException(String.format("Float只能保证6位数的精度[%s]",data));
         return formatBigDecimal(new BigDecimal(data.toString()));
     }
 
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 约束整数位数（只判断，不约数）和小数位数
+     *
+     * @param digit 整数位数
+     * @param scale 小数位数
+     * @return {@link DoubleFormat }
+     */
     public DoubleFormat scale(int digit,int scale){
         this.digit = digit;
         this.scale = scale;
         return this;
     }
+
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 取消精度位数的限制
+     *
+     * @return {@link DoubleFormat }
+     */
+    public DoubleFormat unPrecision(){
+        this.unPrecision = true;
+        return this;
+    }
+
 
 }

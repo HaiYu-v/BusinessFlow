@@ -9,7 +9,10 @@ import java.math.BigDecimal;
  * 精确小数的格式化
  *
  * <p>
- *     TODO
+ *     - 约束条件
+ *      - 大小只支持到Long
+ *      - double只能保证16位数的精确
+ *      - float 只能保证6位数的精确
  * </p>
  * 
  * @date  2024-12-05 
@@ -18,7 +21,8 @@ import java.math.BigDecimal;
  */
 public class BigDecimalFormat extends NumberFormat<BigDecimalFormat, BigDecimal>{
 
-
+    //不保证精度
+    private boolean unPrecision = false;
     private BigDecimalFormat (){}
 
     public static BigDecimalFormat build(){
@@ -59,7 +63,7 @@ public class BigDecimalFormat extends NumberFormat<BigDecimalFormat, BigDecimal>
     @Override
     protected BigDecimal formatDouble(Double data) throws FormatException {
         if(BigDecimal.valueOf(data).toString().length()>17)
-            throw new FormatException(String.format("Double只能保证16位数的精度[%s]",data));
+            if(!unPrecision) throw new FormatException(String.format("Double只能保证16位数的精度[%s]",data));
         return formatBigDecimal(BigDecimal.valueOf(data));
     }
 
@@ -99,7 +103,7 @@ public class BigDecimalFormat extends NumberFormat<BigDecimalFormat, BigDecimal>
     @Override
     protected BigDecimal formatFloat(Float data) throws FormatException {
         if(data.toString().length()>7)
-            throw new FormatException(String.format("Float只能保证6位数的精度[%s]",data));
+            if(!unPrecision) throw new FormatException(String.format("Float只能保证6位数的精度[%s]",data));
         return formatBigDecimal(new BigDecimal(data.toString()));
     }
 
@@ -109,4 +113,14 @@ public class BigDecimalFormat extends NumberFormat<BigDecimalFormat, BigDecimal>
         return this;
     }
 
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 取消精度位数的限制
+     *
+     * @return {@link DoubleFormat }
+     */
+    public BigDecimalFormat unPrecision(){
+        this.unPrecision = true;
+        return this;
+    }
 }

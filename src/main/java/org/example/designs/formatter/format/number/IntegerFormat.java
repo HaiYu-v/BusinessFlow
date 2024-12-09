@@ -9,7 +9,10 @@ import java.math.BigDecimal;
  * 整数格式器
  *
  * <p>
- *     TODO
+ *     - 约束条件
+ *      - 这是自然数
+ *      - 这是质数
+ *      - 不支持浮点数
  * </p>
  *
  * @author HaiYu
