@@ -17,7 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 public class FormatterTest {
     @Test
-    public void test() throws FormatException {
+    public void intTest() throws FormatException {
         Formatter formatter = new Formatter();
         formatter.putIntegerFormat("test1").isRound(4);
         System.out.println(formatter.format(12345, "test1").toString());

@@ -13,9 +13,22 @@ import java.time.format.DateTimeFormatter;
  * 日期格式器
  *
  * <p>
- *     1.年月日
- *     2.年月
- *     3.月日
+ *     - 支持格式
+ *      年月日，月日
+ *
+ *     - 支持类型
+ *      - Integer
+ *      - Long
+ *      - String
+ *      - LocalDate
+ *      - LocalDateTime
+ *      - Date
+ *      - Instant
+ *      - TimeStamp
+ *
+ *     - 约束条件
+ *      - 字符串输出格式
+ *      - 年月日
  * </p>
  *
  * @author HaiYu
@@ -24,7 +37,28 @@ import java.time.format.DateTimeFormatter;
  */
 public class DateFormat extends AbsFormat<DateFormat, LocalDate> {
     private String strFormat = "yyyy-MM-dd";
+    private Integer year = null;
+    private Integer month = null;
+    private Integer day = null;
 
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 修改年月日
+     *
+     * @param localDate
+     * @return {@link LocalDateTime }
+     * @throws FormatException 格式化异常
+     */
+    private LocalDate syncDate(LocalDate localDate) throws FormatException {
+        try {
+            if(null != year) localDate = localDate.withYear(year);
+            if(null != month) localDate = localDate.withMonth(month);
+            if(null != day) localDate = localDate.withDayOfMonth(day);
+        } catch (Exception e) {
+            throw new FormatException("年月日设置错误",e);
+        }
+        return localDate;
+    }
 
     private DateFormat(){}
 
@@ -39,6 +73,7 @@ public class DateFormat extends AbsFormat<DateFormat, LocalDate> {
     public String toStr(Object data) throws FormatException {
         String ret = null;
         LocalDate localDate = format(data);
+        localDate = syncDate(localDate);
         try {
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(strFormat);
             ret = localDate.format(dateFormatter);
@@ -76,6 +111,7 @@ public class DateFormat extends AbsFormat<DateFormat, LocalDate> {
                 }
                 throw new FormatException(String.format("不支持类型[%s]",(null == data?"null":data.getClass().getName())));
             }
+
         } catch (Exception e) {
             throw new FormatException(String.format("[%s]转换失败",data),e);
         }
@@ -83,6 +119,10 @@ public class DateFormat extends AbsFormat<DateFormat, LocalDate> {
         //判断为空
         if(null == ret && !butNull)
             throw new FormatException("数据为null且无默认值");
+
+        //同步年月日
+        ret = syncDate(ret);
+
         if(ret.isBefore(min))
             throw new FormatException(String.format("[%s]小于最小值[%s]",ret,min));
         if(ret.isAfter(max))
@@ -139,6 +179,25 @@ public class DateFormat extends AbsFormat<DateFormat, LocalDate> {
 
     public DateFormat strFormat(String strFormat) {
         this.strFormat = strFormat;
+        return this;
+    }
+
+    public DateFormat date(LocalDate date){
+        this.year = date.getYear();
+        this.month = date.getMonthValue();
+        this.day = date.getDayOfMonth();
+        return this;
+    }
+    public DateFormat year(Integer year){
+        this.year = year;
+        return this;
+    }
+    public DateFormat month(Integer month){
+        this.month = month;
+        return this;
+    }
+    public DateFormat day(Integer day){
+        this.day = day;
         return this;
     }
 

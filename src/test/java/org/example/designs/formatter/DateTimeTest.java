@@ -6,9 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.sql.Time;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDateTime;
+import java.time.*;
 
 /**
  * 日期格式器的测试类
@@ -69,7 +67,6 @@ public class DateTimeTest {
             System.out.println(DateTimeFormat.build().toStr("0229123456"));
             System.out.println(DateTimeFormat.build().toStr("02-29 12:34"));
             System.out.println(DateTimeFormat.build().toStr("02-29 12:34:56"));
-
         }catch (FormatException e){
             e.printStackTrace();
         }
@@ -122,6 +119,8 @@ public class DateTimeTest {
         try {
             //date
             System.out.println("===================date==========================");
+            System.out.println(DateTimeFormat.build().year(2024).month(2).day(29).toStr(LocalTime.now()));
+            System.out.println(DateTimeFormat.build().hour(23).minute(59).second(59).toStr(LocalDate.now()));
             System.out.println(DateTimeFormat.build().toStr(1L));
             System.out.println(DateTimeFormat.build().toStr(System.currentTimeMillis()));
             System.out.println(DateTimeFormat.build().toStr(Instant.now()));

@@ -15,10 +15,25 @@ import java.util.Date;
  * 日期格式器
  *
  * <p>
- *     1.年，月，日，时，分，秒
- *     2.年月日是否要[-]
- *     3.时分秒是否要[:]
- *     4.是否要转成字符串
+ *     - 支持格式
+ *      （年月日，月日） （时分秒，时分，时分秒毫秒）
+ *
+ *     - 支持类型
+ *      - Integer
+ *      - Long
+ *      - String
+ *      - LocalDate
+ *      - LocalDateTime
+ *      - ZonedDateTime
+ *      - Date
+ *      - Instant
+ *      - TimeStamp
+ *      - Time
+ *
+ *     - 约束条件
+ *      - 字符串输出格式
+ *      - 时区
+ *      - 设置年月日时分秒
  * </p>
  *
  * @author HaiYu
@@ -30,6 +45,34 @@ public class DateTimeFormat extends AbsFormat<DateTimeFormat, LocalDateTime> {
     private String strFormat = "yyyy-MM-dd HH:mm:ss";
     //时区(默认中国)
     private ZoneId zone = ZoneId.of("Asia/Shanghai");
+    private Integer year = null;
+    private Integer month = null;
+    private Integer day = null;
+    private Integer hour = null;
+    private Integer minute = null;
+    private Integer second = null;
+
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 修改年月日时分秒
+     *
+     * @param localDate
+     * @return {@link LocalDateTime }
+     * @throws FormatException 格式化异常
+     */
+    private LocalDateTime syncDateTime(LocalDateTime localDate) throws FormatException {
+        try {
+            if(null != year) localDate = localDate.withYear(year);
+            if(null != month) localDate = localDate.withMonth(month);
+            if(null != day) localDate = localDate.withDayOfMonth(day);
+            if(null != hour) localDate = localDate.withHour(hour);
+            if(null != minute) localDate = localDate.withMinute(minute);
+            if(null != second) localDate = localDate.withSecond(second);
+        } catch (Exception e) {
+            throw new FormatException("年月日时分秒设置错误",e);
+        }
+        return localDate;
+    }
 
     private DateTimeFormat(){}
 
@@ -44,6 +87,7 @@ public class DateTimeFormat extends AbsFormat<DateTimeFormat, LocalDateTime> {
     public String toStr(Object data) throws FormatException {
         String ret = null;
         LocalDateTime localDate = format(data);
+        localDate = syncDateTime(localDate);
         try {
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(strFormat);
             ret = localDate.format(dateFormatter);
@@ -74,8 +118,6 @@ public class DateTimeFormat extends AbsFormat<DateTimeFormat, LocalDateTime> {
                 ret = formatTimestamp((Timestamp) data);
             }else if(data instanceof Instant){
                 ret = formatInstant((Instant) data);
-            }else if(data instanceof Duration){
-                ret = formatDuration((Duration) data);
             }else if(data instanceof LocalDate){
                 ret = formatLocalDate((LocalDate) data);
             } else if(data instanceof Date){
@@ -96,10 +138,16 @@ public class DateTimeFormat extends AbsFormat<DateTimeFormat, LocalDateTime> {
         //判断为空
         if(null == ret && !butNull)
             throw new FormatException("数据为null且无默认值");
+
+        //修改年月日时分秒
+        ret = syncDateTime(ret);
+
         if(ret.isBefore(min))
             throw new FormatException(String.format("[%s]小于最小值[%s]",ret,min));
+
         if(ret.isAfter(max))
             throw new FormatException(String.format("[%s]大于最大值[%s]",ret,max));
+
         return ret;
     }
 
@@ -158,10 +206,6 @@ public class DateTimeFormat extends AbsFormat<DateTimeFormat, LocalDateTime> {
         return formatLocalDateTime(LocalDateTime.of(data,LocalTime.MIDNIGHT));
     }
 
-    private LocalDateTime formatDuration(Duration data)  throws FormatException {
-        LocalTime startTime = LocalTime.MIDNIGHT;
-        return formatLocalTime(startTime.plus(data));
-    }
 
     public DateTimeFormat strFormat(String strFormat){
         this.strFormat = strFormat;
@@ -170,6 +214,44 @@ public class DateTimeFormat extends AbsFormat<DateTimeFormat, LocalDateTime> {
 
     public DateTimeFormat zone(ZoneId zoneId){
         this.zone = zoneId;
+        return this;
+    }
+
+    public DateTimeFormat time(LocalTime time){
+        this.hour = time.getHour();
+        this.minute = time.getMinute();
+        this.second = time.getSecond();
+        return this;
+    }
+
+    public DateTimeFormat date(LocalDate date){
+        this.year = date.getYear();
+        this.month = date.getMonthValue();
+        this.day = date.getDayOfMonth();
+        return this;
+    }
+    public DateTimeFormat year(Integer year){
+        this.year = year;
+        return this;
+    }
+    public DateTimeFormat month(Integer month){
+        this.month = month;
+        return this;
+    }
+    public DateTimeFormat day(Integer day){
+        this.day = day;
+        return this;
+    }
+    public DateTimeFormat hour(Integer hour){
+        this.hour = hour;
+        return this;
+    }
+    public DateTimeFormat minute(Integer minute){
+        this.minute = minute;
+        return this;
+    }
+    public DateTimeFormat second(Integer second){
+        this.second = second;
         return this;
     }
 }

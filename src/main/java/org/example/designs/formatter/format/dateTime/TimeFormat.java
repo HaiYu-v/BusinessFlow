@@ -13,7 +13,23 @@ import java.time.format.DateTimeFormatter;
  * 时间格式器
  *
  * <p>
- *     时，分，秒，毫秒
+ *     - 支持格式
+ *      时分秒，时分，时分秒毫秒
+ *
+ *     - 支持类型
+ *      - Integer
+ *      - Long
+ *      - String
+ *      - LocalTime
+ *      - LocalDateTime
+ *      - Instant
+ *      - Duration
+ *      - Timestamp
+ *      - Time
+ *
+ *     - 约束条件
+ *      - 字符串输出格式
+ *      - 时分秒
  * </p>
  *
  * @author HaiYu
@@ -22,7 +38,28 @@ import java.time.format.DateTimeFormatter;
  */
 public class TimeFormat extends AbsFormat<TimeFormat, LocalTime>{
     private String strFormat = "HH:mm:ss";
+    private Integer hour = null;
+    private Integer minute = null;
+    private Integer second = null;
 
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 修改年月日时分秒
+     *
+     * @param localTime
+     * @return {@link LocalDateTime }
+     * @throws FormatException 格式化异常
+     */
+    private LocalTime syncTime(LocalTime localTime) throws FormatException {
+        try {
+            if(null != hour) localTime = localTime.withHour(hour);
+            if(null != minute) localTime = localTime.withMinute(minute);
+            if(null != second) localTime = localTime.withSecond(second);
+        } catch (Exception e) {
+            throw new FormatException("年月日时分秒设置错误",e);
+        }
+        return localTime;
+    }
 
     private TimeFormat(){}
 
@@ -37,6 +74,7 @@ public class TimeFormat extends AbsFormat<TimeFormat, LocalTime>{
     public String toStr(Object data) throws FormatException {
         String ret = null;
         LocalTime localTime = format(data);
+        localTime = syncTime(localTime);
         try {
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(strFormat);
             ret = localTime.format(dateFormatter);
@@ -83,6 +121,10 @@ public class TimeFormat extends AbsFormat<TimeFormat, LocalTime>{
         //判断为空
         if(null == ret && !butNull)
             throw new FormatException("数据为null且无默认值");
+
+        //同步时分秒
+        ret = syncTime(ret);
+
         if(ret.isBefore(min))
             throw new FormatException(String.format("[%s]小于最小值[%s]",ret,min));
         if(ret.isAfter(max))
@@ -148,5 +190,23 @@ public class TimeFormat extends AbsFormat<TimeFormat, LocalTime>{
         return this;
     }
 
+    public TimeFormat time(LocalTime time){
+        this.hour = time.getHour();
+        this.minute = time.getMinute();
+        this.second = time.getSecond();
+        return this;
+    }
 
+    public TimeFormat hour(Integer hour){
+        this.hour = hour;
+        return this;
+    }
+    public TimeFormat minute(Integer minute){
+        this.minute = minute;
+        return this;
+    }
+    public TimeFormat second(Integer second){
+        this.second = second;
+        return this;
+    }
 }
