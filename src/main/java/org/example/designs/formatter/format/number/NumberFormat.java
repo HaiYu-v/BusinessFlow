@@ -38,7 +38,7 @@ public abstract class NumberFormat<F extends NumberFormat,R extends Number>
     protected boolean toNegative = false;
     //这是正数
     protected boolean toPositive = false;
-    //整数位数（默认十位）
+    //整数最大位数（默认十位）
     protected int digit = 10;
     //直接取整（默认）
     //还支持四舍五入和向上取整

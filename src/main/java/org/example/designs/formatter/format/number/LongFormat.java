@@ -6,7 +6,7 @@ import org.example.designs.formatter.util.NumberUtil;
 import java.math.BigDecimal;
 
 /**
- * 整数格式器
+ * 长整数格式器
  *
  * <p>
  *     - 约束条件
@@ -18,8 +18,7 @@ import java.math.BigDecimal;
  * @author HaiYu
  * @date 2024-12-02@version 1.0.0
  */
-public class IntegerFormat extends NumberFormat<IntegerFormat,Integer>{
-
+public class LongFormat extends NumberFormat<LongFormat,Long> {
     //这是自然数
     private boolean isNatural = false;
     //这是质数
@@ -32,7 +31,7 @@ public class IntegerFormat extends NumberFormat<IntegerFormat,Integer>{
      * -----------------------------------------------------------------------------------------------------------------
      * 私有构造
      */
-    private IntegerFormat(){
+    private LongFormat(){
 
     }
 
@@ -42,18 +41,19 @@ public class IntegerFormat extends NumberFormat<IntegerFormat,Integer>{
      *
      * @return {@link IntegerFormat }
      */
-    public static IntegerFormat build() {
-        return new IntegerFormat()
-                .max(Integer.MAX_VALUE)
-                .min(Integer.MIN_VALUE)
-                .scale(10);
+    public static LongFormat build() {
+        return new LongFormat()
+                .max(Long.MAX_VALUE)
+                .min(Long.MIN_VALUE)
+                .digit(19)
+                .scale(19);
     }
 
     @Override
-    protected Integer formatInt(Integer data) throws FormatException {
+    protected Long formatLong(Long data) throws FormatException {
         //判断位数
-        if(digit>10 || digit<0){
-            throw new FormatException(String.format("位数[%d]超过int范围",digit));
+        if(digit>19 || digit<0){
+            throw new FormatException(String.format("位数[%d]超过long范围",digit));
         }
 
         //负数跟其它数的冲突
@@ -66,7 +66,7 @@ public class IntegerFormat extends NumberFormat<IntegerFormat,Integer>{
                 throw new FormatException(String.format("[%d]不能既是自然数，又是负数",data));
         }
         //整数取整
-        data = NumberUtil.intRound(data, scale, roundMode);
+        data = NumberUtil.longRound(data, scale, roundMode);
         //转负数
         if(toNegative) data = (data >= 0 ? -data : data);
         //转正数
@@ -88,15 +88,15 @@ public class IntegerFormat extends NumberFormat<IntegerFormat,Integer>{
     }
 
     @Override
-    protected Integer formatDouble(Double data) throws FormatException {
+    protected Long formatDouble(Double data) throws FormatException {
         if(unDouble) throw new FormatException(String.format("data[%f]不能是浮点数",data));
-        if(data > Integer.MAX_VALUE || data < Integer.MIN_VALUE){
-            throw new FormatException(String.format("[%f]超过int范围",data));
+        if(data > Long.MAX_VALUE || data < Long.MIN_VALUE){
+            throw new FormatException(String.format("[%f]超过long范围",data));
         }
-        return formatInt(data.intValue());
+        return formatLong(data.longValue());
     }
     @Override
-    protected Integer formatString(String data) throws FormatException {
+    protected Long formatString(String data) throws FormatException {
         if(unString) throw new FormatException(String.format("data[%s]不能是字符串",data));
 
         //浮点数
@@ -112,50 +112,44 @@ public class IntegerFormat extends NumberFormat<IntegerFormat,Integer>{
 
         //整数
         if(NumberUtil.isInteger(data,digit)){
-            Long longInt = Long.parseLong(data);
-            if(longInt > Integer.MAX_VALUE || longInt < Integer.MIN_VALUE){
-                throw new FormatException(String.format("[%s]超过int范围",data));
-            }
-            return formatInt(Integer.parseInt(data));
+            return formatLong(Long.parseLong(data));
         }
         throw new FormatException(String.format("[%s]不是浮点数，不是百分比，也不是Integer",data));
     }
 
     @Override
-    protected Integer formatBigDecimal(BigDecimal data) throws FormatException {
+    protected Long formatBigDecimal(BigDecimal data) throws FormatException {
         return formatDouble(data.doubleValue());
     }
 
     @Override
-    protected Integer formatLong(Long data) throws FormatException {
-        return formatInt(data.intValue());
+    protected Long formatInt(Integer data) throws FormatException {
+        return formatLong(data.longValue());
     }
 
     @Override
-    protected Integer formatFloat(Float data) throws FormatException {
+    protected Long formatFloat(Float data) throws FormatException {
         return formatDouble(data.doubleValue());
     }
 
-    public IntegerFormat unDouble(){
+    public LongFormat unDouble(){
         this.unDouble = true;
         return this;
     }
 
-    public IntegerFormat unAll(){
+    public LongFormat unAll(){
         this.unString = true;
         this.unDouble = true;
         return this;
     }
 
-    public IntegerFormat isNatural(){
+    public LongFormat isNatural(){
         this.isNatural = true;
         return this;
     }
 
-    public IntegerFormat isPrime(){
+    public LongFormat isPrime(){
         this.isPrime = true;
         return this;
     }
-
-
 }

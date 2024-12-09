@@ -29,7 +29,8 @@ public class BigDecimalFormat extends NumberFormat<BigDecimalFormat, BigDecimal>
         return new BigDecimalFormat()
                 .max(new BigDecimal(Long.MAX_VALUE))
                 .min(new BigDecimal(Long.MIN_VALUE))
-                .scale(15);
+                .digit(19)
+                .scale(16);
     }
 
     @Override
@@ -85,7 +86,7 @@ public class BigDecimalFormat extends NumberFormat<BigDecimalFormat, BigDecimal>
         }
 
         //整数
-        if(NumberUtil.isInteger(data)){
+        if(NumberUtil.isInteger(data,digit)){
             return formatBigDecimal(new BigDecimal(data));
         }
         throw new FormatException(String.format("[%s]不是浮点数，不是百分比，也不是Integer",data));

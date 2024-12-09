@@ -15,4 +15,5 @@ import org.example.designs.formatter.FormatException;
  */
 public interface IFormat<T,R> {
     R format(T data) throws FormatException;
+    String toStr(T data) throws FormatException;
 }

@@ -26,7 +26,7 @@ import org.example.designs.formatter.FormatException;
  * @version 1.0.0
  * @date 2024-12-05
  */
-public abstract class AbsFormat<F extends AbsFormat,R> implements IFormat<Object,R>{
+public abstract class AbsFormat<F extends AbsFormat,R> implements IFormat<Object,R>,Cloneable{
     //可以为null
     protected boolean butNull = false;
     //不支持字符串
@@ -69,5 +69,10 @@ public abstract class AbsFormat<F extends AbsFormat,R> implements IFormat<Object
     public F defaultValue(R defaultValue){
         this.defaultValue = defaultValue;
         return (F) this;
+    }
+
+    @Override
+    protected F clone() throws CloneNotSupportedException {
+        return (F) super.clone();
     }
 }

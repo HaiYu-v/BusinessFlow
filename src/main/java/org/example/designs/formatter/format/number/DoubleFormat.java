@@ -31,7 +31,8 @@ public class DoubleFormat extends NumberFormat<DoubleFormat,Double>{
         return new DoubleFormat()
                 .max(new Double(Long.MAX_VALUE))
                 .min(new Double(Long.MIN_VALUE))
-                .scale(15);
+                .digit(19)
+                .scale(16);
     }
 
     @Override
@@ -86,7 +87,7 @@ public class DoubleFormat extends NumberFormat<DoubleFormat,Double>{
         }
 
         //整数
-        if(NumberUtil.isInteger(data)){
+        if(NumberUtil.isInteger(data,digit)){
             return formatBigDecimal(new BigDecimal(data));
         }
         throw new FormatException(String.format("[%s]不是浮点数，不是百分比，也不是Integer",data));

@@ -25,6 +25,11 @@ import java.time.LocalDateTime;
 public class DateTimeTest {
 
     @Test
+    void test(){
+
+    }
+
+    @Test
     void TimeTest(){
         try {
             //date

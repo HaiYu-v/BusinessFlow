@@ -76,9 +76,9 @@ public class NumberUtil {
      * @param str
      * @return boolean
      */
-    public static boolean isInteger(String str) {
+    public static boolean isInteger(String str,int digit) {
         if (str == null) return false;
-        return str.matches("^[-+]?\\d{1,10}$");
+        return str.matches("^[-+]?\\d{1,"+digit+"}$");
     }
 
     /**
@@ -118,6 +118,36 @@ public class NumberUtil {
         return true;
     }
 
+    public static boolean isPrime(Long number) {
+
+        if (number == null) {
+            return false;
+        }
+
+        // 1和负数不是质数
+        if (number <= 1) {
+            return false;
+        }
+
+        // 2是质数
+        if (number == 2) {
+            return true;
+        }
+
+        // 偶数不是质数（除了2）
+        if (number % 2 == 0) {
+            return false;
+        }
+
+        // 只需要判断到平方根
+        for (int i = 3; i <= Math.sqrt(number); i += 2) {
+            if (number % i == 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * -----------------------------------------------------------------------------------------------------------------
      * 整数取整
@@ -126,7 +156,7 @@ public class NumberUtil {
      * @param scale
      * @return {@link Integer }
      */
-    public static Integer IntegerRound(Integer number, Integer scale, RoundingMode mode) {
+    public static Integer intRound(Integer number, Integer scale, RoundingMode mode) {
         if(null == number){
             return null;
         }
@@ -141,6 +171,23 @@ public class NumberUtil {
                 .divide(BigDecimal.valueOf(Math.pow(10,digit-scale)), 0, mode)
                 .multiply(BigDecimal.valueOf(Math.pow(10,digit-scale)))
                 .intValue();
+    }
+
+    public static Long longRound(Long number, Integer scale, RoundingMode mode) {
+        if(null == number){
+            return null;
+        }
+
+        int digit = getDigitCount(number);
+
+        if(null == scale || scale>digit ||scale<0){
+            scale = digit;
+        }
+
+        return BigDecimal.valueOf(number)
+                .divide(BigDecimal.valueOf(Math.pow(10,digit-scale)), 0, mode)
+                .multiply(BigDecimal.valueOf(Math.pow(10,digit-scale)))
+                .longValue();
     }
 
 
