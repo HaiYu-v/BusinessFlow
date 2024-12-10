@@ -49,7 +49,7 @@ public class DateFormat extends AbsFormat<DateFormat, LocalDate> {
      * @return {@link LocalDateTime }
      * @throws FormatException 格式化异常
      */
-    private LocalDate syncDate(LocalDate localDate) throws FormatException {
+    private LocalDate setDate(LocalDate localDate) throws FormatException {
         try {
             if(null != year) localDate = localDate.withYear(year);
             if(null != month) localDate = localDate.withMonth(month);
@@ -73,7 +73,7 @@ public class DateFormat extends AbsFormat<DateFormat, LocalDate> {
     public String toStr(Object data) throws FormatException {
         String ret = null;
         LocalDate localDate = format(data);
-        localDate = syncDate(localDate);
+        localDate = setDate(localDate);
         try {
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(strFormat);
             ret = localDate.format(dateFormatter);
@@ -121,7 +121,7 @@ public class DateFormat extends AbsFormat<DateFormat, LocalDate> {
             throw new FormatException("数据为null且无默认值");
 
         //同步年月日
-        ret = syncDate(ret);
+        ret = setDate(ret);
 
         if(ret.isBefore(min))
             throw new FormatException(String.format("[%s]小于最小值[%s]",ret,min));

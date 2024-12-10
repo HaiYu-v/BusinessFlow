@@ -44,13 +44,13 @@ public class TimeFormat extends AbsFormat<TimeFormat, LocalTime>{
 
     /**
      * -----------------------------------------------------------------------------------------------------------------
-     * 修改年月日时分秒
+     * 修改时分秒
      *
      * @param localTime
      * @return {@link LocalDateTime }
      * @throws FormatException 格式化异常
      */
-    private LocalTime syncTime(LocalTime localTime) throws FormatException {
+    private LocalTime setTime(LocalTime localTime) throws FormatException {
         try {
             if(null != hour) localTime = localTime.withHour(hour);
             if(null != minute) localTime = localTime.withMinute(minute);
@@ -74,7 +74,7 @@ public class TimeFormat extends AbsFormat<TimeFormat, LocalTime>{
     public String toStr(Object data) throws FormatException {
         String ret = null;
         LocalTime localTime = format(data);
-        localTime = syncTime(localTime);
+        localTime = setTime(localTime);
         try {
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(strFormat);
             ret = localTime.format(dateFormatter);
@@ -123,7 +123,7 @@ public class TimeFormat extends AbsFormat<TimeFormat, LocalTime>{
             throw new FormatException("数据为null且无默认值");
 
         //同步时分秒
-        ret = syncTime(ret);
+        ret = setTime(ret);
 
         if(ret.isBefore(min))
             throw new FormatException(String.format("[%s]小于最小值[%s]",ret,min));

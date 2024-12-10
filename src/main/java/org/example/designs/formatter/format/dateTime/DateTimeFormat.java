@@ -60,7 +60,7 @@ public class DateTimeFormat extends AbsFormat<DateTimeFormat, LocalDateTime> {
      * @return {@link LocalDateTime }
      * @throws FormatException 格式化异常
      */
-    private LocalDateTime syncDateTime(LocalDateTime localDate) throws FormatException {
+    private LocalDateTime setDateTime(LocalDateTime localDate) throws FormatException {
         try {
             if(null != year) localDate = localDate.withYear(year);
             if(null != month) localDate = localDate.withMonth(month);
@@ -87,7 +87,7 @@ public class DateTimeFormat extends AbsFormat<DateTimeFormat, LocalDateTime> {
     public String toStr(Object data) throws FormatException {
         String ret = null;
         LocalDateTime localDate = format(data);
-        localDate = syncDateTime(localDate);
+        localDate = setDateTime(localDate);
         try {
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(strFormat);
             ret = localDate.format(dateFormatter);
@@ -140,7 +140,7 @@ public class DateTimeFormat extends AbsFormat<DateTimeFormat, LocalDateTime> {
             throw new FormatException("数据为null且无默认值");
 
         //修改年月日时分秒
-        ret = syncDateTime(ret);
+        ret = setDateTime(ret);
 
         if(ret.isBefore(min))
             throw new FormatException(String.format("[%s]小于最小值[%s]",ret,min));
