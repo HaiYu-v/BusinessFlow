@@ -14,11 +14,18 @@ import java.util.Map;
  * @version 1.0.0
  * @date 2024-11-30
  */
-public class StateMachine<S extends StateMachineEnum,E extends StateMachineEnum> {
+public class StateMachine<S extends IEventOrState,E extends IEventOrState> {
     //状态=(事件=处理者)
     private Map<S,Map<E,IStateHandle>> stateEventMap;
+    //状态机描述
+    private String desc;
 
-    public StateMachine() {
+    static public StateMachine build(String desc){
+        return new StateMachine(desc);
+    }
+
+    private StateMachine(String desc) {
+        this.desc = desc;
         this.stateEventMap = new HashMap<>();
     }
 
@@ -33,10 +40,9 @@ public class StateMachine<S extends StateMachineEnum,E extends StateMachineEnum>
      * @throws StateMachineException 状态机异常
      */
     public StateMachine<S ,E> put(S state, E event, IStateHandle handle) throws StateMachineException {
-        if(null == state) throw new StateMachineException("状态不能为空");
-        if(null == event) throw new StateMachineException("事件不能为空");
-        if(null == handle) throw new StateMachineException("处理者不能为空");
-
+        if(null == state) throw new StateMachineException(String.format("状态机[%s]中，状态不能为空",this.desc));
+        if(null == event) throw new StateMachineException(String.format("状态机[%s]中，事件不能为空",this.desc));
+        if(null == handle) throw new StateMachineException(String.format("状态机[%s]中，处理者不能为空",this.desc));
         Map<E, IStateHandle> eventHandler = stateEventMap.getOrDefault(state, new HashMap<E, IStateHandle>());
         eventHandler.put(event, handle);
         stateEventMap.put(state, eventHandler);
@@ -54,10 +60,10 @@ public class StateMachine<S extends StateMachineEnum,E extends StateMachineEnum>
      */
     public IStateHandle get(S state, E event) throws StateMachineException {
         Map<E, IStateHandle> eventHandler = stateEventMap.get(state);
-        if(null == eventHandler) throw new StateMachineException(String.format("状态[%s]不存在或没有事件",state.getDesc()));
+        if(null == eventHandler) throw new StateMachineException(String.format("状态机[%s]中,没有状态[%s]或没有对应事件",this.desc,state.getDesc()));
 
         IStateHandle handle = eventHandler.get(event);
-        if(null == handle) throw new StateMachineException(String.format("状态[%s]的事件[%s]没有处理",state.getDesc(),event.getDesc()));
+        if(null == handle) throw new StateMachineException(String.format("状态机[%s]中,状态[%s]的事件[%s]没有处理者",this.desc,state.getDesc(),event.getDesc()));
 
         return handle;
     }
@@ -78,10 +84,25 @@ public class StateMachine<S extends StateMachineEnum,E extends StateMachineEnum>
         try {
             ret = handle.process(params);
         } catch (Exception e) {
-            throw new StateMachineException(String.format("状态[%s]的事件[%s]处理失败",state.getDesc(),event.getDesc()),e);
+            throw new StateMachineException(String.format("状态机[%s]执行事件[%s]失败, 此对象的状态为[%s]",this.desc,event.getDesc(),state.getDesc()),e);
         }
         return ret;
     }
 
 
+    public Map<S, Map<E, IStateHandle>> getStateEventMap() {
+        return stateEventMap;
+    }
+
+    public void setStateEventMap(Map<S, Map<E, IStateHandle>> stateEventMap) {
+        this.stateEventMap = stateEventMap;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
 }

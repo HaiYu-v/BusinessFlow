@@ -6,7 +6,7 @@ import java.util.Map;
  * 状态处理者
  *
  * <p>
- *     TODO
+ *     实现此接口来对状态进行处理
  * </p>
  *
  * @author HaiYu
