@@ -52,92 +52,9 @@ class ApplicationTests  {
      *
      * @throws ConverException 转换异常
      */
-    @Test
-    void test2() throws ConverException {
-        DataRules beanRuleMap = new DataRules();
-        String rule = "{\n" +
-                "    \"sourceCode\":\"test1\",\n" +
-                "    \"rules\":{\n" +
-                "        \"id\":{\"type\":\"1\",\"formula\":\"123\"},\n" +
-                "        \"name1\":{\"type\":\"1\",\"formula\":\"#price + 1\"},\n" +
-                "        \"price\":{\"type\":\"0\",\"source\":\"[test1.price]\"}\n" +
-                "    }\n" +
-                "}";
-        Converter.analysis(rule,beanRuleMap);
-        DataSource dataSource = new DataSource();
-        dataSource.put("price",3);
-        Test1 test1 = new Test1(1, "test1", 2.0);
-        dataSource.put("test1",test1);
-        Test2 test2 = null;
-        try {
-            test2 = Converter.conver(Test2.class,"test1",beanRuleMap,dataSource,true);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        System.out.println(JSONUtil.toJsonPrettyStr(test2));
-//        System.out.println(DataDesc.class.getCanonicalName());
-//        System.out.println(beanRuleMap);
-
-    }
-
-    @Test
-    void test3(){
-        try {
-            BusinessFlow businessFlow = BusinessFlow.build("测试业务流性能");
-            for(int i=0 ;i<100; i++){
-                businessFlow.add(Chain1.class,"performance");
-            }
-
-            businessFlow.getGlobalValueCache().put("test2",new Test1(1,"xiaoming",1.0));
-            businessFlow
-                    .add(Chain1.class, "start")
-                    .add(Chain1.class, "conver")
-                    .add(Chain1.class, "converTest2")
-                    .start();
-//            System.out.println(end.getName());
-
-//            StringBuilder stringBuilder = new StringBuilder();
-//            System.out.println(businessFlow.getInfoJSON());
-            System.out.println(businessFlow.getVisualLog());
-
-        } catch (BusinessFlowException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
 
-    @Test
-    void test4(){
-        TestController controller = new TestController();
-        System.out.println(controller.test());
-    }
-    public static void func(int x){
 
-    }
-
-    @Test
-    void test5() {
-
-
-        BusinessFlow businessFlow = null;
-        try {
-            businessFlow = BusinessFlow
-                    .build("基本类型转换测试")
-                    .add("匿名类测试", "ret", new IChain() {
-                        @Override
-                        public Object method(TemporaryCache temporaryCache, GlobalCache globalCache) {
-                            return "匿名类执行";
-                        }
-                    });
-//                    .add(Chain1.class, "start1")
-//                    .add(Chain1.class, "conver1")
-
-        } catch (BusinessFlowException e) {
-            e.printStackTrace();
-        } finally {
-            System.out.println(businessFlow.getVisualLog());
-        }
-    }
 
 
 
