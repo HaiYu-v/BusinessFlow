@@ -7,6 +7,7 @@ import org.example.designs.business_flow.core.BusinessFlowException;
 import org.example.designs.business_flow.core.IChain;
 import org.example.designs.conver.Test1;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
 /**
  * TODO
@@ -19,19 +20,20 @@ import org.junit.jupiter.api.Test;
  * @version 1.0.0
  * @date 2024-12-12
  */
+@SpringBootTest
 public class BusinessTest {
     @Test
     void test1(){
         try {
             BusinessFlow businessFlow = BusinessFlow.build("测试业务流性能");
-            for(int i=0 ;i<100; i++){
-                businessFlow.add(Chain1.class,"performance");
-            }
+//            for(int i=0 ;i<100; i++){
+//                businessFlow.add(Chain1.class,"performance");
+//            }
 
             businessFlow.getGlobalValueCache().put("test2",new Test1(1,"xiaoming",1.0));
             businessFlow
-                    .add(Chain1.class, "start")
-                    .add(Chain1.class, "conver")
+                    .add(Chain1.class, "Chain1::start")
+                    .add(Chain1.class, "new Chain1().conver()")
                     .add(Chain1.class, "converTest2")
                     .start();
 //            System.out.println(end.getName());
@@ -41,7 +43,7 @@ public class BusinessTest {
             System.out.println(businessFlow.getVisualLog());
 
         } catch (BusinessFlowException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 

@@ -93,10 +93,23 @@ public class BusinessFlow {
         return businessFlow;
     }
 
-    public BusinessFlow add(String desc,String retCode,IChain chain) throws BusinessFlowException {
-        add(chain,"method",desc,retCode);
-        return this;
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 解析方法字符串为方法名
+     *
+     * "Student.getName()" -> "getName"
+     * "Student::getName"  -> "getName"
+     *  这样可以有效避免方法名写错的问题
+     *
+     * @param method 方法字符串
+     * @return {@link String }
+     */
+    private String analysisMethod(String method){
+        String[] strings = method.split(":|\\.");
+        method = strings[strings.length-1].replaceAll("（.*?）|\\(.*?\\)", "");
+        return method;
     }
+
 
     /**
      * -----------------------------------------------------------------------------------------------------------------
@@ -111,6 +124,7 @@ public class BusinessFlow {
      */
     public BusinessFlow add(Object bean, String methodCode,String desc,String retCode) throws BusinessFlowException {
         try {
+            methodCode = analysisMethod(methodCode);
             //获得业务点
             ChainDesc chainDesc = ChainDesc.build(bean, methodCode, desc, retCode);
             chainQueue.offer(chainDesc);
@@ -131,6 +145,21 @@ public class BusinessFlow {
         }
         add(bean, methodCode,desc,retCode);
 
+        return this;
+    }
+
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 添加业务点，通过匿名类
+     *
+     * @param desc
+     * @param retCode
+     * @param chain
+     * @return {@link BusinessFlow }
+     * @throws BusinessFlowException Data异常
+     */
+    public BusinessFlow add(String desc,String retCode,IChain chain) throws BusinessFlowException {
+        add(chain,"method",desc,retCode);
         return this;
     }
 
