@@ -4,7 +4,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONConfig;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.example.designs.business_flow.annotation.Chain;
 import org.example.designs.business_flow.annotation.Source;
 import org.example.designs.business_flow.cache.GlobalCache;
 import org.example.designs.business_flow.cache.TemporaryCache;
@@ -17,6 +16,8 @@ import org.example.designs.conver.core.Converter;
 import org.example.designs.business_flow.desc.ChainDesc;
 import org.example.designs.task.TaskException;
 import org.example.designs.task.TaskInfo;
+import org.slf4j.MDC;
+
 import java.lang.reflect.Parameter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -25,19 +26,19 @@ import java.util.*;
 
 
 /**
- * 业务流
+ * TODO
  *
  * <p>
- *     1.业务流节点的处理方法必须使用 {@link Chain} 注解
- *     2.业务流节点的desc：add()传入desc > @Chain注解的desc
+ *     TODO
  * </p>
  *
  * @author HaiYu
- * @version 1.0.0
- * @date 2024-11-22
+ * @date 2024-11-22@version 1.0.0
  */
 @Slf4j
 public class BusinessFlow {
+    //是否记录参数和返回值
+    private boolean isRecordParamAndRet = false;
     //业务流的锁
     private final Object startupShutdownMonitor;
     //bean容器
@@ -182,7 +183,9 @@ public class BusinessFlow {
      * @return {@link BusinessFlow }
      * @throws BusinessFlowException Data异常
      */
-    public BusinessFlow start() throws BusinessFlowException {
+    public BusinessFlow intercept() throws BusinessFlowException {
+        //每个业务流启动时，都应该有一个唯一标识
+        if(StrUtil.isBlank(MDC.get("businessID"))) MDC.put("businessID",UUID.randomUUID().toString());
         ChainDesc chainDesc = null;
         Parameter[] parameters = null;
         try {
@@ -213,7 +216,9 @@ public class BusinessFlow {
 
                     //获取执行信息
                     TaskInfo info = chainDesc.getInfo();
-                    chainInfoList.add(new ChainInfo(parameters, chainDesc.getRetBean(), info));
+                    ChainInfo chainInfo = new ChainInfo(parameters, chainDesc.getRetBean(), info);
+                    log.info(JSONUtil.toJsonStr(isRecordParamAndRet?chainInfo:info));
+                    chainInfoList.add(chainInfo);
 
                     //返回值送入临时缓存
                     if(null != chainDesc.getRetBean()){
@@ -225,13 +230,22 @@ public class BusinessFlow {
         } catch (Exception e) {
             //获取执行信息
             TaskInfo info = chainDesc.getInfo();
-            chainInfoList.add(new ChainInfo(parameters, chainDesc.getRetBean(), info));
+            ChainInfo chainInfo = new ChainInfo(parameters, chainDesc.getRetBean(), info);
+            log.info(JSONUtil.toJsonStr(isRecordParamAndRet?chainInfo:info));
+            chainInfoList.add(chainInfo);
             throw new BusinessFlowException(String.format("业务流[%s]执行出错",this.desc),e);
-        }finally {
+        }
+    }
+    public BusinessFlow end() throws BusinessFlowException {
+        try {
+            intercept();
+        } finally {
             this.endTime = LocalDateTime.now();
+            MDC.remove("businessID");
             if(autoPrintLog) log.info(getInfoLog());
             if(autoPrintVisualLog) log.info(getVisualLog());
         }
+        return this;
     }
 
 
@@ -373,6 +387,16 @@ public class BusinessFlow {
         return ChronoUnit.MILLIS.between(startTime, endTime);
     }
 
+    /**
+     * -----------------------------------------------------------------------------------------------------------------
+     * 记录参数和返回值
+     *
+     * @return {@link BusinessFlow }
+     */
+    public BusinessFlow recordParamAndRet(){
+        isRecordParamAndRet = true;
+        return this;
+    }
     public static IContext getContext() {
         return context;
     }

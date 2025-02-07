@@ -1,5 +1,6 @@
 package org.example.designs.business_flow;
 
+import lombok.extern.slf4j.Slf4j;
 import org.example.designs.business_flow.cache.GlobalCache;
 import org.example.designs.business_flow.cache.TemporaryCache;
 import org.example.designs.business_flow.core.BusinessFlow;
@@ -7,6 +8,8 @@ import org.example.designs.business_flow.core.BusinessFlowException;
 import org.example.designs.business_flow.core.IChain;
 import org.example.designs.conver.Test1;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 
 /**
@@ -20,8 +23,12 @@ import org.springframework.boot.test.context.SpringBootTest;
  * @version 1.0.0
  * @date 2024-12-12
  */
+@Slf4j
 @SpringBootTest
 public class BusinessTest {
+
+    private static final Logger logger = LoggerFactory.getLogger(BusinessTest.class);
+
     @Test
     void test1(){
         try {
@@ -35,13 +42,13 @@ public class BusinessTest {
                     .add(Chain1.class, "Chain1::start")
                     .add(Chain1.class, "new Chain1().conver()")
                     .add(Chain1.class, "converTest2")
-                    .start();
+                    .end();
 //            System.out.println(end.getName());
 
 //            StringBuilder stringBuilder = new StringBuilder();
 //            System.out.println(businessFlow.getInfoJSON());
-            System.out.println(businessFlow.getVisualLog());
-
+//            System.out.println(businessFlow.getVisualLog());
+//            log.info(businessFlow.getVisualLog());
         } catch (BusinessFlowException e) {
             e.printStackTrace();
         }

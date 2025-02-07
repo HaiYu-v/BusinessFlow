@@ -22,8 +22,8 @@ public class ChainInfo extends TaskInfo{
     public Parameter[] parameters;
     //返回类型
     public String ret;
-    //这种神经写法真的很好笑,这个变量没有卵用,单纯就是用来作个分隔符
-    private String ____________________________________________ = "";
+//    //这种神经写法真的很好笑,这个变量没有卵用,单纯就是用来作个分隔符
+//    private String ____________________________________________ = "";
 
     public ChainInfo(Parameter[] parameters, Object ret,TaskInfo info) {
         super(info);
@@ -48,7 +48,7 @@ public class ChainInfo extends TaskInfo{
         this.ret = ret;
     }
 
-    public String get____________________________________________() {
-        return ____________________________________________;
-    }
+//    public String get____________________________________________() {
+//        return ____________________________________________;
+//    }
 }

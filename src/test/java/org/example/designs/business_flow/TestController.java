@@ -36,7 +36,7 @@ public class TestController {
                     .add(AelecbillRedapplyService.class, "redBill_upLoad"
                             , "上传红字确认单", "isSuccess")
                     //启动业务流，并输入此业务流的返回类型
-                    .start();
+                    .end();
             System.out.println(flow.getInfoLog());
             return "失败，失败原因是：...";
         } catch (BusinessFlowException e) {
@@ -60,7 +60,7 @@ public class TestController {
                     .add(VtChBillService.class, "combine")
                     .add(AelecbillRedapplyService.class, "redBill_upLoad")
                     //启动业务流，并输入此业务流的返回类型
-                    .start();
+                    .end();
             System.out.println(flow.getVisualLog());
             return "成功，红字确认单申请开具成功";
         } catch (BusinessFlowException e) {
