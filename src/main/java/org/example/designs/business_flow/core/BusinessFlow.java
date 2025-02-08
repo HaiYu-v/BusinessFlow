@@ -16,6 +16,8 @@ import org.example.designs.conver.core.Converter;
 import org.example.designs.business_flow.desc.ChainDesc;
 import org.example.designs.task.TaskException;
 import org.example.designs.task.TaskInfo;
+import org.example.designs.Info.InfoCache;
+import org.example.designs.Info.InfoUtil;
 import org.slf4j.MDC;
 
 import java.lang.reflect.Parameter;
@@ -59,8 +61,6 @@ public class BusinessFlow {
      */
     //业务流额外信息
     private Map<String,Object> businessFlowInfo = new LinkedHashMap<>();
-    //业务流描述
-    private String desc;
     //业务点列表
     private Queue<ChainDesc> chainQueue = new LinkedList<>();
     //起始时间
@@ -69,15 +69,18 @@ public class BusinessFlow {
     private LocalDateTime endTime;
     //业务执行信息列表
     private List<ChainInfo> chainInfoList;
+    //基础信息
+    private InfoCache info;
 
 
     //构造方法私有
-    private BusinessFlow() {
+    private BusinessFlow(InfoCache info) {
         this.startupShutdownMonitor = new Object();
         this.chainInfoList = new ArrayList<>();
         this.globalCache = new GlobalCache();
         this.temporaryCache = new TemporaryCache();
         this.ruleCache = new DataRules();
+        this.info = info;
     }
 
 
@@ -89,10 +92,16 @@ public class BusinessFlow {
      * @return {@link BusinessFlow }
      */
     public static BusinessFlow build(String desc){
-        BusinessFlow businessFlow = new BusinessFlow();
-        businessFlow.setDesc(desc);
+        InfoCache info = InfoUtil.build(desc);
+        BusinessFlow businessFlow = new BusinessFlow(info);
         return businessFlow;
     }
+
+    public static BusinessFlow build(InfoCache info){
+        BusinessFlow businessFlow = new BusinessFlow(info);
+        return businessFlow;
+    }
+
 
     /**
      * -----------------------------------------------------------------------------------------------------------------
@@ -130,7 +139,7 @@ public class BusinessFlow {
             ChainDesc chainDesc = ChainDesc.build(bean, methodCode, desc, retCode);
             chainQueue.offer(chainDesc);
         } catch (Exception e) {
-            throw new BusinessFlowException("业务流["+this.desc+"]的method["+methodCode+"]添加失败",e);
+            throw new BusinessFlowException("业务流["+this.info.getDesc()+"]的method["+methodCode+"]添加失败",e);
         }
         return this;
     }
@@ -142,7 +151,7 @@ public class BusinessFlow {
             //获得业务bean
             bean = context.getData(beanType);
         } catch (Exception e) {
-            throw new BusinessFlowException("业务流["+this.desc+"]的Bean["+beanType.getName()+"]在Bean容器里不存在",e);
+            throw new BusinessFlowException("业务流["+this.info.getDesc()+"]的Bean["+beanType.getName()+"]在Bean容器里不存在",e);
         }
         add(bean, methodCode,desc,retCode);
 
@@ -233,7 +242,7 @@ public class BusinessFlow {
             ChainInfo chainInfo = new ChainInfo(parameters, chainDesc.getRetBean(), info);
             log.info(JSONUtil.toJsonStr(isRecordParamAndRet?chainInfo:info));
             chainInfoList.add(chainInfo);
-            throw new BusinessFlowException(String.format("业务流[%s]执行出错",this.desc),e);
+            throw new BusinessFlowException(String.format("业务流[%s]执行出错",this.info.getDesc()),e);
         }
     }
     public BusinessFlow end() throws BusinessFlowException {
@@ -309,7 +318,7 @@ public class BusinessFlow {
      * @return {@link String }
      */
     public String getInfoLog(){
-        businessFlowInfo.put("desc",desc);
+        businessFlowInfo.put("desc",this.info.getDesc());
         businessFlowInfo.put("chainCount", chainInfoList.size());
         businessFlowInfo.put("startTime",startTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         businessFlowInfo.put("endTime",endTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
@@ -458,11 +467,11 @@ public class BusinessFlow {
     }
 
     public String getDesc() {
-        return desc;
+        return this.info.getDesc();
     }
 
     public void setDesc(String desc) {
-        this.desc = desc;
+        this.info.putInfo("desc",desc);
     }
 
     public LocalDateTime getStartTime() {

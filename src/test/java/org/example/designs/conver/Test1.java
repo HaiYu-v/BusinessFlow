@@ -1,6 +1,5 @@
 package org.example.designs.conver;
 
-import org.example.designs.business_flow.annotation.Table;
 
 /**
  * TODO
@@ -13,7 +12,7 @@ import org.example.designs.business_flow.annotation.Table;
  * @version 1.0.0
  * @date 2024-11-20
  */
-@Table("t_test1")
+
 public class Test1 {
     private int id;
     private String name;
