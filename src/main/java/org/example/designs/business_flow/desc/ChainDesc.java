@@ -2,6 +2,7 @@ package org.example.designs.business_flow.desc;
 
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
+import org.example.designs.Info.InfoCache;
 import org.example.designs.business_flow.annotation.Chain;
 import org.example.designs.business_flow.core.BusinessFlowException;
 import org.example.designs.business_flow.core.IChain;
@@ -37,16 +38,18 @@ import java.util.Map;
     private String retCode;
     //返回bean
     private Object retBean;
-    //业务点执行的信息
-    private ChainInfo chainInfo;
+
 
 
     private ChainDesc(Object bean, Method method, String desc, String retCode) {
+        super(desc);
         this.bean = bean;
         this.method = method;
-        super.taskInfo.desc = desc;
         this.retCode = retCode;
         this.parameters = method.getParameters();
+        this.info.putInfo("method",method.getName());
+//        this.info.putInfo("params",parameters.toString());
+//        this.info.putInfo("retCode",retCode);
     }
 
     /**
@@ -84,6 +87,7 @@ import java.util.Map;
         if(StrUtil.isNotBlank(retCode)){
             chainMethodDesc.setRetCode(retCode);
         }
+
 
         return new ChainDesc(bean
                 , chainMethodDesc.getMethod()
@@ -149,12 +153,12 @@ import java.util.Map;
     }
 
 
-    public ChainInfo getChainInfo() {
-        return chainInfo;
+    public InfoCache getInfo() {
+        return info;
     }
 
-    public void setChainInfo(ChainInfo chainInfo) {
-        this.chainInfo = chainInfo;
+    public void setInfo(InfoCache info) {
+        this.info = info;
     }
 
     public Parameter[] getParameters() {
@@ -170,7 +174,7 @@ import java.util.Map;
     }
 
     public String getDesc() {
-        return super.taskInfo.desc;
+        return this.info.getDesc();
     }
 
     public String getRetCode() {
@@ -198,7 +202,7 @@ import java.util.Map;
     }
 
     public void setDesc(String desc) {
-        this.taskInfo.desc = desc;
+        this.info.putInfo("desc",desc);
     }
 
     public Object[] getParams() {

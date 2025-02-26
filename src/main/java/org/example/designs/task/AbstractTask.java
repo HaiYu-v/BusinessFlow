@@ -4,6 +4,7 @@ package org.example.designs.task;
 
 
 import lombok.extern.slf4j.Slf4j;
+import org.example.designs.Info.InfoCache;
 import org.example.designs.task.postProcessor.after.IAfterPostProcessor;
 import org.example.designs.task.postProcessor.after.fail.Throw;
 import org.example.designs.task.postProcessor.before.IBeforePostProcessor;
@@ -28,6 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Slf4j
 public abstract class AbstractTask {
+    public static String EXECUTE_COUNT = "executeCount";
     //ID自增，保证全局唯一
     private static AtomicInteger NextId  = new AtomicInteger(0);
     //执行前的操作
@@ -35,28 +37,13 @@ public abstract class AbstractTask {
     //执行后的操作
     protected IAfterPostProcessor afterExecute = new Throw();
     //任务信息
-    protected TaskInfo taskInfo;
-    //      //任务ID，唯一
-    //    protected Integer id;
-    //    //优先级
-    //    protected Integer sort;
-    //    //任务的描述
-    //    protected String desc;
-    //    //执行次数
-    //    protected AtomicInteger countExecute = new AtomicInteger(0);
-    //    //任务状态
-    //    protected TaskStatusEnum state = TaskStatusEnum.UN_EXECUTED;
-    //    //开始时间
-    //    protected LocalDateTime startTime;
-    //    //结束时间
-    //    protected LocalDateTime endTime;
+    protected InfoCache info;
 
 
-    public AbstractTask() {
-        this.taskInfo = new TaskInfo();
-        taskInfo.countExecute = new AtomicInteger(0);
-        taskInfo.state = TaskStatusEnum.UN_EXECUTED;
-        taskInfo.id = NextId.incrementAndGet();
+    public AbstractTask(String desc) {
+        this.info = InfoCache.build(desc);
+        this.info.putInfo("id",NextId.incrementAndGet());
+        this.info.nothing();
     }
 
     /**
@@ -70,44 +57,6 @@ public abstract class AbstractTask {
      * @throws Exception
      */
     public abstract boolean executeFunction(Map<String,Object> params) throws Exception;
-
-
-    /**
-     * -----------------------------------------------------------------------------------------------------------------
-     * 简单执行一次（无参）
-     *
-     * @return boolean
-     * @throws TaskException
-     */
-    public boolean simpleExecute() throws Exception {
-        return simpleExecute(null);
-    }
-
-    /**
-     * -----------------------------------------------------------------------------------------------------------------
-     * 简单执行一次
-     *
-     * @param params
-     * @return boolean
-     * @throws TaskException
-     */
-    public boolean simpleExecute(Map<String,Object> params) throws Exception {
-        //修改状态为"任务开始"
-        taskInfo.state= TaskStatusEnum.EXECUTING;
-        try {
-            taskInfo.countExecute.incrementAndGet();
-            //执行任务
-            if(executeFunction(params)){
-                taskInfo.state = TaskStatusEnum.SUCCESS;
-            }else {
-                taskInfo.state = TaskStatusEnum.FAILED;
-            }
-        } catch (Exception e1) {
-            taskInfo.state = TaskStatusEnum.EXCEPTION;
-            throw e1;
-        }
-        return true;
-    }
 
     /**
      * -----------------------------------------------------------------------------------------------------------------
@@ -129,7 +78,7 @@ public abstract class AbstractTask {
      */
     public boolean execute(Map<String,Object> params) throws TaskException {
         //执行的初始时间
-        taskInfo.startTime = LocalDateTime.now();
+        this.info.startTime();
         List<String> msg = new ArrayList<>();
 
         //任务执行前的操作
@@ -143,8 +92,10 @@ public abstract class AbstractTask {
         //任务执行
         Exception e = null;
         try {
-            simpleExecute(params);
+            //修改状态为"任务开始"
+            if(!executeFunction(params)) this.info.failed();
         } catch (Exception ex) {
+            this.info.exceptional();
             e = ex;
         }
 
@@ -158,20 +109,21 @@ public abstract class AbstractTask {
         }
 
         //任务结束时间
-        taskInfo.endTime = LocalDateTime.now();
+
+        info.endTime();
 
         //判断是否需要抛出异常
         if(e != null && isThrow){
-            throw new TaskException(String.format("id为[%d]的任务[%s]执行异常",taskInfo.id,taskInfo.desc),e);
+            throw new TaskException(String.format("任务[%s]执行异常",info.getDesc()),e);
         }else if(beforeException != null && aftereException != null){
-            throw new TaskException((taskInfo.id!=null ? "Task:"+taskInfo.id+", " : "")+"beforeExecute and afterExecute error");
+            throw new TaskException(String.format("任务[%s]前置和后置逻辑执行失败",info.getDesc()));
         }else if(beforeException != null){
-            throw new TaskException((taskInfo.id!=null ? "Task:"+taskInfo.id+", " : "")+"beforeExecute error");
+            throw new TaskException(String.format("任务[%s]后置逻辑执行失败",info.getDesc()));
         }else if(aftereException != null){
-            throw new TaskException((taskInfo.id!=null ? "Task:"+taskInfo.id+", " : "" )+"afterExecute error");
+            throw new TaskException(String.format("任务[%s]前置逻辑执行失败",info.getDesc()));
         }
 
-        return taskInfo.state == TaskStatusEnum.SUCCESS;
+        return info.success();
     }
 
 
@@ -182,10 +134,7 @@ public abstract class AbstractTask {
      * @return {@link Long }
      */
     public Long getRunningTime(){
-        if(taskInfo.startTime == null || taskInfo.endTime == null){
-            return -1L;
-        }
-        return ChronoUnit.MILLIS.between(taskInfo.startTime, taskInfo.endTime);
+        return info.getStartTimestamp();
     }
 
     /**
@@ -194,8 +143,8 @@ public abstract class AbstractTask {
      *
      * @return {@link TaskInfo }
      */
-    public TaskInfo getInfo(){
-         return taskInfo;
+    public InfoCache getInfo(){
+         return info;
     }
 
 
@@ -215,61 +164,41 @@ public abstract class AbstractTask {
         this.afterExecute = afterExecute;
     }
 
-    public TaskStatusEnum getState() {
-        return taskInfo.state;
+    public String getState() {
+        return this.info.getState();
     }
 
-    public Integer getId() {
-        return taskInfo.id;
+    public String getId() {
+        return info.getID();
     }
 
-    public void setId(Integer id) {
-        taskInfo.id = id;
+    public void setId(String id) {
+        info.putInfo("id", id);
     }
 
 
-    public Integer getSort() {
-        return taskInfo.sort;
-    }
-
-    public void setSort(Integer sort) {
-        taskInfo.sort = sort;
-    }
 
     public String getDesc() {
-        return taskInfo.desc;
+        return info.getDesc();
     }
 
     public void setDesc(String desc) {
-        taskInfo.desc = desc;
+        info.putInfo("desc", desc);
     }
 
-    public AtomicInteger getCountExecute() {
-        return taskInfo.countExecute;
+    public int getCountExecute() {
+        return info.getCount(EXECUTE_COUNT);
     }
 
-    public void setCountExecute(AtomicInteger countExecute) {
-        taskInfo.countExecute = countExecute;
-    }
-
-    public void setState(TaskStatusEnum state) {
-        taskInfo.state = state;
-    }
 
     public LocalDateTime getStartTime() {
-        return taskInfo.startTime;
+        return info.getStartDateTime();
     }
 
     public void setStartTime(LocalDateTime startTime) {
-        taskInfo.startTime = startTime;
+        info.putInfo("startTime", startTime);
     }
 
-    public LocalDateTime getEndTime() {
-        return taskInfo.endTime;
-    }
 
-    public void setEndTime(LocalDateTime endTime) {
-        taskInfo.endTime = endTime;
-    }
 }
 

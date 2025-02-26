@@ -135,7 +135,7 @@ public class BulkExecutor<T extends AbstractTask> {
                  throw new RuntimeException(e);
              }
          });
-         return task.getState() == TaskStatusEnum.SUCCESS;
+         return task.getInfo().isSuccess();
     }
 
     /* ---------------------------------------------------------------------------------------------------------------------
@@ -156,11 +156,11 @@ public class BulkExecutor<T extends AbstractTask> {
         } catch (Exception e) {
             throw new BulkExecuteException(e);
         }
-        if(task.getState() == TaskStatusEnum.FAILED) failTasks.add(task.getDesc());
-        if(task.getState() == TaskStatusEnum.SUCCESS) successTasks.add(task.getDesc());
+        if(task.getInfo().isFailed()) failTasks.add(task.getDesc());
+        if(task.getInfo().isSuccess()) successTasks.add(task.getDesc());
         //任务结束
         this.endTime = LocalDateTime.now();
-        return task.getState() == TaskStatusEnum.SUCCESS;
+        return task.getInfo().isSuccess();
     }
 
 
@@ -198,7 +198,7 @@ public class BulkExecutor<T extends AbstractTask> {
     public int getExecuteCount() {
          int count = 0;
          for(AbstractTask task: taskCollection.getTasks()){
-             count += task.getCountExecute().get();
+             count += task.getCountExecute();
          }
         return count;
     }

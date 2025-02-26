@@ -1,30 +1,27 @@
 package org.example.designs.business_flow.core;
 
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONConfig;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.example.designs.Info.InfoConstant;
 import org.example.designs.business_flow.annotation.Source;
 import org.example.designs.business_flow.cache.GlobalCache;
 import org.example.designs.business_flow.cache.TemporaryCache;
 import org.example.designs.business_flow.context.IContext;
 import org.example.designs.business_flow.context.SpringBeanContext;
-import org.example.designs.business_flow.desc.ChainInfo;
 import org.example.designs.conver.core.DataRules;
 import org.example.designs.conver.core.ConverException;
 import org.example.designs.conver.core.Converter;
 import org.example.designs.business_flow.desc.ChainDesc;
 import org.example.designs.task.TaskException;
-import org.example.designs.task.TaskInfo;
 import org.example.designs.Info.InfoCache;
-import org.example.designs.Info.InfoUtil;
 import org.slf4j.MDC;
 
 import java.lang.reflect.Parameter;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
@@ -39,8 +36,24 @@ import java.util.*;
  */
 @Slf4j
 public class BusinessFlow {
+
+    /**一些配置项
+     */
     //是否记录参数和返回值
     private boolean isRecordParamAndRet = false;
+    public BusinessFlow recordParamAndRet(boolean isRecordParamAndRet){
+        this.isRecordParamAndRet = isRecordParamAndRet;
+        return this;
+    }
+
+    //是否可视化打印日志
+    private boolean isPrettyPrint = false;
+
+    public BusinessFlow prettyPrint(boolean isPrettyPrint){
+        this.isPrettyPrint = isPrettyPrint;
+        return this;
+    }
+
     //业务流的锁
     private final Object startupShutdownMonitor;
     //bean容器
@@ -51,10 +64,7 @@ public class BusinessFlow {
     private TemporaryCache temporaryCache;
     //转换规则缓存
     private DataRules ruleCache;
-    //日志是否自动打印
-    private boolean autoPrintLog = false;
-    //可视化日志是否自动打印
-    private boolean autoPrintVisualLog = false;
+
 
     /*
      *  业务流基本信息
@@ -68,7 +78,7 @@ public class BusinessFlow {
     //结束时间
     private LocalDateTime endTime;
     //业务执行信息列表
-    private List<ChainInfo> chainInfoList;
+    private List<Map<String, Object>> chainInfoList;
     //基础信息
     private InfoCache info;
 
@@ -92,7 +102,9 @@ public class BusinessFlow {
      * @return {@link BusinessFlow }
      */
     public static BusinessFlow build(String desc){
-        InfoCache info = InfoUtil.build(desc);
+        InfoCache info = InfoCache.build(desc);
+        info.nothing();
+        info.putInfo("executeFailed",new AtomicInteger(0));
         BusinessFlow businessFlow = new BusinessFlow(info);
         return businessFlow;
     }
@@ -187,19 +199,22 @@ public class BusinessFlow {
 
     /**
      * -----------------------------------------------------------------------------------------------------------------
-     * 启动业务流（有返回值）
+     * 启动业务流，但不结束（有返回值）
      *
      * @return {@link BusinessFlow }
      * @throws BusinessFlowException Data异常
      */
     public BusinessFlow intercept() throws BusinessFlowException {
         //每个业务流启动时，都应该有一个唯一标识
-        if(StrUtil.isBlank(MDC.get("businessID"))) MDC.put("businessID",UUID.randomUUID().toString());
+        String uuid = UUID.randomUUID().toString();
+        info.putInfo("uuid",uuid);
+        if(StrUtil.isBlank(MDC.get("businessID"))) MDC.put("businessID",uuid);
         ChainDesc chainDesc = null;
         Parameter[] parameters = null;
         try {
             synchronized (startupShutdownMonitor) {
-                this.startTime = LocalDateTime.now();
+                info.startTime();
+                info.executing();
                 while (!chainQueue.isEmpty()) {
                     //获得业务点
                     chainDesc = chainQueue.poll();
@@ -211,23 +226,24 @@ public class BusinessFlow {
                     try {
                         chainDesc.setParams(importParams(parameters));
                     } catch (Exception e) {
-                        throw new BusinessFlowException(String.format("业务点[%s][%s]传参失败",chainDesc.getMethod().getName(),chainDesc.getDesc()),e);
+                        throw new BusinessFlowException(String.format("业务点[%s][%s]传参失败",chainDesc.getDesc(),chainDesc.getMethod().getName()),e);
                     }
                     //获取参数后，清除临时缓存
                     temporaryCache.clear();
 
                     //执行业务点,本质上是执行chainDesc的invoke()：execute() -> executeFunction() -> invoke()
                     try {
+                        info.count("executeChain");
                         chainDesc.execute();
                     } catch (TaskException e) {
-                        throw new BusinessFlowException(String.format("业务点[%s][%s]执行失败",chainDesc.getMethod().getName(),chainDesc.getDesc()),e);
+                        info.count("executeFailed");
+                        throw new BusinessFlowException(String.format("业务点[%s][%s]执行失败",chainDesc.getDesc(),chainDesc.getMethod().getName()),e);
                     }
 
                     //获取执行信息
-                    TaskInfo info = chainDesc.getInfo();
-                    ChainInfo chainInfo = new ChainInfo(parameters, chainDesc.getRetBean(), info);
-                    log.info(JSONUtil.toJsonStr(isRecordParamAndRet?chainInfo:info));
-                    chainInfoList.add(chainInfo);
+                    InfoCache chainInfo = chainDesc.getInfo();
+                    log.info(isPrettyPrint ?chainInfo.toJsonPretty() :chainInfo.toJson());
+                    chainInfoList.add(chainInfo.getInfo());
 
                     //返回值送入临时缓存
                     if(null != chainDesc.getRetBean()){
@@ -238,21 +254,24 @@ public class BusinessFlow {
             }
         } catch (Exception e) {
             //获取执行信息
-            TaskInfo info = chainDesc.getInfo();
-            ChainInfo chainInfo = new ChainInfo(parameters, chainDesc.getRetBean(), info);
-            log.info(JSONUtil.toJsonStr(isRecordParamAndRet?chainInfo:info));
-            chainInfoList.add(chainInfo);
+            this.info.endTime();
+            this.info.exceptional();
+            InfoCache chainInfo = chainDesc.getInfo();
+            log.error(isPrettyPrint ?chainInfo.toJsonPretty() :chainInfo.toJson());
+            chainInfoList.add(chainInfo.getInfo());
+//            log.info(JSONUtil.toJsonStr(isRecordParamAndRet?chainInfo:info));
             throw new BusinessFlowException(String.format("业务流[%s]执行出错",this.info.getDesc()),e);
         }
     }
     public BusinessFlow end() throws BusinessFlowException {
         try {
             intercept();
+            this.info.success();
         } finally {
-            this.endTime = LocalDateTime.now();
+            this.info.endTime();
+            log.info(isPrettyPrint?info.toJsonPretty():info.toJson());
             MDC.remove("businessID");
-            if(autoPrintLog) log.info(getInfoLog());
-            if(autoPrintVisualLog) log.info(getVisualLog());
+
         }
         return this;
     }
@@ -318,26 +337,21 @@ public class BusinessFlow {
      * @return {@link String }
      */
     public String getInfoLog(){
-        businessFlowInfo.put("desc",this.info.getDesc());
-        businessFlowInfo.put("chainCount", chainInfoList.size());
-        businessFlowInfo.put("startTime",startTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        businessFlowInfo.put("endTime",endTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        businessFlowInfo.put("runningTime", ChronoUnit.MILLIS.between(startTime, endTime));
-        businessFlowInfo.put("chainInfo", chainInfoList);
-        JSONConfig config = JSONConfig.create()
-                .setDateFormat("yyyy-MM-dd HH:mm:ss")
-                .setIgnoreNullValue(false);
-        return JSONUtil.toJsonStr(businessFlowInfo,config);
+        Map<String, Object> info1 = info.getInfo();
+        info1.put("zz_chainInfos",chainInfoList);
+        return JSONUtil.toJsonStr(info1);
     }
 
     /**
      * -----------------------------------------------------------------------------------------------------------------
-     * 获得可读性高的JSON格式的日志信息
+     * 获得可读性高的JSON格式的信息
      *
      * @return {@link String }
      */
     public String getVisualLog(){
-        return JSONUtil.toJsonPrettyStr(getInfoLog());
+        Map<String, Object> info1 = info.getInfo();
+        info1.put("zz_chainInfos",chainInfoList);
+        return JSONUtil.toJsonPrettyStr(info1);
     }
 
     /**
@@ -396,16 +410,8 @@ public class BusinessFlow {
         return ChronoUnit.MILLIS.between(startTime, endTime);
     }
 
-    /**
-     * -----------------------------------------------------------------------------------------------------------------
-     * 记录参数和返回值
-     *
-     * @return {@link BusinessFlow }
-     */
-    public BusinessFlow recordParamAndRet(){
-        isRecordParamAndRet = true;
-        return this;
-    }
+
+
     public static IContext getContext() {
         return context;
     }
@@ -422,11 +428,11 @@ public class BusinessFlow {
         this.chainQueue = chainQueue;
     }
 
-    public List<ChainInfo> getChainInfoList() {
+    public List<Map<String, Object>> getChainInfoList() {
         return chainInfoList;
     }
 
-    public void setChainInfoList(List<ChainInfo> chainInfoList) {
+    public void setChainInfoList(List<Map<String, Object>> chainInfoList) {
         this.chainInfoList = chainInfoList;
     }
 
@@ -488,24 +494,6 @@ public class BusinessFlow {
 
     public void setEndTime(LocalDateTime endTime) {
         this.endTime = endTime;
-    }
-
-
-
-    public boolean isAutoPrintLog() {
-        return autoPrintLog;
-    }
-
-    public void setAutoPrintLog(boolean autoPrintLog) {
-        this.autoPrintLog = autoPrintLog;
-    }
-
-    public boolean isAutoPrintVisualLog() {
-        return autoPrintVisualLog;
-    }
-
-    public void setAutoPrintVisualLog(boolean autoPrintVisualLog) {
-        this.autoPrintVisualLog = autoPrintVisualLog;
     }
 
     public GlobalCache getGlobalCache() {

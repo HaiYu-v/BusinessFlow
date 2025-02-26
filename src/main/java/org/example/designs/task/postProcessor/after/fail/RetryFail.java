@@ -39,15 +39,15 @@ public class RetryFail implements IAfterPostProcessor {
     @Override
     public boolean afterExecute(AbstractTask task, Exception e) {
         int count = retryCount;
-        while(task.getState() != TaskStatusEnum.SUCCESS && count > 0){
+        while(!task.getInfo().isSuccess() && count > 0){
             try {
                 Thread.sleep(interval);
                 count--;
-                task.simpleExecute();
+                task.execute();
             } catch (Exception ex) {
                 log.error(ex.getMessage(),ex);
             }
         }
-        return task.getState() != TaskStatusEnum.SUCCESS;
+        return !task.getInfo().isSuccess();
     }
 }
