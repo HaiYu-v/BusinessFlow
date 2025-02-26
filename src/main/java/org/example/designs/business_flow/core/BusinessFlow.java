@@ -269,7 +269,11 @@ public class BusinessFlow {
             this.info.success();
         } finally {
             this.info.endTime();
-            log.info(isPrettyPrint?info.toJsonPretty():info.toJson());
+            if(info.isSuccess()){
+                log.info(isPrettyPrint?info.toJsonPretty():info.toJson());
+            }else {
+                log.error(isPrettyPrint?info.toJsonPretty():info.toJson());
+            }
             MDC.remove("businessID");
 
         }
